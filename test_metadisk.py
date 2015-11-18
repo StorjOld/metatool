@@ -5,6 +5,7 @@ import unittest
 import threading
 import time
 
+from hashlib import sha256
 from test_server import MyRequestHandler, ThreadedTCPServer
 
 
@@ -86,7 +87,6 @@ class MetadiskTest(unittest.TestCase):
                          'command "python metadisk.py files" now must return '
                          'the {} list'.format(expected_value))
 
-    # @unittest.skip('yet unrealized action on server for this test')
     def test_upload_simple_call(self):
         """
         Test of uploading file on the server through
@@ -103,7 +103,6 @@ class MetadiskTest(unittest.TestCase):
                 self.metadisk_python_interpreter)) as file:
             upload_response = json.loads(file.read()[4:-1])
         self.assertEqual(upload_response, expected_value)
-
 
     def test_upload_set_file_role(self):
         """
@@ -124,11 +123,10 @@ class MetadiskTest(unittest.TestCase):
         self.assertEqual(upload_response['file_role'],
                          expected_value['file_role'])
 
-
     def test_download_error(self):
         """
-        Test that `metadisk.py download` return error if passed not valid data_hash
-        :return:
+        Test that `metadisk.py download` return error if passed
+        not valid data_hash
         """
         data_hash = 'test_not_valid_data_hash'
         expected_value = {'error_code': 101}
@@ -143,7 +141,6 @@ class MetadiskTest(unittest.TestCase):
     def test_download_valid_data_hash(self):
         """
         Test that `metadisk.py download` return data if passed valid data
-        :return:
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'TEST_FILE_NAME'
@@ -159,13 +156,16 @@ class MetadiskTest(unittest.TestCase):
                 counter += 1
 
             self.assertTrue(os.path.isfile(test_file_name))
-            self.assertEqual(expected_value, open(test_file_name, 'rb').read()[:-1])
+            with open(test_file_name, 'rb') as file:
+                downloaded_file_data = file.read()[:-1]
+            self.assertEqual(expected_value,
+                             downloaded_file_data)
             os.remove(test_file_name)
 
     def test_download_rename_file(self):
         """
-        Test that `metadisk.py download` with `--rename_file` return file with given_name
-        :return:
+        Test that `metadisk.py download` with `--rename_file` return
+        file with given_name
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'DIFFERENT_TEST_FILE_NAME'
@@ -185,8 +185,8 @@ class MetadiskTest(unittest.TestCase):
 
     def test_download_decryption_key(self):
         """
-        Test that `metadisk.py download` with `--decryption_key` return file with given_name
-        :return:
+        Test that `metadisk.py download` with `--decryption_key`
+        return file with given_name
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'TEST_FILE_NAME'
@@ -204,14 +204,15 @@ class MetadiskTest(unittest.TestCase):
                 counter += 1
 
             self.assertTrue(os.path.isfile(test_file_name))
-            self.assertEqual(expected_value, open(test_file_name, 'rb').read()[:-1])
+            with open(test_file_name, 'rb') as file:
+                downloaded_file_data = file.read()[:-1]
+            self.assertEqual(expected_value,
+                             downloaded_file_data)
             os.remove(test_file_name)
 
     def test_error_audit(self):
         """
         Test that `metadisk.py audit` return error when not valid data passed
-
-        :return:
         """
         data_hash = 'test_not_valid_data_hash'
         challenge_seed = 'test_not_valid_challenge_seed'
@@ -228,15 +229,17 @@ class MetadiskTest(unittest.TestCase):
     def test_audit_valid_json_data(self):
         """
         Test that `metadisk.py audit` return data when valid data passed
-        :return:
         """
-        data_hash = '3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7'
-        challenge_seed = '19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b'
+        data_hash = '3a6eb0790f39ac87c94f3856b2dd2c5d'\
+                    '110e6811602261a9a923d3bb23adc8b7'
+        challenge_seed = '19b25856e1c150ca834cffc8b59b23ad'\
+                         'bd0ec0389e58eb22b3b64768098d002b'
 
         expected_value = {
             "data_hash": data_hash,
             "challenge_seed": challenge_seed,
-            "challenge_response": "a068cf9870a41ecc36e18be9277bc353f88e29ad8a1b2a778581b37453de7692"
+            "challenge_response": "a068cf9870a41ecc36e18be9277bc353"
+                                  "f88e29ad8a1b2a778581b37453de7692"
         }
 
         with os.popen('{} metadisk.py audit {} {}'.format(
