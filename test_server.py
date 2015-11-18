@@ -1,9 +1,11 @@
 import json
 import socketserver
 from urllib.parse import urlparse, parse_qs
+from hashlib import sha256
 
 
 API_FILES_RESPONSE_STATUS = [0]
+
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
@@ -116,7 +118,8 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
     def response_api_files_(self):
         """
         Generate an appropriate response string for the specific case
-        of the "python metadisk.py files" command call.
+        of the "python metadisk.py files" and "python metadisk.py upload ..."
+        command call.
         :return: byte, response string
         """
         if self.method == 'GET':
@@ -127,10 +130,12 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
             API_FILES_RESPONSE_STATUS[0] += 1
             return choose[API_FILES_RESPONSE_STATUS[0]]
         else:
+            file_content = self.data.decode().split('\r\n')[-2].encode()
+            data_hash = sha256(file_content).hexdigest()
+            file_role = self.data.decode().split('"file_role"\r\n\r\n')[1][:3]
             message_content = {
-                "data_hash": "3b438fd7b1f223890f18f8ffc50c19c0"
-                             "0b08340fc4fc76a94ba3a1c160b332a0",
-                "file_role": "001"
+                "data_hash": data_hash,
+                "file_role": file_role
             }
             return self._set_body(message_content)
 
