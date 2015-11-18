@@ -26,42 +26,65 @@ class MetadiskTest(unittest.TestCase):
         cls.server.shutdown()
         cls.server.server_close()
 
-    @unittest.skip('yet unrealized action on server for this test')
     def test_info(self):
-        with os.popen('%s metadisk.py info' %
-                              self.metadisk_python_interpreter) as file:
-            info_response = file.read()
-        info_dict = json.loads(info_response[4:-1])
+        """
+        Testing of getting right response from the "python metadisk.py info"
+        command call.
+        """
+        expected_value = {
+          "public_key": "13LWbTkeuu4Pz7nFd6jCEEAwLfYZsDJSnK",
+          "bandwidth": {
+            "total": {
+              "incoming": 0,
+              "outgoing": 0
+            },
+            "current": {
+              "incoming": 0,
+              "outgoing": 0
+            },
+            "limits": {
+              "incoming": None,
+              "outgoing": None
+            }
+          },
+          "storage": {
+            "capacity": 524288000,
+            "used": 0,
+            "max_file_size": 0
+          }
+        }
+        with os.popen('{} metadisk.py info'.format(
+                self.metadisk_python_interpreter)) as file:
+            info_response = json.loads(file.read()[4:-1])
 
-        self.assertEqual(info_dict.keys(),
-                         dict.fromkeys(('bandwidth', 'storage', 'public_key'),
-                                       None).keys())
-        self.assertEqual(info_dict['bandwidth'].keys(),
-                         dict.fromkeys(('current', 'limits', 'total'),
-                                       None).keys())
-        self.assertEqual(info_dict['bandwidth'].keys(),
-                         dict.fromkeys(('current', 'limits', 'total'),
-                                       None).keys())
-        for item in info_dict['bandwidth'].keys():
-            for key in ["incoming", "outgoing"]:
-                self.assertTrue(key in info_dict['bandwidth'][item])
-        self.assertEqual(info_dict["storage"].keys(),
-                         dict.fromkeys(("capacity", "max_file_size", "used"),
-                                       None).keys())
+        self.assertEqual(info_response, expected_value)
 
-    def test_files_1(self):
-        # first call must return an empty list of files
-        with os.popen('%s metadisk.py files' %
-                              self.metadisk_python_interpreter) as file:
+    def test_files_empty_result(self):
+        """
+        Test for getting the empty list of served files.
+        Must be called first, just before the "test_files_filled_result()"
+        test case
+        """
+        expected_value = []
+        with os.popen('{} metadisk.py files'.format(
+                self.metadisk_python_interpreter)) as file:
             files_response = json.loads(file.read()[4:-1])
-        self.assertEqual(files_response, [])
+        self.assertEqual(files_response, expected_value,
+                         'command "python metadisk.py files" must return '
+                         'must receive an empty list')
 
-    def test_files_2(self):
-        # first call must return an empty list of files
-        with os.popen('%s metadisk.py files' %
-                              self.metadisk_python_interpreter) as file:
+    def test_files_filled_result(self):
+        """
+        Testing for receiving the filled list of files from the server.
+        Need to be called after "test_files_empty_result()" test case.
+        """
+        expected_value = [1, 2]
+        with os.popen('{} metadisk.py files'.format(
+                self.metadisk_python_interpreter)) as file:
             files_response = json.loads(file.read()[4:-1])
-        self.assertEqual(files_response, [1, 2])
+        self.assertEqual(files_response, expected_value,
+                         'command "python metadisk.py files" now must return '
+                         'the {} list'.format(expected_value))
 
     @unittest.skip('yet unrealized action on server for this test')
     def test_upload(self):

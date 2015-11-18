@@ -24,7 +24,7 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         """
         Method to handle requests
-        :return:
+        :return: None
         """
         self.data = self.request.recv(1024).strip()
         self.parse_request(self.data.decode("utf-8"))
@@ -91,8 +91,42 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
         message += b'\n' + body
         return message
 
-    def response_api_files_(self):
+    def response_api_nodes_me_(self):
+        """
+        Preparing the response string for the "python metadisk.py info"
+        command call.
+        :return: byte, response string
+        """
+        json_prototype = {
+          "public_key": "13LWbTkeuu4Pz7nFd6jCEEAwLfYZsDJSnK",
+          "bandwidth": {
+            "total": {
+              "incoming": 0,
+              "outgoing": 0
+            },
+            "current": {
+              "incoming": 0,
+              "outgoing": 0
+            },
+            "limits": {
+              "incoming": None,
+              "outgoing": None
+            }
+          },
+          "storage": {
+            "capacity": 524288000,
+            "used": 0,
+            "max_file_size": 0
+          }
+        }
+        return self._set_body(json_prototype)
 
+    def response_api_files_(self):
+        """
+        Generate an appropriate response string for the specific case
+        of the "python metadisk.py files" command call.
+        :return: byte, response string
+        """
         choose = {
             1: self._set_body([]),
             2: self._set_body([1, 2])
