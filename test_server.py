@@ -87,5 +87,10 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
     def response_api_audit_(self):
         data_hash = '3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7'
         challenge_seed = '19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b'
-
+        if data_hash in self.body['data_hash'] and challenge_seed in self.body['challenge_seed']:
+            return self._set_body({
+                "data_hash": "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7",
+                "challenge_seed": "19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b",
+                "challenge_response": "a068cf9870a41ecc36e18be9277bc353f88e29ad8a1b2a778581b37453de7692"
+            })
         return self._set_body({'error_code': 102})

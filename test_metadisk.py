@@ -50,7 +50,6 @@ class MetadiskTest(unittest.TestCase):
                          dict.fromkeys(("capacity", "max_file_size", "used"),
                                        None).keys())
 
-    @unittest.skip('yet unrealized action on server for this test')
     def test_files(self):
         # first call must return an empty list of files
         with os.popen('%s metadisk.py files' %
@@ -98,8 +97,14 @@ class MetadiskTest(unittest.TestCase):
         os.remove(rename_file)
 
     def test_error_audit(self):
-        data_hash = 'test_data_hash'
-        challenge_seed = 'test_challenge_seed'
+        """
+        Test that `metadisk.py audit` return error when not valid data passed
+
+        :return:
+        """
+        data_hash = 'test_not_valid_data_hash'
+        challenge_seed = 'test_not_valid_challenge_seed'
+        expected_value = {'error_code': 102}
 
         with os.popen('{} metadisk.py audit {} {}'.format(
                 self.metadisk_python_interpreter,
@@ -107,31 +112,29 @@ class MetadiskTest(unittest.TestCase):
                 challenge_seed
         )) as audit:
             audit_response = json.loads(audit.read()[4:-1])
-            print(audit_response)
+            self.assertEqual(expected_value, audit_response)
 
-    # def test_valid_json_data(self):
-    #     data_hash = ''
-    #     challenge_seed = ''
-    #     with os.popen('{} metadisk.py audit {} {}'.format(
-    #             self.metadisk_python_interpreter,
-    #             data_hash,
-    #             challenge_seed
-    #     )) as audit:
-    #         pass
-        # with os.popen('%s metadisk.py upload metadisk.py' %
-        #                       self.metadisk_python_interpreter) as file:
-        #     upload_response = json.loads(file.read()[4:-1])
-        # with open('metadisk.py', 'rb') as file:
-        #     file_data = file.read()
-        # challenge_seed = sha256(b'seed').hexdigest()
-        # challenge_response = sha256(
-        #     file_data + challenge_seed.encode()).hexdigest()
-        # with os.popen('%s metadisk.py audit %s %s' % (
-        #         self.metadisk_python_interpreter, upload_response['data_hash'],
-        #         challenge_seed,))as file:
-        #     audit_response = json.loads(file.read()[4:-1])
-        # self.assertEqual(challenge_response,
-        #                  audit_response['challenge_response'])
+    def test_valid_json_data(self):
+        """
+        Test that `metadisk.py audit` return data when valid data passed
+        :return:
+        """
+        data_hash = '3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7'
+        challenge_seed = '19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b'
+
+        expected_value = {
+            "data_hash": data_hash,
+            "challenge_seed": challenge_seed,
+            "challenge_response": "a068cf9870a41ecc36e18be9277bc353f88e29ad8a1b2a778581b37453de7692"
+        }
+
+        with os.popen('{} metadisk.py audit {} {}'.format(
+                self.metadisk_python_interpreter,
+                data_hash,
+                challenge_seed
+        )) as audit:
+            audit_response = json.loads(audit.read()[4:-1])
+            self.assertEqual(expected_value, audit_response)
 
 
 if __name__ == '__main__':
