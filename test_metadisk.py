@@ -50,20 +50,32 @@ class MetadiskTest(unittest.TestCase):
                          dict.fromkeys(("capacity", "max_file_size", "used"),
                                        None).keys())
 
-
-    def test_files_1(self):
-        # first call must return an empty list of files
-        with os.popen('%s metadisk.py files' %
-                              self.metadisk_python_interpreter) as file:
+    def test_files_empty_result(self):
+        """
+        Testing for getting the empty list of served files.
+        Must be called first, just before the "test_files_filled_result()"
+        test case
+        """
+        expected_value = []
+        with os.popen('{} metadisk.py files'.format(
+                self.metadisk_python_interpreter)) as file:
             files_response = json.loads(file.read()[4:-1])
-        self.assertEqual(files_response, [])
+        self.assertEqual(files_response, expected_value,
+                         'command "python metadisk.py files" must return '
+                         'must receive an empty list')
 
-    def test_files_2(self):
-        # first call must return an empty list of files
-        with os.popen('%s metadisk.py files' %
-                              self.metadisk_python_interpreter) as file:
+    def test_files_filled_result(self):
+        """
+        Testing for receiving the filled list of files from the server.
+        Need to be called after "test_files_empty_result()" test case.
+        """
+        expected_value = [1, 2]
+        with os.popen('{} metadisk.py files'.format(
+                self.metadisk_python_interpreter)) as file:
             files_response = json.loads(file.read()[4:-1])
-        self.assertEqual(files_response, [1, 2])
+        self.assertEqual(files_response, expected_value,
+                         'command "python metadisk.py files" now must return '
+                         'the {} list'.format(expected_value))
 
     @unittest.skip('yet unrealized action on server for this test')
     def test_upload(self):

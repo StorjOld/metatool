@@ -24,7 +24,7 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         """
         Method to handle requests
-        :return:
+        :return: None
         """
         self.data = self.request.recv(1024).strip()
         self.parse_request(self.data.decode("utf-8"))
@@ -84,7 +84,11 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
         return message
 
     def response_api_files_(self):
-
+        """
+        Generate an appropriate response string for the specific case
+        of the "python metadisk.py files" command call.
+        :return: bytes type
+        """
         choose = {
             1: self._set_body([]),
             2: self._set_body([1, 2])
