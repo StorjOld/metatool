@@ -1,3 +1,4 @@
+import json
 import socketserver
 
 
@@ -21,7 +22,7 @@ class MyRequestHandler(socketserver.StreamRequestHandler):
     @staticmethod
     def _set_body(body):
         message = b'HTTP/1.0 200 OK\n'
-        body = b'\n' + str.encode(str(body)) + b'\n'
+        body = b'\n' + str.encode(json.dumps(body)) + b'\n'
         headers = {
             'Content-Type': 'application/json',
             'Content-Length': len(body),
