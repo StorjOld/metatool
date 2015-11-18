@@ -50,6 +50,7 @@ class MetadiskTest(unittest.TestCase):
                          dict.fromkeys(("capacity", "max_file_size", "used"),
                                        None).keys())
 
+    @unittest.skip('yet unrealized action on server for this test')
     def test_files(self):
         # first call must return an empty list of files
         with os.popen('%s metadisk.py files' %
@@ -96,9 +97,27 @@ class MetadiskTest(unittest.TestCase):
         self.assertEqual(upload_response['data_hash'], ensure_hash)
         os.remove(rename_file)
 
-    @unittest.skip('yet unrealized action on server for this test')
-    def test_audit(self):
-        pass
+    def test_error_audit(self):
+        data_hash = 'test_data_hash'
+        challenge_seed = 'test_challenge_seed'
+
+        with os.popen('{} metadisk.py audit {} {}'.format(
+                self.metadisk_python_interpreter,
+                data_hash,
+                challenge_seed
+        )) as audit:
+            audit_response = json.loads(audit.read()[4:-1])
+            print(audit_response)
+
+    # def test_valid_json_data(self):
+    #     data_hash = ''
+    #     challenge_seed = ''
+    #     with os.popen('{} metadisk.py audit {} {}'.format(
+    #             self.metadisk_python_interpreter,
+    #             data_hash,
+    #             challenge_seed
+    #     )) as audit:
+    #         pass
         # with os.popen('%s metadisk.py upload metadisk.py' %
         #                       self.metadisk_python_interpreter) as file:
         #     upload_response = json.loads(file.read()[4:-1])
