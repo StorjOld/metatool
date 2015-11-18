@@ -2,9 +2,8 @@ import os
 import sys
 import json
 import unittest
-import time
 import socketserver
-import _thread
+import threading
 
 from hashlib import sha256
 
@@ -19,11 +18,10 @@ class MyRequestHandler(socketserver.StreamRequestHandler):
         """
         Temporary method, which response to "python metadisk.py files"
         command.
-        :return: response with display of empty list
+        :return: None
         """
         self.data = self.rfile.readline().strip()
-        print("{} wrote:".format(self.client_address[0]))
-        print(self.data)
+        print("Received: {}".format(self.data))
         start_line = b'HTTP/1.0 200 OK\n'
         message = b'\n[]\n'
         headers = {
@@ -35,12 +33,10 @@ class MyRequestHandler(socketserver.StreamRequestHandler):
             self.wfile.write(bytes('%s: %s\n' % line, 'utf-8'))
         self.wfile.write(message)
 
-    def finish(self):
-        # You may run server like threading object and call shutdown from
-        # the main program stream.
 
-        # Temporary decision for shutdown server inside threading.
-        self.server._BaseServer__shutdown_request = True
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
+
 
 
 class MetadiskTest(unittest.TestCase):
@@ -48,14 +44,22 @@ class MetadiskTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.metadisk_python_interpreter = sys.executable
+        HOST, PORT = 'localhost', 5000
+        ThreadedTCPServer.allow_reuse_address = True
+        cls.server = ThreadedTCPServer((HOST, PORT), MyRequestHandler)
+
+        server_thread = threading.Thread(target=cls.server.serve_forever)
+        server_thread.daemon = True
+        server_thread.start()
+
 
     def setUp(self):
-        HOST, PORT = 'localhost', 5000
-        socketserver.TCPServer.allow_reuse_address = True
-        server = socketserver.TCPServer((HOST, PORT), MyRequestHandler)
-        _thread.start_new_thread(server.serve_forever, ())
-        # delay for running server.
-        time.sleep(2)
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server.shutdown()
+        cls.server.server_close()
 
     @unittest.skip('yet unrealized action on server for this test')
     def test_info(self):
