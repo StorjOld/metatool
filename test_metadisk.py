@@ -98,20 +98,21 @@ class MetadiskTest(unittest.TestCase):
 
     @unittest.skip('yet unrealized action on server for this test')
     def test_audit(self):
-        with os.popen('%s metadisk.py upload metadisk.py' %
-                              self.metadisk_python_interpreter) as file:
-            upload_response = json.loads(file.read()[4:-1])
-        with open('metadisk.py', 'rb') as file:
-            file_data = file.read()
-        challenge_seed = sha256(b'seed').hexdigest()
-        challenge_response = sha256(
-            file_data + challenge_seed.encode()).hexdigest()
-        with os.popen('%s metadisk.py audit %s %s' % (
-                self.metadisk_python_interpreter, upload_response['data_hash'],
-                challenge_seed,))as file:
-            audit_response = json.loads(file.read()[4:-1])
-        self.assertEqual(challenge_response,
-                         audit_response['challenge_response'])
+        pass
+        # with os.popen('%s metadisk.py upload metadisk.py' %
+        #                       self.metadisk_python_interpreter) as file:
+        #     upload_response = json.loads(file.read()[4:-1])
+        # with open('metadisk.py', 'rb') as file:
+        #     file_data = file.read()
+        # challenge_seed = sha256(b'seed').hexdigest()
+        # challenge_response = sha256(
+        #     file_data + challenge_seed.encode()).hexdigest()
+        # with os.popen('%s metadisk.py audit %s %s' % (
+        #         self.metadisk_python_interpreter, upload_response['data_hash'],
+        #         challenge_seed,))as file:
+        #     audit_response = json.loads(file.read()[4:-1])
+        # self.assertEqual(challenge_response,
+        #                  audit_response['challenge_response'])
 
 
 if __name__ == '__main__':

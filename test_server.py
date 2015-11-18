@@ -19,9 +19,9 @@ class MyRequestHandler(socketserver.StreamRequestHandler):
         self.wfile.write(message)
 
     @staticmethod
-    def response_api_files_():
+    def _set_body(body):
         message = b'HTTP/1.0 200 OK\n'
-        body = b'\n[]\n'
+        body = b'\n' + str.encode(str(body)) + b'\n'
         headers = {
             'Content-Type': 'application/json',
             'Content-Length': len(body),
@@ -31,3 +31,9 @@ class MyRequestHandler(socketserver.StreamRequestHandler):
         message += body
         return message
 
+    def response_api_files_(self):
+        return self._set_body([])
+
+    @staticmethod
+    def response_api_audit_():
+        pass
