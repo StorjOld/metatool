@@ -3,6 +3,8 @@ import socketserver
 from urllib.parse import urlparse, parse_qs
 
 
+API_FILES_RESPONSE_STATUS = [0]
+
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
@@ -71,18 +73,24 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
         :return: byte, response string
         """
         message = b'HTTP/1.0 200 OK\n'
-        body = b'\n' + str.encode(json.dumps(body)) + b'\n'
+        body = str.encode(json.dumps(body)) + b'\n'
         headers = {
             'Content-Type': 'application/json',
             'Content-Length': len(body),
         }
         for line in sorted(headers.items()):
             message += bytes('%s: %s\n' % line, 'utf-8')
-        message += body
+        message += b'\n' + body
         return message
 
     def response_api_files_(self):
-        return self._set_body([])
+
+        choose = {
+            1: self._set_body([]),
+            2: self._set_body([1, 2])
+        }
+        API_FILES_RESPONSE_STATUS[0] += 1
+        return choose[API_FILES_RESPONSE_STATUS[0]]
 
     def response_api_audit_(self):
         data_hash = '3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7'
