@@ -3,8 +3,7 @@ import sys
 import json
 import unittest
 import threading
-
-from hashlib import sha256
+import time
 
 from test_server import MyRequestHandler, ThreadedTCPServer
 
@@ -126,27 +125,87 @@ class MetadiskTest(unittest.TestCase):
                          expected_value['file_role'])
 
 
-    @unittest.skip('yet unrealized action on server for this test')
-    def test_download(self):
-        with os.popen('%s metadisk.py upload metadisk.py' %
-                              self.metadisk_python_interpreter) as file:
-            upload_response = json.loads(file.read()[4:-1])
-        os.system('%s metadisk.py download %s' % (
-                self.metadisk_python_interpreter,
-                upload_response['data_hash']))
-        with open(upload_response['data_hash'], 'rb') as file:
-            ensure_hash = sha256(file.read()).hexdigest()
-        self.assertEqual(upload_response['data_hash'], ensure_hash)
-        os.remove(ensure_hash)
+    def test_download_error(self):
+        """
+        Test that `metadisk.py download` return error if passed not valid data_hash
+        :return:
+        """
+        data_hash = 'test_not_valid_data_hash'
+        expected_value = {'error_code': 101}
+        with os.popen('{} metadisk.py download {}'.format(
+            self.metadisk_python_interpreter,
+            data_hash
+        )) as download:
+            download_response = json.loads(download.read()[4:-1])
 
-        rename_file = 'test_download_file'
-        os.system('%s metadisk.py download %s --rename_file %s' % (
-                self.metadisk_python_interpreter, upload_response['data_hash'],
-                rename_file,))
-        with open(rename_file, 'rb') as file:
-            ensure_hash = sha256(file.read()).hexdigest()
-        self.assertEqual(upload_response['data_hash'], ensure_hash)
-        os.remove(rename_file)
+            self.assertEqual(expected_value, download_response)
+
+    def test_download_valid_data_hash(self):
+        """
+        Test that `metadisk.py download` return data if passed valid data
+        :return:
+        """
+        data_hash = 'test_valid_data_hash'
+        test_file_name = 'TEST_FILE_NAME'
+        expected_value = b'TEST_DATA'
+        with os.popen('{} metadisk.py download {}'.format(
+            self.metadisk_python_interpreter,
+            data_hash
+        )):
+            counter = 0
+
+            while not os.path.exists(test_file_name) or counter > 10:
+                time.sleep(1)
+                counter += 1
+
+            self.assertTrue(os.path.isfile(test_file_name))
+            self.assertEqual(expected_value, open(test_file_name, 'rb').read()[:-1])
+            os.remove(test_file_name)
+
+    def test_download_rename_file(self):
+        """
+        Test that `metadisk.py download` with `--rename_file` return file with given_name
+        :return:
+        """
+        data_hash = 'test_valid_data_hash'
+        test_file_name = 'DIFFERENT_TEST_FILE_NAME'
+        with os.popen('{} metadisk.py download {} --rename_file {}'.format(
+            self.metadisk_python_interpreter,
+            data_hash,
+            test_file_name
+        )):
+            counter = 0
+
+            while not os.path.exists(test_file_name) or counter > 10:
+                time.sleep(1)
+                counter += 1
+
+            self.assertTrue(os.path.isfile(test_file_name))
+            os.remove(test_file_name)
+
+    def test_download_decryption_key(self):
+        """
+        Test that `metadisk.py download` with `--decryption_key` return file with given_name
+        :return:
+        """
+        data_hash = 'test_valid_data_hash'
+        test_file_name = 'TEST_FILE_NAME'
+        decryption_key = 'some_test_decryption_key'
+        expected_value = b'TEST_DATA'
+        with os.popen('{} metadisk.py download {} --decryption_key {}'.format(
+            self.metadisk_python_interpreter,
+            data_hash,
+            decryption_key
+        )):
+            counter = 0
+
+            while not os.path.exists(test_file_name) or counter > 10:
+                time.sleep(1)
+                counter += 1
+
+            self.assertTrue(os.path.isfile(test_file_name))
+            self.assertEqual(expected_value, open(test_file_name, 'rb').read()[:-1])
+            os.remove(test_file_name)
 
     def test_error_audit(self):
         """
@@ -166,7 +225,7 @@ class MetadiskTest(unittest.TestCase):
             audit_response = json.loads(audit.read()[4:-1])
             self.assertEqual(expected_value, audit_response)
 
-    def test_valid_json_data(self):
+    def test_audit_valid_json_data(self):
         """
         Test that `metadisk.py audit` return data when valid data passed
         :return:
