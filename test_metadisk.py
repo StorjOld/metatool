@@ -50,12 +50,19 @@ class MetadiskTest(unittest.TestCase):
                          dict.fromkeys(("capacity", "max_file_size", "used"),
                                        None).keys())
 
-    def test_files(self):
+    def test_files_1(self):
         # first call must return an empty list of files
         with os.popen('%s metadisk.py files' %
                               self.metadisk_python_interpreter) as file:
             files_response = json.loads(file.read()[4:-1])
         self.assertEqual(files_response, [])
+
+    def test_files_2(self):
+        # first call must return an empty list of files
+        with os.popen('%s metadisk.py files' %
+                              self.metadisk_python_interpreter) as file:
+            files_response = json.loads(file.read()[4:-1])
+        self.assertEqual(files_response, [1, 2])
 
     @unittest.skip('yet unrealized action on server for this test')
     def test_upload(self):
