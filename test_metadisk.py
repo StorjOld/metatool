@@ -185,31 +185,6 @@ class MetadiskTest(unittest.TestCase):
             self.assertEqual(expected_value, open(test_file_name, 'rb').read()[:-1])
             os.remove(test_file_name)
 
-    # def test_download(self):
-    #
-    #     with os.popen('%s metadisk.py upload metadisk.py' %
-    #                           self.metadisk_python_interpreter) as file:
-    #         upload_response = json.loads(file.read()[4:-1])
-    #
-    #     os.system('%s metadisk.py download %s' % (
-    #             self.metadisk_python_interpreter,
-    #             upload_response['data_hash']))
-    #
-    #     with open(upload_response['data_hash'], 'rb') as file:
-    #         ensure_hash = sha256(file.read()).hexdigest()
-    #
-    #     self.assertEqual(upload_response['data_hash'], ensure_hash)
-    #     os.remove(ensure_hash)
-    #
-    #     rename_file = 'test_download_file'
-    #     os.system('%s metadisk.py download %s --rename_file %s' % (
-    #             self.metadisk_python_interpreter, upload_response['data_hash'],
-    #             rename_file,))
-    #     with open(rename_file, 'rb') as file:
-    #         ensure_hash = sha256(file.read()).hexdigest()
-    #     self.assertEqual(upload_response['data_hash'], ensure_hash)
-    #     os.remove(rename_file)
-
     def test_error_audit(self):
         """
         Test that `metadisk.py audit` return error when not valid data passed
