@@ -17,11 +17,11 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
     headers = None
     body = None
     path = None
-    query_string = None
+    query_data = None
 
     def handle(self):
         """
-        Met
+        Method to handle requests
         :return:
         """
         self.data = self.request.recv(1024).strip()
@@ -31,6 +31,16 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
         self.request.sendall(message)
 
     def parse_request(self, req):
+        """
+        Method to parse request and set to class request attributes
+            - self.path - url path "path/to/something"
+            - self.method - http method type
+            - self.headers - http headers
+            - self.body - request body data
+            - self.query_data - request query data
+        :param req: request string
+        :return:
+        """
         headers = {}
         lines = req.splitlines()
         in_body = False
@@ -50,12 +60,16 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
         self.body = parse_qs(body)
 
         if '?' in path:
-            self.path, self.query_string = self.path.split("?")
-            self.query_string = parse_qs(self.query_string)
-
+            self.path, query_string = self.path.split("?")
+            self.query_data = parse_qs(query_string)
 
     @staticmethod
     def _set_body(body):
+        """
+        Set body message for response
+        :param body: dict or list
+        :return: byte, response string
+        """
         message = b'HTTP/1.0 200 OK\n'
         body = b'\n' + str.encode(json.dumps(body)) + b'\n'
         headers = {
