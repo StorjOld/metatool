@@ -2,8 +2,8 @@ import json
 import socketserver
 from urllib.parse import urlparse, parse_qs
 
-
 API_FILES_RESPONSE_STATUS = [0]
+
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
@@ -17,9 +17,9 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
     data = None
     method = None
     headers = None
-    body = None
+    body = {}
     path = None
-    query_data = None
+    query_data = {}
 
     def handle(self):
         """
@@ -66,20 +66,28 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
             self.query_data = parse_qs(query_string)
 
     @staticmethod
-    def _set_body(body):
+    def _set_body(body, status_code=200, is_json=True, file_name='TEST_FILE_NAME'):
         """
         Set body message for response
         :param body: dict or list
         :return: byte, response string
         """
-        message = b'HTTP/1.0 200 OK\n'
-        body = str.encode(json.dumps(body)) + b'\n'
+        message = b'HTTP/1.0 ' + str.encode(str(status_code)) + b' OK\n'
+
+        if is_json:
+            body = str.encode(json.dumps(body)) + b'\n'
+        else:
+            body = body + b'\n'
+
         headers = {
             'Content-Type': 'application/json',
             'Content-Length': len(body),
         }
+        if not is_json:
+            headers['X-Sendfile'] = file_name
         for line in sorted(headers.items()):
             message += bytes('%s: %s\n' % line, 'utf-8')
+
         message += b'\n' + body
         return message
 
@@ -93,6 +101,10 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
         return choose[API_FILES_RESPONSE_STATUS[0]]
 
     def response_api_audit_(self):
+        """
+        Method to get audit data
+        :return: bytes, response string
+        """
         data_hash = '3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7'
         challenge_seed = '19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b'
         if data_hash in self.body['data_hash'] and challenge_seed in self.body['challenge_seed']:
@@ -102,3 +114,21 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
                 "challenge_response": "a068cf9870a41ecc36e18be9277bc353f88e29ad8a1b2a778581b37453de7692"
             })
         return self._set_body({'error_code': 102})
+
+    def response_api_files_test_not_valid_data_hash(self):
+        """
+        Method to get error when invalid data send
+        :return:
+        """
+        return self._set_body({'error_code': 101}, 400)
+
+    def response_api_files_test_valid_data_hash(self):
+        """
+        Method to get data when valid data send
+        :return:
+        """
+        bin_data = b'TEST_DATA'
+        if 'file_alias' in self.query_data:
+            return self._set_body(bin_data, is_json=False,
+                                  file_name=self.query_data['file_alias'][0])
+        return self._set_body(bin_data, is_json=False)
