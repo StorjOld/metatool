@@ -87,22 +87,27 @@ class MetadiskTest(unittest.TestCase):
                          'command "python metadisk.py files" now must return '
                          'the {} list'.format(expected_value))
 
-    @unittest.skip('yet unrealized action on server for this test')
+    # @unittest.skip('yet unrealized action on server for this test')
     def test_upload(self):
+        expected_value = {
+            "data_hash": "3b438fd7b1f223890f18f8ffc50c19c0"
+                         "0b08340fc4fc76a94ba3a1c160b332a0",
+            "file_role": "001"
+        }
         with os.popen('%s metadisk.py upload metadisk.py' %
                               self.metadisk_python_interpreter) as file:
             upload_response = json.loads(file.read()[4:-1])
-        self.assertEqual(upload_response['file_role'], '001')
-
-        with os.popen('%s metadisk.py files' %
-                              self.metadisk_python_interpreter) as file:
-            files_response = json.loads(file.read()[4:-1])
-        self.assertEqual(files_response, [upload_response['data_hash'], ])
-
-        with os.popen('%s metadisk.py upload test_metadisk.py --file_role 002'
-                              % self.metadisk_python_interpreter) as file:
-            upload_response = json.loads(file.read()[4:-1])
-        self.assertEqual(upload_response['file_role'], '002')
+        self.assertEqual(upload_response, expected_value)
+        #
+        # with os.popen('%s metadisk.py files' %
+        #                       self.metadisk_python_interpreter) as file:
+        #     files_response = json.loads(file.read()[4:-1])
+        # self.assertEqual(files_response, [upload_response['data_hash'], ])
+        #
+        # with os.popen('%s metadisk.py upload test_metadisk.py --file_role 002'
+        #                       % self.metadisk_python_interpreter) as file:
+        #     upload_response = json.loads(file.read()[4:-1])
+        # self.assertEqual(upload_response['file_role'], '002')
 
     @unittest.skip('yet unrealized action on server for this test')
     def test_download(self):

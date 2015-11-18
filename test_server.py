@@ -119,12 +119,20 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
         of the "python metadisk.py files" command call.
         :return: byte, response string
         """
-        choose = {
-            1: self._set_body([]),
-            2: self._set_body([1, 2])
-        }
-        API_FILES_RESPONSE_STATUS[0] += 1
-        return choose[API_FILES_RESPONSE_STATUS[0]]
+        if self.method == 'GET':
+            choose = {
+                1: self._set_body([]),
+                2: self._set_body([1, 2])
+            }
+            API_FILES_RESPONSE_STATUS[0] += 1
+            return choose[API_FILES_RESPONSE_STATUS[0]]
+        else:
+            message_content = {
+                "data_hash": "3b438fd7b1f223890f18f8ffc50c19c0"
+                             "0b08340fc4fc76a94ba3a1c160b332a0",
+                "file_role": "001"
+            }
+            return self._set_body(message_content)
 
     def response_api_audit_(self):
         data_hash = '3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7'
