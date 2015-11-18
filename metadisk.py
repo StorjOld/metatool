@@ -11,7 +11,7 @@ import requests
 from btctxstore import BtcTxStore
 
 
-url_base = 'http://dev.storj.anvil8.com'
+url_base = 'http://localhost:5000'
 
 parser = argparse.ArgumentParser()
 
