@@ -2,41 +2,11 @@ import os
 import sys
 import json
 import unittest
-import socketserver
 import threading
 
 from hashlib import sha256
 
-
-class MyRequestHandler(socketserver.StreamRequestHandler):
-    """
-    Request handler for testing metadisk.py.
-
-    """
-
-    def handle(self):
-        """
-        Temporary method, which response to "python metadisk.py files"
-        command.
-        :return: None
-        """
-        self.data = self.rfile.readline().strip()
-        print("Received: {}".format(self.data))
-        start_line = b'HTTP/1.0 200 OK\n'
-        message = b'\n[]\n'
-        headers = {
-            'Content-Type': 'application/json',
-            'Content-Length': len(message),
-        }
-        self.wfile.write(start_line)
-        for line in sorted(headers.items()):
-            self.wfile.write(bytes('%s: %s\n' % line, 'utf-8'))
-        self.wfile.write(message)
-
-
-class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    pass
-
+from test_server import MyRequestHandler, ThreadedTCPServer
 
 
 class MetadiskTest(unittest.TestCase):
