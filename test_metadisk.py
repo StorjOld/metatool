@@ -14,17 +14,13 @@ class MetadiskTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.metadisk_python_interpreter = sys.executable
-        HOST, PORT = 'localhost', 5000
+        host, port = 'localhost', 5000
         ThreadedTCPServer.allow_reuse_address = True
-        cls.server = ThreadedTCPServer((HOST, PORT), MyRequestHandler)
+        cls.server = ThreadedTCPServer((host, port), MyRequestHandler)
 
         server_thread = threading.Thread(target=cls.server.serve_forever)
         server_thread.daemon = True
         server_thread.start()
-
-
-    def setUp(self):
-        pass
 
     @classmethod
     def tearDownClass(cls):

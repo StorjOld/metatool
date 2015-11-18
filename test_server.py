@@ -10,6 +10,7 @@ class MyRequestHandler(socketserver.StreamRequestHandler):
     Request handler for testing metadisk.py.
 
     """
+    data = None
 
     def handle(self):
         self.data = self.rfile.readline().strip().split()
@@ -17,8 +18,8 @@ class MyRequestHandler(socketserver.StreamRequestHandler):
         message = getattr(self, 'response{}'.format(url))()
         self.wfile.write(message)
 
-
-    def response_api_files_(self):
+    @staticmethod
+    def response_api_files_():
         message = b'HTTP/1.0 200 OK\n'
         body = b'\n[]\n'
         headers = {
