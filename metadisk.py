@@ -17,34 +17,35 @@ Example:
 
 ------------------------------------------------------------------------------
 SPECIFICATION THROUGH ALL OF ACTIONS
-Each action return response status as a first line and appropriate data for a
-specific action.
-When an error is occur whilst an response it will be shown instead of
-success result.
+Each the action return response status as a first line and appropriate data for
+a specific action.
+When an error is occur whilst the response it will be shown instead of
+the success result.
 
 ... files
-            Return the list of hans-code of files uploaded at the server.
-            Return an empty list in the files absence case.
+            Return the list of hash-codes of files uploaded at the server or
+            return an empty list in the files absence case.
 
 ... info
-            Return an json file with information about the nodes data usage
+            Return a json file with an information about the data usage of
+            the node.
 
 ... upload <path_to_file> [-r | --file_role <FILE_ROLE>]
             Upload file to the server.
 
-        <path_to_file> - Name of file from the working directory
-                         or full/related path to the file.
+        <path_to_file> - Name of the file from the working directory
+                         or a full/related path to the file.
 
         [-r | --file_role <FILE_ROLE>]  -  Key "-r" or "--file_role" purposed
                 for the setting desired "file role". 001 by default.
 
-            Return an json file with two fields of information about
-            downloaded file.
+            Return a json file with two fields of the information about
+            the downloaded file.
 
 ... audit <data_hash> <challenge_seed>
-            This action purposed for ensure existence of files on the server
-                                (in opposite to plain serving hashes of files).
-            Return an json file of three files with the response data:
+            This action purposed for checkout the existence of files on the
+            server (in opposite to plain serving hashes of files).
+            Return a json file of three files with the response data:
                 {
                   "challenge_response": ... ,
                   "challenge_seed": ... ,
@@ -53,6 +54,7 @@ success result.
 
 ... download <file_hash> [--decryption_key KEY] [--rename_file NEW_NAME]
             This action fetch desired file from the server by the "hash name".
+            Return nothing if the file downloaded successful.
 
         <file_hash> - string with represent the "file hash".
 
@@ -64,6 +66,7 @@ success result.
         [--rename_file NEW_NAME] - Optional argument which define the NAME for
                 storing file on the your disk. You can indicate an relative and
                 the full path to directory with this name as well.
+
 
 Note: metadisk.py for running require Python 3 interpreter and installed
 packages specified at the setup.sh
