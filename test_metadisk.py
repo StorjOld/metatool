@@ -15,6 +15,7 @@ class MetadiskTest(unittest.TestCase):
     def setUpClass(cls):
         cls.metadisk_python_interpreter = sys.executable
         host, port = 'localhost', 5000
+        cls.url_base = 'http://{}:{}'.format(host, port)
         ThreadedTCPServer.allow_reuse_address = True
         cls.server = ThreadedTCPServer((host, port), MyRequestHandler)
 
@@ -54,8 +55,8 @@ class MetadiskTest(unittest.TestCase):
             "max_file_size": 0
           }
         }
-        with os.popen('{} metadisk.py info'.format(
-                self.metadisk_python_interpreter)) as file:
+        with os.popen('{} metadisk.py info --url {}'.format(
+                self.metadisk_python_interpreter, self.url_base)) as file:
             info_response = json.loads(file.read()[4:-1])
 
         self.assertEqual(info_response, expected_value)
@@ -67,8 +68,8 @@ class MetadiskTest(unittest.TestCase):
         test case
         """
         expected_value = []
-        with os.popen('{} metadisk.py files'.format(
-                self.metadisk_python_interpreter)) as file:
+        with os.popen('{} metadisk.py files --url {}'.format(
+                self.metadisk_python_interpreter, self.url_base)) as file:
             files_response = json.loads(file.read()[4:-1])
         self.assertEqual(files_response, expected_value,
                          'command "python metadisk.py files" must return '
@@ -80,8 +81,8 @@ class MetadiskTest(unittest.TestCase):
         Need to be called after "test_files_empty_result()" test case.
         """
         expected_value = [1, 2]
-        with os.popen('{} metadisk.py files'.format(
-                self.metadisk_python_interpreter)) as file:
+        with os.popen('{} metadisk.py files --url {}'.format(
+                self.metadisk_python_interpreter, self.url_base)) as file:
             files_response = json.loads(file.read()[4:-1])
         self.assertEqual(files_response, expected_value,
                          'command "python metadisk.py files" now must return '
@@ -99,8 +100,8 @@ class MetadiskTest(unittest.TestCase):
             "data_hash": data_hash,
             "file_role": "001",
         }
-        with os.popen('{} metadisk.py upload setup.sh'.format(
-                self.metadisk_python_interpreter)) as file:
+        with os.popen('{} metadisk.py upload setup.sh --url {}'.format(
+                self.metadisk_python_interpreter, self.url_base)) as file:
             upload_response = json.loads(file.read()[4:-1])
         self.assertEqual(upload_response, expected_value)
 
@@ -117,8 +118,9 @@ class MetadiskTest(unittest.TestCase):
             "file_role": "002",
         }
         with os.popen(
-                '{} metadisk.py upload setup.sh --file_role 002'.format(
-                    self.metadisk_python_interpreter)) as file:
+                '{} metadisk.py upload setup.sh --file_role '
+                '002 --url {}'.format(
+                    self.metadisk_python_interpreter, self.url_base)) as file:
             upload_response = json.loads(file.read()[4:-1])
         self.assertEqual(upload_response['file_role'],
                          expected_value['file_role'])
@@ -130,9 +132,10 @@ class MetadiskTest(unittest.TestCase):
         """
         data_hash = 'test_not_valid_data_hash'
         expected_value = {'error_code': 101}
-        with os.popen('{} metadisk.py download {}'.format(
+        with os.popen('{} metadisk.py download {} --url {}'.format(
             self.metadisk_python_interpreter,
-            data_hash
+            data_hash,
+            self.url_base
         )) as download:
             download_response = json.loads(download.read()[4:-1])
 
@@ -145,9 +148,10 @@ class MetadiskTest(unittest.TestCase):
         data_hash = 'test_valid_data_hash'
         test_file_name = 'TEST_FILE_NAME'
         expected_value = b'TEST_DATA'
-        with os.popen('{} metadisk.py download {}'.format(
+        with os.popen('{} metadisk.py download {} --url {}'.format(
             self.metadisk_python_interpreter,
-            data_hash
+            data_hash,
+            self.url_base
         )):
             counter = 0
 
@@ -169,11 +173,14 @@ class MetadiskTest(unittest.TestCase):
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'DIFFERENT_TEST_FILE_NAME'
-        with os.popen('{} metadisk.py download {} --rename_file {}'.format(
-            self.metadisk_python_interpreter,
-            data_hash,
-            test_file_name
-        )):
+        with os.popen(
+            '{} metadisk.py download {} --rename_file {} --url {}'.format(
+                self.metadisk_python_interpreter,
+                data_hash,
+                test_file_name,
+                self.url_base
+            )
+        ):
             counter = 0
 
             while not os.path.exists(test_file_name) or counter > 10:
@@ -192,11 +199,15 @@ class MetadiskTest(unittest.TestCase):
         test_file_name = 'TEST_FILE_NAME'
         decryption_key = 'some_test_decryption_key'
         expected_value = b'TEST_DATA'
-        with os.popen('{} metadisk.py download {} --decryption_key {}'.format(
-            self.metadisk_python_interpreter,
-            data_hash,
-            decryption_key
-        )):
+        with os.popen(
+            '{} metadisk.py download {} --decryption_key {} --url {}'.format(
+                self.metadisk_python_interpreter,
+                data_hash,
+                decryption_key,
+                self.url_base,
+            )
+        ):
+
             counter = 0
 
             while not os.path.exists(test_file_name) or counter > 10:
@@ -218,10 +229,11 @@ class MetadiskTest(unittest.TestCase):
         challenge_seed = 'test_not_valid_challenge_seed'
         expected_value = {'error_code': 102}
 
-        with os.popen('{} metadisk.py audit {} {}'.format(
-                self.metadisk_python_interpreter,
-                data_hash,
-                challenge_seed
+        with os.popen('{} metadisk.py audit {} {} --url {}'.format(
+            self.metadisk_python_interpreter,
+            data_hash,
+            challenge_seed,
+            self.url_base
         )) as audit:
             audit_response = json.loads(audit.read()[4:-1])
             self.assertEqual(expected_value, audit_response)
@@ -242,10 +254,11 @@ class MetadiskTest(unittest.TestCase):
                                   "f88e29ad8a1b2a778581b37453de7692"
         }
 
-        with os.popen('{} metadisk.py audit {} {}'.format(
-                self.metadisk_python_interpreter,
-                data_hash,
-                challenge_seed
+        with os.popen('{} metadisk.py audit {} {} --url {}'.format(
+            self.metadisk_python_interpreter,
+            data_hash,
+            challenge_seed,
+            self.url_base
         )) as audit:
             audit_response = json.loads(audit.read()[4:-1])
             self.assertEqual(expected_value, audit_response)

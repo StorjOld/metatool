@@ -5,28 +5,30 @@ Metadisc api util
 Takes following parameters:
     :param audit: get audit data for given data_hash and challenge_seed
         Example:
-            `python3 metadisk.py audit data_hash challenge_seed`
-    :param download: download file and save it in current directory by given file_hash
+           `python3 metadisk.py audit data_hash challenge_seed`
+    :param download: download file and save it in current directory by given
+                                                                file_hash
         Example:
-            `python3 metadisk.py download file_hash`
-        also have two attributes `--decryption_key decryption_key` and `--rename_file new_file_name`
-            --decryption_key - download decrypted file using given key
-            --rename_file - download file with given new name
+           `python3 metadisk.py download file_hash`
+        also have two attributes `--decryption_key decryption_key` and
+        `--rename_file new_file_name`
+           --decryption_key - download decrypted file using given key
+           --rename_file - download file with given new name
         Examples:
-            `python3 metadisk.py download file_hash --decryption_key some_key`
-            `python3 metadisk.py download file_hash --rename_file new_file_name`
+           `python3 metadisk.py download file_hash --decryption_key some_key`
+           `python3 metadisk.py download file_hash --rename_file new_file_name`
     :param files: get available list of files hashes
         Example:
-            `python3 metadisk.py files`
+           `python3 metadisk.py files`
 
     :param info: return information about node
         Example:
-            `python3 metadisk.py info`
+           `python3 metadisk.py info`
     :param upload: upload given file to node
         Example:
-            `python3 metadisk.py upload path/to/file`
+           `python3 metadisk.py upload path/to/file`
         also have argument `--file_role`
-            --file_role - set file role on node by default 001
+           --file_role - set file role on node by default 001
         Example:
             `python3 metadisk.py upload path/to/file --file_role 002`
 """
@@ -40,11 +42,11 @@ from btctxstore import BtcTxStore
 from urllib.parse import urljoin
 
 
-url_base = 'http://localhost:5000'
-
 parser = argparse.ArgumentParser()
 parser.add_argument('action',
                     choices=['audit', 'download', 'files', 'info', 'upload'])
+parser.add_argument('--url', type=str, dest='url_base',
+                    default='http://dev.storj.anvil8.com/')
 
 btctx_api = BtcTxStore(testnet=True, dryrun=True)
 sender_key = btctx_api.create_key()
@@ -73,7 +75,7 @@ def action_audit():
     signature = btctx_api.sign_unicode(sender_key, args.file_hash)
 
     response = requests.post(
-        urljoin(url_base, '/api/audit/'),
+        urljoin(args.url_base, '/api/audit/'),
         data={
             'data_hash': args.file_hash,
             'challenge_seed': args.seed,
@@ -107,7 +109,7 @@ def action_download():
         params['file_alias'] = args.rename_file
 
     response = requests.get(
-        urljoin(url_base, '/api/files/' + args.file_hash),
+        urljoin(args.url_base, '/api/files/' + args.file_hash),
         params=params,
         headers={
             'sender-address': sender_address,
@@ -140,7 +142,7 @@ def action_upload():
     signature = btctx_api.sign_unicode(sender_key, data_hash)
 
     response = requests.post(
-        urljoin(url_base, '/api/files/'),
+        urljoin(args.url_base, '/api/files/'),
         data={
             'data_hash': data_hash,
             'file_role': args.file_role,
@@ -159,7 +161,8 @@ def action_files():
     Action method for files command
     :return: None
     """
-    response = requests.get(urljoin(url_base, '/api/files/'))
+    args = parser.parse_args()
+    response = requests.get(urljoin(args.url_base, '/api/files/'))
     _show_data(response)
 
 
@@ -168,10 +171,9 @@ def action_info():
     Action method for info command
     :return: None
     """
-    response = requests.get(urljoin(url_base, '/api/nodes/me/'))
+    args = parser.parse_args()
+    response = requests.get(urljoin(args.url_base, '/api/nodes/me/'))
     _show_data(response)
 
 
 getattr(sys.modules[__name__], 'action_{}'.format(sys.argv[1]))()
-
-
