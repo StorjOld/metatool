@@ -1,36 +1,72 @@
 #! /usr/bin/env python3
-"""
-Metadisc api util
+"""\
+===========================================
+welcome to the metadisk.py help information
+===========================================
 
-Takes following parameters:
-    :param audit: get audit data for given data_hash and challenge_seed
-        Example:
-           `python3 metadisk.py audit data_hash challenge_seed`
-    :param download: download file and save it in current directory by given
-                                                                file_hash
-        Example:
-           `python3 metadisk.py download file_hash`
-        also have two attributes `--decryption_key decryption_key` and
-        `--rename_file new_file_name`
-           --decryption_key - download decrypted file using given key
-           --rename_file - download file with given new name
-        Examples:
-           `python3 metadisk.py download file_hash --decryption_key some_key`
-           `python3 metadisk.py download file_hash --rename_file new_file_name`
-    :param files: get available list of files hashes
-        Example:
-           `python3 metadisk.py files`
+usage: metadisk.py <action> [ appropriate | arguments | for each | of actions ]
 
-    :param info: return information about node
-        Example:
-           `python3 metadisk.py info`
-    :param upload: upload given file to node
-        Example:
-           `python3 metadisk.py upload path/to/file`
-        also have argument `--file_role`
-           --file_role - set file role on node by default 001
-        Example:
-            `python3 metadisk.py upload path/to/file --file_role 002`
+"metadisk.py" expect the main first positional argument <action> which define
+the action of the program. Must be one of:
+
+    files | info | upload | download | audit
+
+Example:
+
+    python3 metadisk.py upload ~/path/to/file.txt --file_role 002
+
+------------------------------------------------------------------------------
+SPECIFICATION THROUGH ALL OF ACTIONS
+Each action return response status as a first line and appropriate data for a
+specific action.
+When an error is occur whilst an response it will be shown instead of
+success result.
+
+... files
+            Return the list of hans-code of files uploaded at the server.
+            Return an empty list in the files absence case.
+
+... info
+            Return an json file with information about the nodes data usage
+
+... upload <path_to_file> [-r | --file_role <FILE_ROLE>]
+            Upload file to the server.
+
+        <path_to_file> - Name of file from the working directory
+                         or full/related path to the file.
+
+        [-r | --file_role <FILE_ROLE>]  -  Key "-r" or "--file_role" purposed
+                for the setting desired "file role". 001 by default.
+
+            Return an json file with two fields of information about
+            downloaded file.
+
+... audit <data_hash> <challenge_seed>
+            This action purposed for ensure existence of files on the server
+                                (in opposite to plain serving hashes of files).
+            Return an json file of three files with the response data:
+                {
+                  "challenge_response": ... ,
+                  "challenge_seed": ... ,
+                  "data_hash": ... ,
+                }
+
+... download <file_hash> [--decryption_key KEY] [--rename_file NEW_NAME]
+            This action fetch desired file from the server by the "hash name".
+
+        <file_hash> - string with represent the "file hash".
+
+        [--decryption_key KEY] - Optional argument. When is defined the file
+                downloading from the server in decrypted state (if allowed for
+                this file).
+
+            !!!WARNING!!! - will rewrite existed files with the same name!
+        [--rename_file NEW_NAME] - Optional argument which define the NAME for
+                storing file on the your disk. You can indicate an relative and
+                the full path to directory with this name as well.
+
+Note: metadisk.py for running require Python 3 interpreter and installed
+packages specified at the setup.sh
 """
 import sys
 import os.path
@@ -176,4 +212,8 @@ def action_info():
     _show_data(response)
 
 
-getattr(sys.modules[__name__], 'action_{}'.format(sys.argv[1]))()
+if __name__ == '__main__':
+    if (len(sys.argv) == 1) or (sys.argv[1] in ['-h', '-help', '--help']):
+        print(__doc__)
+    else:
+        getattr(sys.modules[__name__], 'action_{}'.format(sys.argv[1]))()
