@@ -81,7 +81,7 @@ from btctxstore import BtcTxStore
 from urllib.parse import urljoin
 
 # Get the url from environment variable
-url_base = os.environ.get('MEATADISKSERVER', 'http://dev.storj.anvil8.com/')
+url_base = os.getenv('MEATADISKSERVER', 'http://dev.storj.anvil8.com/')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('action',

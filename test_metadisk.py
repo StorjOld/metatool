@@ -6,7 +6,7 @@ import threading
 import time
 
 from hashlib import sha256
-from test_server import MyRequestHandler, ThreadedTCPServer
+from testing_server import MyRequestHandler, ThreadedTCPServer
 
 
 class MetadiskTest(unittest.TestCase):
