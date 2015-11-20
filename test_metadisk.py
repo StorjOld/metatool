@@ -256,7 +256,7 @@ class MetadiskTest(unittest.TestCase):
             audit_response = json.loads(audit.read()[4:-1])
             self.assertEqual(expected_value, audit_response)
 
-    def test_url_attribute(self):
+    def test_url_attribute_use(self):
         """
         Test of the "--url" optional argument. The "metadisk.py" must use this
         value like url of all responses.
@@ -267,11 +267,16 @@ class MetadiskTest(unittest.TestCase):
         server_thread = threading.Thread(target=server.serve_forever)
         server_thread.daemon = True
         server_thread.start()
+
+        # Hiding of the server running logging. Excise next string if test is
+        # failing to look at the errors of local server.
+        sys.stderr = StringIO()
         with os.popen(
             '{} metadisk.py info --url http://{}:{}'.format(
                 self.metadisk_python_interpreter, host, port)
         ) as file:
             info_response_status = file.read()[:3]
+        sys.stderr = sys.__stderr__  # Turn back the error stream output.
         self.assertEqual(
             info_response_status,
             '501',
@@ -280,6 +285,39 @@ class MetadiskTest(unittest.TestCase):
         )
         server.shutdown()
         server.server_close()
+
+    def test_url_attribute_default(self):
+        """
+        Test of the default case for "metadisk.py" target server
+        (without "--url" positional attribute).
+        Might be just like the value in environment variable "MEATADISKSERVER"
+        """
+        host, port = 'localhost', 5467
+        os.putenv('MEATADISKSERVER', 'http://{}:{}'.format(host, port))
+        server = ThreadedTCPServer((host, port), BaseHTTPRequestHandler)
+
+        server_thread = threading.Thread(target=server.serve_forever)
+        server_thread.daemon = True
+        server_thread.start()
+
+        # Hiding of the server running logging. Excise next string if test is
+        # failing to look at the errors of local server.
+        sys.stderr = StringIO()
+        with os.popen(
+            '{} metadisk.py info --url http://{}:{}'.format(
+                self.metadisk_python_interpreter, host, port)
+        ) as file:
+            info_response_status = file.read()[:3]
+        sys.stderr = sys.__stderr__  # Turn back the error stream output.
+        self.assertEqual(
+            info_response_status,
+            '501',
+            'the "response status" must be 501, like from this test-case '
+            'local server specified at the "MEATADISKSERVER" env. variable!'
+        )
+        server.shutdown()
+        server.server_close()
+
 
 if __name__ == '__main__':
     unittest.main()

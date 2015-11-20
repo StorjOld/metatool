@@ -4,20 +4,28 @@
 welcome to the metadisk.py help information
 ===========================================
 
-usage: metadisk.py <action> [ appropriate | arguments | for each | of actions ]
+usage:
+metadisk.py <action> [ appropriate | arguments | for actions ] [--url URL_ADDR]
 
 "metadisk.py" expect the main first positional argument <action> which define
 the action of the program. Must be one of:
 
     files | info | upload | download | audit
 
+Each of actions expect an appropriate set of arguments after it. They are
+separately described below.
 Example:
 
     python3 metadisk.py upload ~/path/to/file.txt --file_role 002
 
+The "--url" optional argument define url address of the target server.
+By default the server is "http://dev.storj.anvil8.com/". In example:
+
+You can either set an system environment variable "MEATADISKSERVER" to
+provide target server instead of using the "--url" opt. argument.
 ------------------------------------------------------------------------------
 SPECIFICATION THROUGH ALL OF ACTIONS
-Each the action return response status as a first line and appropriate data for
+Each action return response status as a first line and appropriate data for
 a specific action.
 When an error is occur whilst the response it will be shown instead of
 the success result.

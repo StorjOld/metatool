@@ -8,25 +8,35 @@ Below is the thorough specification for the metadisk.py usage.
 
 ---
 
-In the common for running the application you may use the `python3` terminal command with specified `metadisk.py` and required arguments.
-For the plain test run you can enter the following command in the terminal(in the same current directory as metadisk.py):
+In general for running the application you may use the `python3` terminal command with specified `metadisk.py` and required arguments.
+For watching help **information** run `metadisk.py` without arguments or with `-h`, `-help`, `--help`:
 
 
-    $ python3 metadisk.py -h   
-    usage: metadisk.py [-h] {audit,download,files,info,upload}
-    
-    positional arguments:
-      {audit,download,files,info,upload}
-    
-    optional arguments:
-      -h, --help            show this help message and exit
-    
+    $ python3 metadisk.py
+    ===========================================
+    welcome to the metadisk.py help information
+    ===========================================
 
+    usage:
+    <-- the help information -->
+    
+---
+
+Common form of the usage **metadisk.py** is:
+
+    python metadisk.py <action> [ appropriate | arguments | for actions ] [--url URL_ADDRESS]
+    
 The first required argument after `metadisk.py` is an **action**. Namely one of 
 `audit`,`download`,`files`,`info`,`upload`, each for an appropriate task.
 In example: 
 
     $ python3 metadisk.py info
+    
+
+The `--url` optional argument define url address of the *target server*.
+By default the server is **http://dev.storj.anvil8.com/**.
+You can either set an system *environment variable* **MEATADISKSERVER** to
+provide target server instead of using the `--url` opt. argument.
     
 Let us go through all of them!
 
