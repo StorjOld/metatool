@@ -84,12 +84,13 @@ from urllib.parse import urljoin
 parser = argparse.ArgumentParser()
 parser.add_argument('action',
                     choices=['audit', 'download', 'files', 'info', 'upload'])
-parser.add_argument('--url', type=str, dest='url_base',
-                    default='http://dev.storj.anvil8.com/')
 
 btctx_api = BtcTxStore(testnet=True, dryrun=True)
 sender_key = btctx_api.create_key()
 sender_address = btctx_api.get_address(sender_key)
+
+# Get the url from environment variable
+url_base = os.environ.get('MEATADISKSERVER', 'http://dev.storj.anvil8.com/')
 
 
 def _show_data(response):
@@ -114,7 +115,7 @@ def action_audit():
     signature = btctx_api.sign_unicode(sender_key, args.file_hash)
 
     response = requests.post(
-        urljoin(args.url_base, '/api/audit/'),
+        urljoin(url_base, '/api/audit/'),
         data={
             'data_hash': args.file_hash,
             'challenge_seed': args.seed,
@@ -148,7 +149,7 @@ def action_download():
         params['file_alias'] = args.rename_file
 
     response = requests.get(
-        urljoin(args.url_base, '/api/files/' + args.file_hash),
+        urljoin(url_base, '/api/files/' + args.file_hash),
         params=params,
         headers={
             'sender-address': sender_address,
@@ -181,7 +182,7 @@ def action_upload():
     signature = btctx_api.sign_unicode(sender_key, data_hash)
 
     response = requests.post(
-        urljoin(args.url_base, '/api/files/'),
+        urljoin(url_base, '/api/files/'),
         data={
             'data_hash': data_hash,
             'file_role': args.file_role,
@@ -200,8 +201,8 @@ def action_files():
     Action method for files command
     :return: None
     """
-    args = parser.parse_args()
-    response = requests.get(urljoin(args.url_base, '/api/files/'))
+    # args = parser.parse_args()
+    response = requests.get(urljoin(url_base, '/api/files/'))
     _show_data(response)
 
 
@@ -210,8 +211,8 @@ def action_info():
     Action method for info command
     :return: None
     """
-    args = parser.parse_args()
-    response = requests.get(urljoin(args.url_base, '/api/nodes/me/'))
+    # args = parser.parse_args()
+    response = requests.get(urljoin(url_base, '/api/nodes/me/'))
     _show_data(response)
 
 
