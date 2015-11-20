@@ -22,7 +22,7 @@ class MetadiskTest(unittest.TestCase):
         server_thread.daemon = True
         server_thread.start()
 
-        # set the test server address like an environment variable which will
+        # Set the test server address like an environment variable which will
         # be used by the metadisk.py whilst the testing.
         os.environ['MEATADISKSERVER'] = 'http://{}:{}'.format(host, port)
 
