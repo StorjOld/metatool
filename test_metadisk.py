@@ -6,7 +6,9 @@ import threading
 import time
 
 from hashlib import sha256
+from io import StringIO
 from testing_server import MyRequestHandler, ThreadedTCPServer
+from http.server import BaseHTTPRequestHandler
 
 
 class MetadiskTest(unittest.TestCase):
@@ -254,6 +256,30 @@ class MetadiskTest(unittest.TestCase):
             audit_response = json.loads(audit.read()[4:-1])
             self.assertEqual(expected_value, audit_response)
 
+    def test_url_attribute(self):
+        """
+        Test of the "--url" optional argument. The "metadisk.py" must use this
+        value like url of all responses.
+        """
+        host, port = 'localhost', 5467
+        server = ThreadedTCPServer((host, port), BaseHTTPRequestHandler)
+
+        server_thread = threading.Thread(target=server.serve_forever)
+        server_thread.daemon = True
+        server_thread.start()
+        with os.popen(
+            '{} metadisk.py info --url http://{}:{}'.format(
+                self.metadisk_python_interpreter, host, port)
+        ) as file:
+            info_response_status = file.read()[:3]
+        self.assertEqual(
+            info_response_status,
+            '501',
+            'the "response status" must be 501, like from this test-case local'
+            ' server specified after "--url" optional argument!'
+        )
+        server.shutdown()
+        server.server_close()
 
 if __name__ == '__main__':
     unittest.main()
