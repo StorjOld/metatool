@@ -19,8 +19,11 @@ Example:
     python3 metadisk.py upload ~/path/to/file.txt --file_role 002
 
 The "--url" optional argument define url address of the target server.
-By default the server is "http://dev.storj.anvil8.com/". In example:
+In example:
 
+    python metadisk.py info --url http://dev.storj.anvil8.com
+
+But by default the server is "http://dev.storj.anvil8.com/" as well :)
 You can either set an system environment variable "MEATADISKSERVER" to
 provide target server instead of using the "--url" opt. argument.
 ------------------------------------------------------------------------------

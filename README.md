@@ -22,7 +22,7 @@ For watching help **information** run `metadisk.py` without arguments or with `-
     
 ---
 
-Common form of the usage **metadisk.py** is:
+Common form of usage the **metadisk.py** is:
 
     python metadisk.py <action> [ appropriate | arguments | for actions ] [--url URL_ADDRESS]
     
@@ -33,11 +33,16 @@ In example:
     $ python3 metadisk.py info
     
 
-The `--url` optional argument define url address of the *target server*.
-By default the server is **http://dev.storj.anvil8.com/**.
+The `--url` optional argument define url address of the *target server*:
+
+    python metadisk.py info --url http://dev.storj.anvil8.com
+
+This example in truth don't bring any obvious difference in results - by default the target server is **http://dev.storj.anvil8.com/** as well.
 You can either set an system *environment variable* **MEATADISKSERVER** to
 provide target server instead of using the `--url` opt. argument.
-    
+
+
+All of actions define set of original required arguments.
 Let us go through all of them!
 
 ---
