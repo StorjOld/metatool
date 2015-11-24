@@ -228,8 +228,11 @@ def action_info():
     _show_data(response)
 
 
-if __name__ == '__main__':
+def main():
     if (len(sys.argv) == 1) or (sys.argv[1] in ['-h', '-help', '--help']):
         print(__doc__)
     else:
         getattr(sys.modules[__name__], 'action_{}'.format(sys.argv[1]))()
+
+if __name__ == '__main__':
+    main()

@@ -1,14 +1,14 @@
+import json
 import os
 import sys
-import json
-import unittest
 import threading
 import time
-
+import unittest
 from hashlib import sha256
-from io import StringIO
-from testing_server import MyRequestHandler, ThreadedTCPServer
 from http.server import BaseHTTPRequestHandler
+from io import StringIO
+
+from metatool.testing_server import MyRequestHandler, ThreadedTCPServer
 
 
 class MetadiskTest(unittest.TestCase):
@@ -27,6 +27,8 @@ class MetadiskTest(unittest.TestCase):
         # Set the test server address like an environment variable which will
         # be used by the metadisk.py whilst the testing.
         os.environ['MEATADISKSERVER'] = 'http://{}:{}'.format(host, port)
+        path = os.path.abspath(os.path.dirname(__file__))
+        os.chdir(path)
 
     @classmethod
     def tearDownClass(cls):
