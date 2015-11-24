@@ -138,7 +138,14 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
             API_FILES_RESPONSE_STATUS[0] += 1
             return choose[API_FILES_RESPONSE_STATUS[0]]
         else:
-            file_content = self.data.decode().split('\r\n')[-2].encode()
+            boundary = self.headers['Content-Type'].split('boundary=')[-1]
+            data = self.data.decode()
+            part_of_body = data.split('\r\n--' + boundary)
+            for item in part_of_body:
+                if 'filename' in item:
+                    file_data_part = item
+            file_data = file_data_part.partition('\r\n\r\n')[-1]
+            file_content = file_data.encode()
             data_hash = sha256(file_content).hexdigest()
             file_role = self.data.decode().split('"file_role"\r\n\r\n')[1][:3]
             message_content = {
