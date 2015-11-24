@@ -98,36 +98,40 @@ class MetadiskTest(unittest.TestCase):
         Test of uploading file on the server through
         "python metadisk.py upload setup.sh" command call.
         """
-        with open('setup.sh', 'rb') as file:
-                data_hash = sha256(file.read()).hexdigest()
-
+        file_data = b'some data in test file\r\n\r\nself-delete after the test'
+        data_hash = sha256(file_data).hexdigest()
+        with open('temporary_test_file', 'w') as file:
+            file.write(file_data.decode())
         expected_value = {
             "data_hash": data_hash,
             "file_role": "001",
         }
-        with os.popen('{} metadisk.py upload setup.sh'.format(
+        with os.popen('{} metadisk.py upload temporary_test_file'.format(
                 self.metadisk_python_interpreter)) as file:
             upload_response = json.loads(file.read()[4:-1])
         self.assertEqual(upload_response, expected_value)
+        os.remove('temporary_test_file')
 
     def test_upload_set_file_role(self):
         """
         Test of uploading file on the server through
         "python metadisk.py upload setup.sh --file_role 002" command call.
         """
-        with open('setup.sh', 'rb') as file:
-                data_hash = sha256(file.read()).hexdigest()
-
+        file_data = b'some data in test file\r\n\r\nself-delete after the test'
+        data_hash = sha256(file_data).hexdigest()
+        with open('temporary_test_file', 'w') as file:
+            file.write(file_data.decode())
         expected_value = {
             "data_hash": data_hash,
             "file_role": "002",
         }
         with os.popen(
-                '{} metadisk.py upload setup.sh --file_role 002'.format(
-                    self.metadisk_python_interpreter)) as file:
+            '{} metadisk.py upload temporary_test_file --file_role 002'.format(
+                self.metadisk_python_interpreter)) as file:
             upload_response = json.loads(file.read()[4:-1])
         self.assertEqual(upload_response['file_role'],
                          expected_value['file_role'])
+        os.remove('temporary_test_file')
 
     def test_download_error(self):
         """
