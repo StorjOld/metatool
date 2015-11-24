@@ -6,4 +6,7 @@ python:
   - "3.5"
 install:
   - pip install .
-script: python metatool/test_metadisk.py
+  - pip install coveralls
+script: 
+  - python setup.py test
+  - coverage run --source=metatool setup.py test
