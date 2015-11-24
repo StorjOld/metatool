@@ -100,8 +100,8 @@ class MetadiskTest(unittest.TestCase):
         """
         file_data = b'some data in test file\r\n\r\nself-delete after the test'
         data_hash = sha256(file_data).hexdigest()
-        with open('temporary_test_file', 'w') as file:
-            file.write(file_data.decode())
+        with open('temporary_test_file', 'wb') as file:
+            file.write(file_data)
         expected_value = {
             "data_hash": data_hash,
             "file_role": "001",
@@ -119,8 +119,8 @@ class MetadiskTest(unittest.TestCase):
         """
         file_data = b'some data in test file\r\n\r\nself-delete after the test'
         data_hash = sha256(file_data).hexdigest()
-        with open('temporary_test_file', 'w') as file:
-            file.write(file_data.decode())
+        with open('temporary_test_file', 'wb') as file:
+            file.write(file_data)
         expected_value = {
             "data_hash": data_hash,
             "file_role": "002",
