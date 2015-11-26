@@ -1,17 +1,17 @@
 import json
-import socketserver
+import SocketServer
 
-from urllib.parse import parse_qs
+from urlparse import parse_qs
 from hashlib import sha256
 
 API_FILES_RESPONSE_STATUS = [0]
 
 
-class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
 
 
-class MyRequestHandler(socketserver.BaseRequestHandler):
+class MyRequestHandler(SocketServer.BaseRequestHandler):
     """
     Request handler for testing metadisk.py.
 
@@ -88,7 +88,7 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
         if not is_json:
             headers['X-Sendfile'] = file_name
         for line in sorted(headers.items()):
-            message += bytes('%s: %s\n' % line, 'utf-8')
+            message += bytes('%s: %s\n' % line)
 
         message += b'\n' + body
         return message

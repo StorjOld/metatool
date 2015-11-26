@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import json
 import os
 import sys
@@ -5,7 +6,7 @@ import threading
 import time
 import unittest
 from hashlib import sha256
-from http.server import BaseHTTPRequestHandler
+from BaseHTTPServer import BaseHTTPRequestHandler
 from io import StringIO
 
 from metatool.testing_server import MyRequestHandler, ThreadedTCPServer
@@ -267,8 +268,8 @@ class MetadiskTest(unittest.TestCase):
         Test of the "--url" optional argument. The "metadisk.py" must use this
         value like url of all responses.
         """
-        host, port = 'localhost', 5467
-        server = ThreadedTCPServer((host, port), BaseHTTPRequestHandler)
+        host, port = 'localhost', 54670
+        server = ThreadedTCPServer((host, port), MyRequestHandler)
 
         server_thread = threading.Thread(target=server.serve_forever)
         server_thread.daemon = True
@@ -285,7 +286,7 @@ class MetadiskTest(unittest.TestCase):
         sys.stderr = sys.__stderr__  # Turn back the error stream output.
         self.assertEqual(
             info_response_status,
-            '501',
+            '200',
             'the "response status" must be 501, like from this test-case local'
             ' server specified after "--url" optional argument!'
         )
@@ -298,9 +299,9 @@ class MetadiskTest(unittest.TestCase):
         (without "--url" positional attribute).
         Might be just like the value in environment variable "MEATADISKSERVER"
         """
-        host, port = 'localhost', 5467
+        host, port = 'localhost', 54670
         os.putenv('MEATADISKSERVER', 'http://{}:{}'.format(host, port))
-        server = ThreadedTCPServer((host, port), BaseHTTPRequestHandler)
+        server = ThreadedTCPServer((host, port), MyRequestHandler)
 
         server_thread = threading.Thread(target=server.serve_forever)
         server_thread.daemon = True
@@ -317,7 +318,7 @@ class MetadiskTest(unittest.TestCase):
         sys.stderr = sys.__stderr__  # Turn back the error stream output.
         self.assertEqual(
             info_response_status,
-            '501',
+            '200',
             'the "response status" must be 501, like from this test-case '
             'local server specified at the "MEATADISKSERVER" env. variable!'
         )
