@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import json
 import os
 import sys
@@ -5,7 +6,7 @@ import threading
 import time
 import unittest
 from hashlib import sha256
-from http.server import BaseHTTPRequestHandler
+from BaseHTTPServer import BaseHTTPRequestHandler
 from io import StringIO
 
 from metatool.testing_server import MyRequestHandler, ThreadedTCPServer
