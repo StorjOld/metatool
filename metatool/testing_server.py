@@ -94,7 +94,10 @@ class MyRequestHandler(socketserver.BaseRequestHandler):
         if not is_json:
             headers['X-Sendfile'] = file_name
         for line in sorted(headers.items()):
-            message += bytes('%s: %s\n' % line, 'utf-8')
+            if sys.version_info.major == 3:
+                message += bytes('%s: %s\n' % line, 'utf-8')
+            else:
+                message += bytes('%s: %s\n' % line)
 
         message += b'\n' + body
         return message
