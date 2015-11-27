@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import json
 import os
 import sys
@@ -6,7 +5,6 @@ import threading
 import time
 import unittest
 from hashlib import sha256
-from BaseHTTPServer import BaseHTTPRequestHandler
 from io import StringIO
 
 from metatool.testing_server import MyRequestHandler, ThreadedTCPServer
@@ -268,7 +266,7 @@ class MetadiskTest(unittest.TestCase):
         Test of the "--url" optional argument. The "metadisk.py" must use this
         value like url of all responses.
         """
-        host, port = 'localhost', 54670
+        host, port = 'localhost', 5467
         server = ThreadedTCPServer((host, port), MyRequestHandler)
 
         server_thread = threading.Thread(target=server.serve_forever)
@@ -287,7 +285,7 @@ class MetadiskTest(unittest.TestCase):
         self.assertEqual(
             info_response_status,
             '200',
-            'the "response status" must be 501, like from this test-case local'
+            'the "response status" must be 200, like from this test-case local'
             ' server specified after "--url" optional argument!'
         )
         server.shutdown()
@@ -299,7 +297,7 @@ class MetadiskTest(unittest.TestCase):
         (without "--url" positional attribute).
         Might be just like the value in environment variable "MEATADISKSERVER"
         """
-        host, port = 'localhost', 54670
+        host, port = 'localhost', 5467
         os.putenv('MEATADISKSERVER', 'http://{}:{}'.format(host, port))
         server = ThreadedTCPServer((host, port), MyRequestHandler)
 
@@ -319,7 +317,7 @@ class MetadiskTest(unittest.TestCase):
         self.assertEqual(
             info_response_status,
             '200',
-            'the "response status" must be 501, like from this test-case '
+            'the "response status" must be 200, like in this test-case'
             'local server specified at the "MEATADISKSERVER" env. variable!'
         )
         server.shutdown()

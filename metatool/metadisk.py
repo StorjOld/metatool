@@ -89,7 +89,12 @@ import requests
 
 from hashlib import sha256
 from btctxstore import BtcTxStore
-from urlparse import urljoin
+# 2.x/3.x compliance logic
+if sys.version_info.major == 3:
+    from urllib.parse import urljoin
+else:
+    from urlparse import urljoin
+
 
 # Get the url from environment variable
 url_base = os.getenv('MEATADISKSERVER', 'http://dev.storj.anvil8.com/')
