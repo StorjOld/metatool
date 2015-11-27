@@ -5,7 +5,6 @@ import threading
 import time
 import unittest
 from hashlib import sha256
-from http.server import BaseHTTPRequestHandler
 from io import StringIO
 
 from metatool.testing_server import MyRequestHandler, ThreadedTCPServer
@@ -268,7 +267,7 @@ class MetadiskTest(unittest.TestCase):
         value like url of all responses.
         """
         host, port = 'localhost', 5467
-        server = ThreadedTCPServer((host, port), BaseHTTPRequestHandler)
+        server = ThreadedTCPServer((host, port), MyRequestHandler)
 
         server_thread = threading.Thread(target=server.serve_forever)
         server_thread.daemon = True
@@ -285,8 +284,8 @@ class MetadiskTest(unittest.TestCase):
         sys.stderr = sys.__stderr__  # Turn back the error stream output.
         self.assertEqual(
             info_response_status,
-            '501',
-            'the "response status" must be 501, like from this test-case local'
+            '200',
+            'the "response status" must be 200, like from this test-case local'
             ' server specified after "--url" optional argument!'
         )
         server.shutdown()
@@ -300,7 +299,7 @@ class MetadiskTest(unittest.TestCase):
         """
         host, port = 'localhost', 5467
         os.putenv('MEATADISKSERVER', 'http://{}:{}'.format(host, port))
-        server = ThreadedTCPServer((host, port), BaseHTTPRequestHandler)
+        server = ThreadedTCPServer((host, port), MyRequestHandler)
 
         server_thread = threading.Thread(target=server.serve_forever)
         server_thread.daemon = True
@@ -317,8 +316,8 @@ class MetadiskTest(unittest.TestCase):
         sys.stderr = sys.__stderr__  # Turn back the error stream output.
         self.assertEqual(
             info_response_status,
-            '501',
-            'the "response status" must be 501, like from this test-case '
+            '200',
+            'the "response status" must be 200, like in this test-case'
             'local server specified at the "MEATADISKSERVER" env. variable!'
         )
         server.shutdown()

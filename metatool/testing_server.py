@@ -1,8 +1,14 @@
 import json
-import socketserver
-
-from urllib.parse import parse_qs
+import sys
+# 2.x/3.x compliance logic
 from hashlib import sha256
+if sys.version_info.major == 3:
+    import socketserver
+    from urllib.parse import parse_qs
+else:
+    import SocketServer as socketserver
+    from urlparse import parse_qs
+
 
 API_FILES_RESPONSE_STATUS = [0]
 
