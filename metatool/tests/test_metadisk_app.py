@@ -7,7 +7,7 @@ import unittest
 from hashlib import sha256
 from io import StringIO
 
-from metatool.testing_server import MyRequestHandler, ThreadedTCPServer
+from metatool.tests.testing_server import MyRequestHandler, ThreadedTCPServer
 
 
 class MetadiskTest(unittest.TestCase):
@@ -26,7 +26,7 @@ class MetadiskTest(unittest.TestCase):
         # Set the test server address like an environment variable which will
         # be used by the metadisk.py whilst the testing.
         os.environ['MEATADISKSERVER'] = 'http://{}:{}'.format(host, port)
-        path = os.path.abspath(os.path.dirname(__file__))
+        path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         os.chdir(path)
 
     @classmethod
@@ -281,6 +281,7 @@ class MetadiskTest(unittest.TestCase):
                 self.metadisk_python_interpreter, host, port)
         ) as file:
             info_response_status = file.read()[:3]
+        sys.stderr.close()
         sys.stderr = sys.__stderr__  # Turn back the error stream output.
         self.assertEqual(
             info_response_status,
@@ -313,6 +314,7 @@ class MetadiskTest(unittest.TestCase):
                 self.metadisk_python_interpreter, host, port)
         ) as file:
             info_response_status = file.read()[:3]
+        sys.stderr.close()
         sys.stderr = sys.__stderr__  # Turn back the error stream output.
         self.assertEqual(
             info_response_status,
