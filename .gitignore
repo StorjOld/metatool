@@ -1,6 +1,6 @@
 /.idea
 .venv/
-/__pycache__
+__pycache__/
 /build
 /dist
 /metatool.egg-info

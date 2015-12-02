@@ -1,13 +1,13 @@
 #! /usr/bin/env python3
 """\
 ===========================================
-welcome to the metadisk.py help information
+welcome to the metatool help information
 ===========================================
 
 usage:
-metadisk.py <action> [ appropriate | arguments | for actions ] [--url URL_ADDR]
+metatool <action> [ appropriate | arguments | for actions ] [--url URL_ADDR]
 
-"metadisk.py" expect the main first positional argument <action> which define
+"metatool" expect the main first positional argument <action> which define
 the action of the program. Must be one of:
 
     files | info | upload | download | audit
@@ -16,12 +16,12 @@ Each of actions expect an appropriate set of arguments after it. They are
 separately described below.
 Example:
 
-    python3 metadisk.py upload ~/path/to/file.txt --file_role 002
+    metatool upload ~/path/to/file.txt --file_role 002
 
 The "--url" optional argument define url address of the target server.
 In example:
 
-    python metadisk.py info --url http://dev.storj.anvil8.com
+    metatool info --url http://dev.storj.anvil8.com
 
 But by default the server is "http://dev.storj.anvil8.com/" as well :)
 You can either set an system environment variable "MEATADISKSERVER" to
@@ -77,10 +77,6 @@ the success result.
         [--rename_file NEW_NAME] - Optional argument which define the NAME for
                 storing file on your disk. You can indicate an relative and
                 full path to the directory with this name as well.
-
-
-Note: metadisk.py for running require Python 3 interpreter and installed
-packages specified at the setup.sh
 """
 import sys
 import os.path
