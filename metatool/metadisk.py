@@ -92,18 +92,20 @@ else:
     from urlparse import urljoin
 
 
-# Get the url from environment variable
-url_base = os.getenv('MEATADISKSERVER', 'http://dev.storj.anvil8.com/')
+def set_up():
+    global url_base, parser, btctx_api, sender_key, sender_address
+    # Get the url from environment variable
+    url_base = os.getenv('MEATADISKSERVER', 'http://dev.storj.anvil8.com/')
 
-parser = argparse.ArgumentParser()
-parser.add_argument('action',
-                    choices=['audit', 'download', 'files', 'info', 'upload'])
-parser.add_argument('--url', type=str, dest='url_base',
-                    default=url_base)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('action',
+                        choices=['audit', 'download', 'files', 'info', 'upload'])
+    parser.add_argument('--url', type=str, dest='url_base',
+                        default=url_base)
 
-btctx_api = BtcTxStore(testnet=True, dryrun=True)
-sender_key = btctx_api.create_key()
-sender_address = btctx_api.get_address(sender_key)
+    btctx_api = BtcTxStore(testnet=True, dryrun=True)
+    sender_key = btctx_api.create_key()
+    sender_address = btctx_api.get_address(sender_key)
 
 
 def _show_data(response):
@@ -230,6 +232,7 @@ def action_info():
 
 
 def main():
+    set_up()
     if (len(sys.argv) == 1) or (sys.argv[1] in ['-h', '-help', '--help']):
         print(__doc__)
     else:
