@@ -1,4 +1,11 @@
-# Guide for metatool
+#  metatool
+
+[![Build Status](https://travis-ci.org/Storj/metatool.svg?branch=master)](https://travis-ci.org/Storj/metatool)
+[![Coverage Status](https://coveralls.io/repos/Storj/metatool/badge.svg?branch=master&service=github)](https://coveralls.io/github/Storj/metatool?branch=master)
+[![License](https://img.shields.io/badge/license-AGPL%20License-blue.svg)](https://github.com/Storj/metatool/blob/master/LICENSE)
+
+https://img.shields.io/github/license/storj/metatool.svg
+
 metadisk.py is a console utility purposed for interact with the Metadisk service.
 It completely repeat all actions that you can perform with the Metadisk
 service through the "curl" terminal command, described at the <http://dev.storj.anvil8.com/> page.
