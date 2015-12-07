@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-AGPL%20License-blue.svg)](https://github.com/Storj/metatool/blob/master/LICENSE)
 
 metadisk.py is a console utility purposed for interact with the Metadisk service.
-It completely repeat all actions that you can perform with the Metadisk
+It can do all actions that you can perform with the Metadisk
 service through the "curl" terminal command, described at the <http://dev.storj.anvil8.com/> page.
 > **_Note:_ metadisk.py** for running require Python3 interpreter and installed packages specified at the __setup.sh__
 
@@ -14,7 +14,7 @@ Below is the thorough specification for the metadisk.py usage.
 ---
 
 In general for running the application you may use the `python3` terminal command with specified `metadisk.py` and required arguments.
-For watching help **information** run `metadisk.py` without arguments or with `-h`, `-help`, `--help`:
+For help **information** run `metadisk.py` without arguments or with `-h`, `-help`, `--help`:
 
 
     $ python3 metadisk.py
@@ -27,7 +27,7 @@ For watching help **information** run `metadisk.py` without arguments or with `-
     
 ---
 
-Common form of usage the **metadisk.py** is:
+Syntax for usage of **metadisk.py** is:
 
     python metadisk.py <action> [ appropriate | arguments | for actions ] [--url URL_ADDRESS]
     
@@ -42,7 +42,7 @@ The `--url` optional argument define url address of the *target server*:
 
     python metadisk.py info --url http://dev.storj.anvil8.com
 
-This example in truth don't bring any obvious difference in results - by default the target server is **http://dev.storj.anvil8.com/** as well.
+By default the target server is **http://dev.storj.anvil8.com/** as well.
 You can either set an system *environment variable* **MEATADISKSERVER** to
 provide target server instead of using the `--url` opt. argument.
 
@@ -52,7 +52,7 @@ Let us go through all of them!
 
 ---
 
-There are two the most simple **action** with no arguments after:
+There are two the most simple **actions** with no arguments after:
 
 
 ### `$ python3 metadisk.py files`
@@ -91,7 +91,7 @@ This command outputs the *response code* - `200` and all *hash-names* of uploade
       }
     }
 
-Such a command outputs the *response code* - `200` and a content of the json file with the data usage of nodes.
+Such a command outputs the *response code* - `200` and a content of the json file with the data usage of nodes, capacity, and public key.
 
 ---
 
@@ -122,8 +122,8 @@ If you want to set the other value of **file_role** use optional argument -r or 
     
 ### `$ python3 metadisk.py audit <data_hash> <challenge_seed>`
 
-This **action** purposed for the ensure in an existence of files on the server (in opposite to the plain serving hashes of files).
-It require two positional arguments (both compulsory):
+This **action** ensures the existence of files on the server.
+It requires two positional arguments (both compulsory):
 
 1. `file_hash` - hash-name of the file which you want to check out
 2. `seed` - **__challenge seed__**, which is just a snippet of the data, purposed for generation a new original *hash-sum*
