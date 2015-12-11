@@ -151,6 +151,9 @@ def action_download():
     parser.add_argument('file_hash', type=str, help="file hash")
     parser.add_argument('--decryption_key', type=str, help="decryption key")
     parser.add_argument('--rename_file', type=str, help="rename file")
+    parser.add_argument('--link',
+                        action='store_true',
+                        help='will return rust url for man. request')
 
     args = parser.parse_args()
 
@@ -163,22 +166,31 @@ def action_download():
     if args.rename_file:
         params['file_alias'] = args.rename_file
 
-    response = requests.get(
-        urljoin(args.url_base, '/api/files/' + args.file_hash),
+    data_for_requests = dict(
         params=params,
         headers={
             'sender-address': sender_address,
             'signature': signature,
         }
     )
-
-    if response.status_code == 200:
-        file_name = os.path.join(os.path.dirname(__file__),
-                                 response.headers['X-Sendfile'])
-        with open(file_name, 'wb') as fp:
-            fp.write(response.content)
+    url_for_requests = urljoin(args.url_base, '/api/files/' + args.file_hash)
+    request = requests.Request('GET', url_for_requests, **data_for_requests)
+    if args.link:
+        request_string = request.prepare()
+        print(request_string.url)
     else:
-        _show_data(response)
+        response = requests.get(
+            url_for_requests,
+            **data_for_requests
+        )
+
+        if response.status_code == 200:
+            file_name = os.path.join(os.path.dirname(__file__),
+                                     response.headers['X-Sendfile'])
+            with open(file_name, 'wb') as fp:
+                fp.write(response.content)
+        else:
+            _show_data(response)
 
 
 def action_upload():
