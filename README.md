@@ -136,7 +136,7 @@ Be sure to put this arguments in the right order:
 Responce for the command is the *response code* - `201` and json with the data you was enter with the one additional item - 
 **`challenge_response`** - the original **hash** mentioned above. You can compare it with an expected value.
 
-### `$ metatool download <file_hash> [--decryption_key KEY] [--rename_file NEW_NAME]`
+### `$ metatool download <file_hash> [--decryption_key KEY] [--rename_file NEW_NAME] [--link]`
 
 **download** action fetch the file from server. Here is one required argument - **`file_hash`** and two optional - 
 **`--decryption_key`** and **`--rename_file`**.
@@ -144,6 +144,7 @@ Responce for the command is the *response code* - `201` and json with the data y
 * **`file_hash`** - hash-name of the needed file.
 * **`--decryption_key`** - key for the decryption file.
 * **`--rename_file`** - desired saving name (included path) of the downloaded file.
+* **`--link`** -- will return the url GET request string instead of performing the downloading.
  
 Below is the example of commands and explanation for it.
 
@@ -151,6 +152,12 @@ This command save the file at the current directory under the hash-name; return 
 while operation complete successfully, otherwise show an occured error:
 
     $ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695
+    
+You can fetch the **http request string** and perform the downloading in example through the browser by passing **--link** optional argument.
+**metatool** will not than execute the downloading but just will generate the appropriate **URL** string:
+
+    $ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 --rename_file just_file.md --link
+    http://your.node.com/api/files/76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695?file_alias=just_file.md
 
 
 It's doing the same but saving decrypted file:
