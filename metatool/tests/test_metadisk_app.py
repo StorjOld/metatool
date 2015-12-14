@@ -4,9 +4,14 @@ import sys
 import threading
 import time
 import unittest
-from urllib.parse import urlparse, parse_qs, urlencode
 from hashlib import sha256
 from io import StringIO
+
+if sys.version_info.major == 3:
+    from urllib.parse import urlparse, parse_qs, urlencode
+else:
+    from urlparse import urlparse, parse_qs
+    from urllib import urlencode
 
 from metatool.tests.testing_server import MyRequestHandler, ThreadedTCPServer
 
