@@ -4,6 +4,7 @@ import sys
 import threading
 import time
 import unittest
+from urllib.parse import urlparse, parse_qs, urlencode
 from hashlib import sha256
 from io import StringIO
 
@@ -220,6 +221,50 @@ class MetadiskTest(unittest.TestCase):
             self.assertEqual(expected_value,
                              downloaded_file_data)
             os.remove(test_file_name)
+
+    def test_download_link(self):
+        """
+        Test for the '--link' argument. It should return GET url request string
+        which can be used like an ordinary url string in the browser. Returned
+        string must contain all additional argument passed after the download,
+        line '--decryption_kay' and '--rename_file'.
+        """
+        data_hash = sha256(b'test_data').hexdigest()
+        with os.popen('{} metadisk.py download {} --link'.format(
+            self.metadisk_python_interpreter,
+            data_hash
+        )) as printed_data:
+            request_url_string = printed_data.read().rstrip(os.linesep)
+        url_object = urlparse(request_url_string)
+        data_hash_from_url = url_object.path.split('/')[-1]
+        self.assertEqual(data_hash, data_hash_from_url,
+                         'unexpected "data_hash" value '
+                         'in the returned url line'
+        )
+
+        sended_data = dict(
+                decryption_key='my_key',
+                file_alias='new_name.txt'
+            )
+        expected_url_get_dict = parse_qs(urlencode(sended_data))
+        bash_command_template = """\
+        {} metadisk.py download {} --decryption_key {} --rename_file {} --link
+        """
+        with os.popen(
+            bash_command_template.format(
+                self.metadisk_python_interpreter,
+                data_hash,
+                sended_data['decryption_key'],
+                sended_data['file_alias'],
+            )
+        ) as printed_data:
+            request_url_string = printed_data.read().rstrip(os.linesep)
+        received_url_get_dict = parse_qs(urlparse(request_url_string).query)
+        self.assertEqual(expected_url_get_dict, received_url_get_dict,
+                         'unexpected "decryption_key" value in the returned '
+                         'url line')
+
+
 
     def test_error_audit(self):
         """
