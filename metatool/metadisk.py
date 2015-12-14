@@ -64,10 +64,14 @@ the success result.
                 }
 
 ... download <file_hash> [--decryption_key KEY] [--rename_file NEW_NAME]
+                                                [--link]
             This action fetch desired file from the server by the "hash name".
             Return nothing if the file downloaded successful.
 
         <file_hash> - string with represent the "file hash".
+
+        [--link] - will return the url GET request string instead of
+                executing the downloading.
 
         [--decryption_key KEY] - Optional argument. When is defined the file
                 downloading from the server in decrypted state (if allowed for
