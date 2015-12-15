@@ -1,7 +1,7 @@
 # Guide for metatool
 metatool is a console utility purposed for interact with the MetaDisk service.
 It completely repeat all actions that you can perform with the MetaDisk
-service through the "curl" terminal command, described at the <http://dev.storj.anvil8.com/> page.
+service through the "curl" terminal command, described at the <http://node2.metadisk.org/> page.
 
 Below is the thorough specification for the metatool usage.
 
@@ -34,9 +34,9 @@ In example:
 
 The `--url` optional argument define url address of the *target server*:
 
-    metatool info --url http://dev.storj.anvil8.com
+    metatool info --url http://node2.metadisk.org/
 
-This example in truth don't bring any obvious difference in results - by default the target server is **http://dev.storj.anvil8.com/** as well.
+This example in truth don't bring any obvious difference in results - by default the target server is **http://node2.metadisk.org/** as well.
 You can either set an system *environment variable* **MEATADISKSERVER** to
 provide target server instead of using the `--url` opt. argument.
 
@@ -107,11 +107,11 @@ uploaded file.
 
 If you want to set the other value of **file_role** use optional argument -r or --file_role:
 
-    $ metatool upload README.md --file_role 002
+    $ metatool upload README.md --file_role 001
     201
     {
       "data_hash": "76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695",
-      "file_role": "002"
+      "file_role": "001"
     }
     
 Metatool allow you to define behavior and accessibility of the file, while the uploading to the server. 
