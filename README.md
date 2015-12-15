@@ -114,6 +114,17 @@ If you want to set the other value of **file_role** use optional argument -r or 
       "file_role": "002"
     }
     
+|       |                     sort of the meaning                          |
+|       |:----------------------------------------------------------------:|
+| index |               Payment |           Access              | Servable |
+|:------|-----------------------|-------------------------------|---------:|
+|  0    | Free                  | Anyone can access             |   False  |
+|  1    | Paid by downloader    | Specified users can access    |   True   |
+|  2    | Paid by owner         | Only owner can access         |  --//--  |
+
+
+
+    
 ### `$ metatool audit <data_hash> <challenge_seed>`
 
 This **action** purposed for the ensure in an existence of files on the server (in opposite to the plain serving hashes of files).
