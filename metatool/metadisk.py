@@ -83,6 +83,7 @@ the success result.
                 full path to the directory with this name as well.
 """
 import sys
+import os
 import os.path
 import argparse
 import requests
@@ -97,16 +98,14 @@ else:
 
 
 def set_up():
-    global url_base, parser, btctx_api, sender_key, sender_address
-    # Get the url from environment variable
-    url_base = os.getenv('MEATADISKSERVER', 'http://dev.storj.anvil8.com/')
+    global parser, btctx_api, sender_key, sender_address, redirect_error_status
 
+    redirect_error_status = (400, 404, 500, 503)
     parser = argparse.ArgumentParser()
-    parser.add_argument('action',
-                        choices=['audit', 'download', 'files', 'info', 'upload'])
+    parser.add_argument(
+        'action', choices=['audit', 'download', 'files', 'info', 'upload'])
     parser.add_argument('--url', type=str, dest='url_base',
                         default=url_base)
-
     btctx_api = BtcTxStore(testnet=True, dryrun=True)
     sender_key = btctx_api.create_key()
     sender_address = btctx_api.get_address(sender_key)
@@ -144,7 +143,7 @@ def action_audit():
             'signature': signature,
         }
     )
-    _show_data(response)
+    return response
 
 
 def action_download():
@@ -189,12 +188,15 @@ def action_download():
         )
 
         if response.status_code == 200:
-            file_name = os.path.join(os.path.dirname(__file__),
+            file_name = os.path.join(os.getcwd(),
                                      response.headers['X-Sendfile'])
+
             with open(file_name, 'wb') as fp:
                 fp.write(response.content)
+            print('saved as {}'.format(file_name))
+            return
         else:
-            _show_data(response)
+            return response
 
 
 def action_upload():
@@ -224,7 +226,7 @@ def action_upload():
             'signature': signature,
         }
     )
-    _show_data(response)
+    return response
 
 
 def action_files():
@@ -234,7 +236,7 @@ def action_files():
     """
     args = parser.parse_args()
     response = requests.get(urljoin(args.url_base, '/api/files/'))
-    _show_data(response)
+    return response
 
 
 def action_info():
@@ -244,15 +246,28 @@ def action_info():
     """
     args = parser.parse_args()
     response = requests.get(urljoin(args.url_base, '/api/nodes/me/'))
-    _show_data(response)
+    return response
 
 
 def main():
-    set_up()
+    global url_base
+    core_nodes =('http://node2.metadisk.org/', 'http://node3.metadisk.org/')
+    # Get the url from environment variable
+    env_node = os.getenv('MEATADISKSERVER', None)
+    used_nodes = (env_node,) if env_node else core_nodes
+
     if (len(sys.argv) == 1) or (sys.argv[1] in ['-h', '-help', '--help']):
         print(__doc__)
     else:
-        getattr(sys.modules[__name__], 'action_{}'.format(sys.argv[1]))()
+        for url_base in used_nodes:
+            set_up()
+            response = getattr(
+                sys.modules[__name__], 'action_{}'.format(sys.argv[1]))()
+            if not isinstance(response, requests.models.Response):
+                return
+            if response.status_code not in redirect_error_status:
+                break
+        _show_data(response)
 
 if __name__ == '__main__':
     main()
