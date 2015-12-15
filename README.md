@@ -114,16 +114,26 @@ If you want to set the other value of **file_role** use optional argument -r or 
       "file_role": "002"
     }
     
-|       |                     sort of the meaning                          |
-|       |:----------------------------------------------------------------:|
-| index |               Payment |           Access              | Servable |
-|:------|-----------------------|-------------------------------|---------:|
-|  0    | Free                  | Anyone can access             |   False  |
-|  1    | Paid by downloader    | Specified users can access    |   True   |
-|  2    | Paid by owner         | Only owner can access         |  --//--  |
+Metatool allow you to define behavior and access of the file, while the uploading to the server. 
+The way to do this is to define the `file_role` mentioned above, which is the set in three significant numbers: 
+    
+    [ (0 / 1 / 2)  (0 / 1 / 2)  (0 / 1) ] 
+       <payment>     <access>  <servable>
 
+    +--------------------------------------------------------------------------+
+    |       |                     sort of the meaning                          |
+    | value |------------------------------------------------------------------|
+    |       |               Payment |           Access              | Servable |
+    |-------+-----------------------+-------------------------------+----------|
+    |  0    | Free                  | Anyone can access             |   False  |
+    |  1    | Paid by downloader    | Specified users can access    |   True   |
+    |  2    | Paid by owner         | Only owner can access         |  --//--  |
+    +--------------------------------------------------------------------------+
 
-
+1. **Payment value** - is define who must pay for the downloading.
+2. **Access value** - is define who can access to the file on the server.
+3. **Servable value** - is define can be served data being decrypted or not while the downloading. 
+                        (I will be used only when decryption key is passed.)
     
 ### `$ metatool audit <data_hash> <challenge_seed>`
 
