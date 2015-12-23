@@ -98,14 +98,9 @@ else:
 
 
 def set_up():
-    global parser, btctx_api, sender_key, sender_address, redirect_error_status
+    global btctx_api, sender_key, sender_address, redirect_error_status
 
     redirect_error_status = (400, 404, 500, 503)
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'action', choices=['audit', 'download', 'files', 'info', 'upload'])
-    parser.add_argument('--url', type=str, dest='url_base',
-                        default=url_base)
     btctx_api = BtcTxStore(testnet=True, dryrun=True)
     sender_key = btctx_api.create_key()
     sender_address = btctx_api.get_address(sender_key)
@@ -121,15 +116,11 @@ def _show_data(response):
     print(response.text)
 
 
-def action_audit():
+def action_audit(args):
     """
     Action method for audit command
     :return: None
     """
-    parser.add_argument('file_hash', type=str, help="file hash")
-    parser.add_argument('seed', type=str, help="challenge seed")
-    args = parser.parse_args()
-
     signature = btctx_api.sign_unicode(sender_key, args.file_hash)
 
     response = requests.post(
@@ -146,20 +137,11 @@ def action_audit():
     return response
 
 
-def action_download():
+def action_download(args):
     """
     Action method for download command
     :return: None
     """
-    parser.add_argument('file_hash', type=str, help="file hash")
-    parser.add_argument('--decryption_key', type=str, help="decryption key")
-    parser.add_argument('--rename_file', type=str, help="rename file")
-    parser.add_argument('--link',
-                        action='store_true',
-                        help='will return rust url for man. request')
-
-    args = parser.parse_args()
-
     signature = btctx_api.sign_unicode(sender_key, args.file_hash)
     params = {}
 
@@ -199,16 +181,11 @@ def action_download():
             return response
 
 
-def action_upload():
+def action_upload(args):
     """
     Action method for upload command
     :return: None
     """
-    parser.add_argument('file', type=argparse.FileType('rb'),
-                        help="path to file")
-    parser.add_argument('-r', '--file_role', type=str, default='001',
-                        help="set file role")
-    args = parser.parse_args()
     files = {'file_data': args.file}
     data_hash = sha256(args.file.read()).hexdigest()
     args.file.seek(0)
@@ -229,29 +206,26 @@ def action_upload():
     return response
 
 
-def action_files():
+def action_files(args):
     """
     Action method for files command
     :return: None
     """
-    args = parser.parse_args()
     response = requests.get(urljoin(args.url_base, '/api/files/'))
     return response
 
 
-def action_info():
+def action_info(args):
     """
     Action method for info command
     :return: None
     """
-    args = parser.parse_args()
     response = requests.get(urljoin(args.url_base, '/api/nodes/me/'))
     return response
 
 
 def main():
-    global url_base
-    core_nodes =('http://node2.metadisk.org/', 'http://node3.metadisk.org/')
+    core_nodes = ('http://node2.metadisk.org/', 'http://node3.metadisk.org/')
     # Get the url from environment variable
     env_node = os.getenv('MEATADISKSERVER', None)
     used_nodes = (env_node,) if env_node else core_nodes
@@ -259,15 +233,66 @@ def main():
     if (len(sys.argv) == 1) or (sys.argv[1] in ['-h', '-help', '--help']):
         print(__doc__)
     else:
+        response = None
         for url_base in used_nodes:
             set_up()
-            response = getattr(
-                sys.modules[__name__], 'action_{}'.format(sys.argv[1]))()
+            parsed_args = parse(url_base)
+            response = parsed_args.func(parsed_args)
             if not isinstance(response, requests.models.Response):
                 return
             if response.status_code not in redirect_error_status:
                 break
         _show_data(response)
+
+
+def parse(url_base):
+    """
+    Parsing logic of the METATOOL.
+    :return: parser object
+    """
+    # create the top-level parser
+    main_parser = argparse.ArgumentParser(prog='METATOOL')
+    main_parser.add_argument('--url', type=str, dest='url_base',
+                             default=url_base)
+    subparsers = main_parser.add_subparsers(help='sub-command help')
+
+    # Create the parser for the "audit" command.
+    parser_audit = subparsers.add_parser('audit', help='define audit purpose!')
+    parser_audit.add_argument('file_hash', type=str, help="file hash")
+    parser_audit.add_argument('seed', type=str, help="challenge seed")
+    parser_audit.set_defaults(func=action_audit)
+
+    # Create the parser for the "download" command.
+    parser_download = subparsers.add_parser('download',
+                                            help='define download purpose!')
+    parser_download.add_argument('file_hash', type=str, help="file hash")
+    parser_download.add_argument('--decryption_key', type=str,
+                                 help="decryption key")
+    parser_download.add_argument('--rename_file', type=str, help="rename file")
+    parser_download.add_argument('--link', action='store_true',
+                                 help='will return rust url for man. request')
+    parser_download.set_defaults(func=action_download)
+
+    # create the parser for the "upload" command.
+    parser_upload = subparsers.add_parser('upload',
+                                          help='define upload purpose!')
+    parser_upload.add_argument('file', type=argparse.FileType('rb'),
+                               help="path to file")
+    parser_upload.add_argument('-r', '--file_role', type=str, default='001',
+                               help="set file role")
+    parser_upload.set_defaults(func=action_upload)
+
+    # create the parser for the "files" command.
+    parser_files = subparsers.add_parser('files', help='define files purpose!')
+    parser_files.set_defaults(func=action_files)
+
+    # create the parser for the "info" command.
+    parser_info = subparsers.add_parser('info', help='define info purpose!')
+    parser_info.set_defaults(func=action_info)
+
+    # parse the commands
+    return main_parser.parse_args()
+
 
 if __name__ == '__main__':
     main()
