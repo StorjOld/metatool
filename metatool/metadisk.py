@@ -230,13 +230,13 @@ def main():
     env_node = os.getenv('MEATADISKSERVER', None)
     used_nodes = (env_node,) if env_node else core_nodes
 
-    if (len(sys.argv) == 1) or (sys.argv[1] in ['-h', '-help', '--help']):
-        print(__doc__)
+    if len(sys.argv) == 1:
+        parse(core_nodes[0]).print_help()
     else:
         response = None
         for url_base in used_nodes:
             set_up()
-            parsed_args = parse(url_base)
+            parsed_args = parse(url_base).parse_args()
             response = parsed_args.func(parsed_args)
             if not isinstance(response, requests.models.Response):
                 return
@@ -291,7 +291,7 @@ def parse(url_base):
     parser_info.set_defaults(func=action_info)
 
     # parse the commands
-    return main_parser.parse_args()
+    return main_parser
 
 
 if __name__ == '__main__':
