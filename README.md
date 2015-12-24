@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-AGPL%20License-blue.svg)](https://github.com/Storj/metatool/blob/master/LICENSE)
 
 metatool is a console utility purposed for interact with the MetaDisk service.
-It completely repeat all actions that you can perform with the MetaDisk
+It completely repeats all actions that you can perform with the MetaDisk
 service through the "curl" terminal command, described at the <http://node2.metadisk.org/> page.
 
 Below is the thorough specification for the metatool usage.
