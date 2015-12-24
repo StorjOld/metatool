@@ -1,4 +1,9 @@
-# Guide for metatool
+#  metatool
+
+[![Build Status](https://travis-ci.org/Storj/metatool.svg?branch=master)](https://travis-ci.org/Storj/metatool)
+[![Coverage Status](https://coveralls.io/repos/Storj/metatool/badge.svg?branch=master&service=github)](https://coveralls.io/github/Storj/metatool?branch=master)
+[![License](https://img.shields.io/badge/license-AGPL%20License-blue.svg)](https://github.com/Storj/metatool/blob/master/LICENSE)
+
 metatool is a console utility purposed for interact with the MetaDisk service.
 It completely repeat all actions that you can perform with the MetaDisk
 service through the "curl" terminal command, described at the <http://node2.metadisk.org/> page.
@@ -8,8 +13,7 @@ Below is the thorough specification for the metatool usage.
 ---
 
 In general for running the application you may use the `metatool` terminal command with specified required arguments.
-For watching help **information** run `metatool` without arguments or with `-h`, `-help`, `--help`:
-
+For help **information** run `metatool` without arguments or with `-h`, `-help`, `--help`:
 
     $ metatool
     ===========================================
@@ -21,7 +25,7 @@ For watching help **information** run `metatool` without arguments or with `-h`,
     
 ---
 
-Common form of usage the **metatool** is:
+Syntax for usage of **metatool** is:
 
     metatool <action> [ appropriate | arguments | for actions ] [--url URL_ADDRESS]
     
@@ -46,7 +50,7 @@ Let us go through all of them!
 
 ---
 
-There are two the most simple **action** with no arguments after:
+There are two the most simple **actions** with no arguments after:
 
 
 ### `$ metatool files`
@@ -85,7 +89,7 @@ This command outputs the *response code* - `200` and all *hash-names* of uploade
       }
     }
 
-Such a command outputs the *response code* - `200` and a content of the json file with the data usage of nodes.
+Such a command outputs the *response code* - `200` and a content of the json file with the data usage of nodes, capacity, and public key.
 
 ---
 
@@ -137,8 +141,8 @@ The way to do this is to define the `file_role` mentioned above, which is the se
     
 ### `$ metatool audit <data_hash> <challenge_seed>`
 
-This **action** purposed for the ensure in an existence of files on the server (in opposite to the plain serving hashes of files).
-It require two positional arguments (both compulsory):
+This **action** ensures the existence of files on the server.
+It requires two positional arguments (both compulsory):
 
 1. `file_hash` - hash-name of the file which you want to check out
 2. `seed` - **__challenge seed__**, which is just a snippet of the data, purposed for generation a new original *hash-sum*
