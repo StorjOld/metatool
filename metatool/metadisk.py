@@ -253,9 +253,9 @@ def url_normalize(url_string):
     :return: string obj in http://<net location>
     """
     url_string = url_string.lstrip('/')
-    url_string = url_string.split('//', maxsplit=1)[-1]
+    url_string = url_string.split('//')[-1]
     url_string = url_string.lstrip('/')
-    url_string = url_string.split('/', maxsplit=1)[0]
+    url_string = url_string.split('/')[0]
     return 'http://' + url_string
 
 
