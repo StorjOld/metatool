@@ -96,153 +96,161 @@ if sys.version_info.major == 3:
 else:
     from urlparse import urljoin
 
+CORE_NODES_URL = ('http://node2.metadisk.org/', 'http://node3.metadisk.org/')
 
-def set_up():
-    global btctx_api, sender_key, sender_address, redirect_error_status
-
+class Metatool:
+    """
+    METATOOL
+    """
     redirect_error_status = (400, 404, 500, 503)
     btctx_api = BtcTxStore(testnet=True, dryrun=True)
-    sender_key = btctx_api.create_key()
-    sender_address = btctx_api.get_address(sender_key)
+    url_base = ''
 
+    def __init__(
+            self,
+            sender_key=btctx_api.create_key(),
+    ):
+        self.sender_address = self.btctx_api.get_address(sender_key)
+        self.sender_key = sender_key
 
-def _show_data(response):
-    """
-    Method to show data in console
-    :param response: response from BtcTxStore node
-    :return: None
-    """
-    print(response.status_code)
-    print(response.text)
+    def __parse_cmd_args(self):
+        self.args = parse(self.url_base).parse_args()
 
+    def run(self):
+        # Get the url from environment variable
+        env_node = os.getenv('MEATADISKSERVER', None)
+        used_nodes = (env_node,) if env_node else CORE_NODES_URL
 
-def action_audit(args):
-    """
-    Action method for audit command
-    :return: None
-    """
-    signature = btctx_api.sign_unicode(sender_key, args.file_hash)
-
-    response = requests.post(
-        urljoin(args.url_base, '/api/audit/'),
-        data={
-            'data_hash': args.file_hash,
-            'challenge_seed': args.seed,
-        },
-        headers={
-            'sender-address': sender_address,
-            'signature': signature,
-        }
-    )
-    return response
-
-
-def action_download(args):
-    """
-    Action method for download command
-    :return: None
-    """
-    signature = btctx_api.sign_unicode(sender_key, args.file_hash)
-    params = {}
-
-    if args.decryption_key:
-        params['decryption_key'] = args.decryption_key
-
-    if args.rename_file:
-        params['file_alias'] = args.rename_file
-
-    data_for_requests = dict(
-        params=params,
-        headers={
-            'sender-address': sender_address,
-            'signature': signature,
-        }
-    )
-    url_for_requests = urljoin(args.url_base, '/api/files/' + args.file_hash)
-    request = requests.Request('GET', url_for_requests, **data_for_requests)
-    if args.link:
-        request_string = request.prepare()
-        print(request_string.url)
-    else:
-        response = requests.get(
-            url_for_requests,
-            **data_for_requests
-        )
-
-        if response.status_code == 200:
-            file_name = os.path.join(os.getcwd(),
-                                     response.headers['X-Sendfile'])
-
-            with open(file_name, 'wb') as fp:
-                fp.write(response.content)
-            print('saved as {}'.format(file_name))
-            return
+        if len(sys.argv) == 1:
+            parse(CORE_NODES_URL[0]).print_help()
         else:
-            return response
+            response = None
+            for url_base in used_nodes:
+                self.url_base = url_base
+                self.__parse_cmd_args()
+                response = self.args.execute_case(self)
+                if not isinstance(response, requests.models.Response):
+                    return
+                if response.status_code not in self.redirect_error_status:
+                    break
+            self._show_data(response)
 
+    @classmethod
+    def _show_data(cls, response):
+        """
+        Method to show data in console
+        :param response: response from BtcTxStore node
+        :return: None
+        """
+        print(response.status_code)
+        print(response.text)
 
-def action_upload(args):
-    """
-    Action method for upload command
-    :return: None
-    """
-    files = {'file_data': args.file}
-    data_hash = sha256(args.file.read()).hexdigest()
-    args.file.seek(0)
-    signature = btctx_api.sign_unicode(sender_key, data_hash)
+    def action_audit(self):
+        """
+        Action method for audit command
+        :return: None
+        """
+        signature = self.btctx_api.sign_unicode(self.sender_key,
+                                                self.args.file_hash)
 
-    response = requests.post(
-        urljoin(args.url_base, '/api/files/'),
-        data={
-            'data_hash': data_hash,
-            'file_role': args.file_role,
-        },
-        files=files,
-        headers={
-            'sender-address': sender_address,
-            'signature': signature,
-        }
-    )
-    return response
+        response = requests.post(
+            urljoin(self.args.url_base, '/api/audit/'),
+            data={
+                'data_hash': self.args.file_hash,
+                'challenge_seed': self.args.seed,
+            },
+            headers={
+                'sender-address': self.sender_address,
+                'signature': signature,
+            }
+        )
+        return response
 
+    def action_download(self):
+        """
+        Action method for download command
+        :return: None
+        """
+        signature = self.btctx_api.sign_unicode(self.sender_key,
+                                                self.args.file_hash)
+        params = {}
 
-def action_files(args):
-    """
-    Action method for files command
-    :return: None
-    """
-    response = requests.get(urljoin(args.url_base, '/api/files/'))
-    return response
+        if self.args.decryption_key:
+            params['decryption_key'] = self.args.decryption_key
 
+        if self.args.rename_file:
+            params['file_alias'] = self.args.rename_file
 
-def action_info(args):
-    """
-    Action method for info command
-    :return: None
-    """
-    response = requests.get(urljoin(args.url_base, '/api/nodes/me/'))
-    return response
+        data_for_requests = dict(
+            params=params,
+            headers={
+                'sender-address': self.sender_address,
+                'signature': signature,
+            }
+        )
+        url_for_requests = urljoin(self.args.url_base,
+                                   '/api/files/' + self.args.file_hash)
+        request = requests.Request('GET', url_for_requests,
+                                   **data_for_requests)
+        if self.args.link:
+            request_string = request.prepare()
+            print(request_string.url)
+        else:
+            response = requests.get(
+                url_for_requests,
+                **data_for_requests
+            )
 
+            if response.status_code == 200:
+                file_name = os.path.join(os.getcwd(),
+                                         response.headers['X-Sendfile'])
 
-def main():
-    core_nodes = ('http://node2.metadisk.org/', 'http://node3.metadisk.org/')
-    # Get the url from environment variable
-    env_node = os.getenv('MEATADISKSERVER', None)
-    used_nodes = (env_node,) if env_node else core_nodes
-
-    if len(sys.argv) == 1:
-        parse(core_nodes[0]).print_help()
-    else:
-        response = None
-        for url_base in used_nodes:
-            set_up()
-            parsed_args = parse(url_base).parse_args()
-            response = parsed_args.func(parsed_args)
-            if not isinstance(response, requests.models.Response):
+                with open(file_name, 'wb') as fp:
+                    fp.write(response.content)
+                print('saved as {}'.format(file_name))
                 return
-            if response.status_code not in redirect_error_status:
-                break
-        _show_data(response)
+            else:
+                return response
+
+    def action_upload(self):
+        """
+        Action method for upload command
+        :return: None
+        """
+        files = {'file_data': self.args.file}
+        data_hash = sha256(self.args.file.read()).hexdigest()
+        self.args.file.seek(0)
+        signature = self.btctx_api.sign_unicode(self.sender_key, data_hash)
+
+        response = requests.post(
+            urljoin(self.args.url_base, '/api/files/'),
+            data={
+                'data_hash': data_hash,
+                'file_role': self.args.file_role,
+            },
+            files=files,
+            headers={
+                'sender-address': self.sender_address,
+                'signature': signature,
+            }
+        )
+        return response
+
+    def action_files(self):
+        """
+        Action method for files command
+        :return: None
+        """
+        response = requests.get(urljoin(self.args.url_base, '/api/files/'))
+        return response
+
+    def action_info(self):
+        """
+        Action method for info command
+        :return: None
+        """
+        response = requests.get(urljoin(self.args.url_base, '/api/nodes/me/'))
+        return response
 
 
 def url_normalize(url_string):
@@ -278,7 +286,7 @@ def parse(url_base):
     parser_audit = subparsers.add_parser('audit', help='define audit purpose!')
     parser_audit.add_argument('file_hash', type=str, help="file hash")
     parser_audit.add_argument('seed', type=str, help="challenge seed")
-    parser_audit.set_defaults(func=action_audit)
+    parser_audit.set_defaults(execute_case=Metatool.action_audit)
 
     # Create the parser for the "download" command.
     parser_download = subparsers.add_parser('download',
@@ -289,7 +297,7 @@ def parse(url_base):
     parser_download.add_argument('--rename_file', type=str, help="rename file")
     parser_download.add_argument('--link', action='store_true',
                                  help='will return rust url for man. request')
-    parser_download.set_defaults(func=action_download)
+    parser_download.set_defaults(execute_case=Metatool.action_download)
 
     # create the parser for the "upload" command.
     parser_upload = subparsers.add_parser('upload',
@@ -298,18 +306,23 @@ def parse(url_base):
                                help="path to file")
     parser_upload.add_argument('-r', '--file_role', type=str, default='001',
                                help="set file role")
-    parser_upload.set_defaults(func=action_upload)
+    parser_upload.set_defaults(execute_case=Metatool.action_upload)
 
     # create the parser for the "files" command.
     parser_files = subparsers.add_parser('files', help='define files purpose!')
-    parser_files.set_defaults(func=action_files)
+    parser_files.set_defaults(execute_case=Metatool.action_files)
 
     # create the parser for the "info" command.
     parser_info = subparsers.add_parser('info', help='define info purpose!')
-    parser_info.set_defaults(func=action_info)
+    parser_info.set_defaults(execute_case=Metatool.action_info)
 
     # parse the commands
     return main_parser
+
+
+def main():
+    metatool = Metatool()
+    metatool.run()
 
 
 if __name__ == '__main__':

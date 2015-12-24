@@ -127,7 +127,7 @@ The way to do this is to define the `file_role` mentioned above, which is the se
     +--------------------------------------------------------------------------+
     |       |                     sort of the meaning                          |
     | value |------------------------------------------------------------------|
-    |       |               Payment |           Access              | Servable |
+    |       |       Payment         |           Access              | Servable |
     |-------+-----------------------+-------------------------------+----------|
     |  0    | Free                  | Anyone can access             |   False  |
     |  1    | Paid by downloader    | Specified users can access    |   True   |
