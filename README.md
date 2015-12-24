@@ -9,7 +9,7 @@ It completely repeats all actions that you can perform with the MetaDisk
 service through the "curl" terminal command, described at the <http://node2.metadisk.org/> page.
 
 Below is the thorough specification for the metatool usage.
-
+fix
 ---
 
 In general for running the application you may use the `metatool` terminal command with specified required arguments.
