@@ -9,7 +9,7 @@ It completely repeats all actions that you can perform with the MetaDisk
 service through the "curl" terminal command, described at the <http://node2.metadisk.org/> page.
 
 Below is the thorough specification for the metatool usage.
-
+fix
 ---
 
 In general for running the application you may use the `metatool` terminal command with specified required arguments.
@@ -127,7 +127,7 @@ The way to do this is to define the `file_role` mentioned above, which is the se
     +--------------------------------------------------------------------------+
     |       |                     sort of the meaning                          |
     | value |------------------------------------------------------------------|
-    |       |               Payment |           Access              | Servable |
+    |       |       Payment         |           Access              | Servable |
     |-------+-----------------------+-------------------------------+----------|
     |  0    | Free                  | Anyone can access             |   False  |
     |  1    | Paid by downloader    | Specified users can access    |   True   |
