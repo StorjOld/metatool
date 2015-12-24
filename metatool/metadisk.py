@@ -245,15 +245,33 @@ def main():
         _show_data(response)
 
 
-def parse(url_base):
+def url_normalize(url_string):
     """
-    Parsing logic of the METATOOL.
-    :return: parser object
+    It puts the URL string into required format.
+
+    :param url_string:
+    :return: string obj in http://<net location>
+    """
+    url_string = url_string.lstrip('/')
+    url_string = url_string.split('//', maxsplit=1)[-1]
+    url_string = url_string.lstrip('/')
+    url_string = url_string.split('/', maxsplit=1)[0]
+    return 'http://' + url_string
+
+
+def parse(url_base):
+    """Set parsing logic for the METATOOL.
+    Doesn't perform parsing, just fills the parser object with arguments.
+
+    :param url_base: (str) URL string which defines the server will be used.
+        In example http://node2.metadisk.org:8000
+
+    :return: argparse.ArgumentParser instance
     """
     # create the top-level parser
     main_parser = argparse.ArgumentParser(prog='METATOOL')
     main_parser.add_argument('--url', type=str, dest='url_base',
-                             default=url_base)
+                             default=url_normalize(url_base))
     subparsers = main_parser.add_subparsers(help='sub-command help')
 
     # Create the parser for the "audit" command.
