@@ -4,12 +4,12 @@
 [![Coverage Status](https://coveralls.io/repos/Storj/metatool/badge.svg?branch=master&service=github)](https://coveralls.io/github/Storj/metatool?branch=master)
 [![License](https://img.shields.io/badge/license-AGPL%20License-blue.svg)](https://github.com/Storj/metatool/blob/master/LICENSE)
 
-metatool is a console utility purposed for interact with the MetaDisk service.
+**metatool** is a console utility purposed for interact with the MetaDisk service.
 It completely repeats all actions that you can perform with the MetaDisk
 service through the "curl" terminal command, described at the <http://node2.metadisk.org/> page.
 
 Below is the thorough specification for the metatool usage.
-fix
+
 ---
 
 In general for running the application you may use the `metatool` terminal command with specified required arguments.

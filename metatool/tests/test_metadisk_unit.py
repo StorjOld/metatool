@@ -1,17 +1,12 @@
 import sys
-import json
-import os.path
 import unittest
 
-from metatool.metadisk import show_data
-from requests import Response
+from metatool.__main__ import show_data
 
 if sys.version_info.major == 3:
     from io import StringIO
-    from unittest.mock import patch, MagicMock, mock_open, Mock
 else:
     from io import BytesIO as StringIO
-    from mock import patch, MagicMock, mock_open, Mock
 
 
 class MetadiskTest(unittest.TestCase):

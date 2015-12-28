@@ -30,7 +30,7 @@ class MetadiskTest(unittest.TestCase):
         server_thread.start()
 
         # Set the test server address like an environment variable which will
-        # be used by the metadisk.py whilst the testing.
+        # be used by the __main__.py whilst the testing.
         os.environ['MEATADISKSERVER'] = 'http://{}:{}'.format(host, port)
         path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         os.chdir(path)
@@ -42,7 +42,7 @@ class MetadiskTest(unittest.TestCase):
 
     def test_info(self):
         """
-        Testing of getting right response from the "python metadisk.py info"
+        Testing of getting right response from the "python __main__.py info"
         command call.
         """
         expected_value = {
@@ -67,7 +67,7 @@ class MetadiskTest(unittest.TestCase):
             "max_file_size": 0
           }
         }
-        with os.popen('{} metadisk.py info'.format(
+        with os.popen('{} __main__.py info'.format(
                 self.metadisk_python_interpreter)) as file:
             info_response = json.loads(file.read()[4:-1])
 
@@ -80,11 +80,11 @@ class MetadiskTest(unittest.TestCase):
         test case
         """
         expected_value = []
-        with os.popen('{} metadisk.py files'.format(
+        with os.popen('{} __main__.py files'.format(
                 self.metadisk_python_interpreter)) as file:
             files_response = json.loads(file.read()[4:-1])
         self.assertEqual(files_response, expected_value,
-                         'command "python metadisk.py files" must return '
+                         'command "python __main__.py files" must return '
                          'must receive an empty list')
 
     def test_files_filled_result(self):
@@ -93,17 +93,17 @@ class MetadiskTest(unittest.TestCase):
         Need to be called after "test_files_empty_result()" test case.
         """
         expected_value = [1, 2]
-        with os.popen('{} metadisk.py files'.format(
+        with os.popen('{} __main__.py files'.format(
                 self.metadisk_python_interpreter)) as file:
             files_response = json.loads(file.read()[4:-1])
         self.assertEqual(files_response, expected_value,
-                         'command "python metadisk.py files" now must return '
+                         'command "python __main__.py files" now must return '
                          'the {} list'.format(expected_value))
 
     def test_upload_simple_call(self):
         """
         Test of uploading file on the server through
-        "python metadisk.py upload setup.sh" command call.
+        "python __main__.py upload setup.sh" command call.
         """
         file_data = b'some data in test file\r\n\r\nself-delete after the test'
         data_hash = sha256(file_data).hexdigest()
@@ -113,7 +113,7 @@ class MetadiskTest(unittest.TestCase):
             "data_hash": data_hash,
             "file_role": "001",
         }
-        with os.popen('{} metadisk.py upload temporary_test_file'.format(
+        with os.popen('{} __main__.py upload temporary_test_file'.format(
                 self.metadisk_python_interpreter)) as file:
             upload_response = json.loads(file.read()[4:-1])
         self.assertEqual(upload_response, expected_value)
@@ -122,7 +122,7 @@ class MetadiskTest(unittest.TestCase):
     def test_upload_set_file_role(self):
         """
         Test of uploading file on the server through
-        "python metadisk.py upload setup.sh --file_role 002" command call.
+        "python __main__.py upload setup.sh --file_role 002" command call.
         """
         file_data = b'some data in test file\r\n\r\nself-delete after the test'
         data_hash = sha256(file_data).hexdigest()
@@ -133,7 +133,7 @@ class MetadiskTest(unittest.TestCase):
             "file_role": "002",
         }
         with os.popen(
-            '{} metadisk.py upload temporary_test_file --file_role 002'.format(
+            '{} __main__.py upload temporary_test_file --file_role 002'.format(
                 self.metadisk_python_interpreter)) as file:
             upload_response = json.loads(file.read()[4:-1])
         self.assertEqual(upload_response['file_role'],
@@ -142,12 +142,12 @@ class MetadiskTest(unittest.TestCase):
 
     def test_download_error(self):
         """
-        Test that `metadisk.py download` return error if passed
+        Test that `__main__.py download` return error if passed
         not valid data_hash
         """
         data_hash = 'test_not_valid_data_hash'
         expected_value = {'error_code': 101}
-        with os.popen('{} metadisk.py download {}'.format(
+        with os.popen('{} __main__.py download {}'.format(
             self.metadisk_python_interpreter,
             data_hash
         )) as download:
@@ -157,12 +157,12 @@ class MetadiskTest(unittest.TestCase):
 
     def test_download_valid_data_hash(self):
         """
-        Test that `metadisk.py download` return data if passed valid data
+        Test that `__main__.py download` return data if passed valid data
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'TEST_FILE_NAME'
         expected_value = b'TEST_DATA'
-        with os.popen('{} metadisk.py download {}'.format(
+        with os.popen('{} __main__.py download {}'.format(
             self.metadisk_python_interpreter,
             data_hash
         )):
@@ -181,12 +181,12 @@ class MetadiskTest(unittest.TestCase):
 
     def test_download_rename_file(self):
         """
-        Test that `metadisk.py download` with `--rename_file` return
+        Test that `__main__.py download` with `--rename_file` return
         file with given_name
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'DIFFERENT_TEST_FILE_NAME'
-        with os.popen('{} metadisk.py download {} --rename_file {}'.format(
+        with os.popen('{} __main__.py download {} --rename_file {}'.format(
             self.metadisk_python_interpreter,
             data_hash,
             test_file_name
@@ -202,14 +202,14 @@ class MetadiskTest(unittest.TestCase):
 
     def test_download_decryption_key(self):
         """
-        Test that `metadisk.py download` with `--decryption_key`
+        Test that `__main__.py download` with `--decryption_key`
         return file with given_name
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'TEST_FILE_NAME'
         decryption_key = 'some_test_decryption_key'
         expected_value = b'TEST_DATA'
-        with os.popen('{} metadisk.py download {} --decryption_key {}'.format(
+        with os.popen('{} __main__.py download {} --decryption_key {}'.format(
             self.metadisk_python_interpreter,
             data_hash,
             decryption_key
@@ -235,7 +235,7 @@ class MetadiskTest(unittest.TestCase):
         line '--decryption_kay' and '--rename_file'.
         """
         data_hash = sha256(b'test_data').hexdigest()
-        with os.popen('{} metadisk.py download {} --link'.format(
+        with os.popen('{} __main__.py download {} --link'.format(
             self.metadisk_python_interpreter,
             data_hash
         )) as printed_data:
@@ -253,7 +253,7 @@ class MetadiskTest(unittest.TestCase):
             )
         expected_url_get_dict = parse_qs(urlencode(sended_data))
         bash_command_template = """\
-        {} metadisk.py download {} --decryption_key {} --rename_file {} --link
+        {} __main__.py download {} --decryption_key {} --rename_file {} --link
         """
         with os.popen(
             bash_command_template.format(
@@ -273,13 +273,13 @@ class MetadiskTest(unittest.TestCase):
 
     def test_error_audit(self):
         """
-        Test that `metadisk.py audit` return error when not valid data passed
+        Test that `__main__.py audit` return error when not valid data passed
         """
         data_hash = 'test_not_valid_data_hash'
         challenge_seed = 'test_not_valid_challenge_seed'
         expected_value = {'error_code': 102}
 
-        with os.popen('{} metadisk.py audit {} {}'.format(
+        with os.popen('{} __main__.py audit {} {}'.format(
                 self.metadisk_python_interpreter,
                 data_hash,
                 challenge_seed
@@ -289,7 +289,7 @@ class MetadiskTest(unittest.TestCase):
 
     def test_audit_valid_json_data(self):
         """
-        Test that `metadisk.py audit` return data when valid data passed
+        Test that `__main__.py audit` return data when valid data passed
         """
         data_hash = '3a6eb0790f39ac87c94f3856b2dd2c5d'\
                     '110e6811602261a9a923d3bb23adc8b7'
@@ -303,7 +303,7 @@ class MetadiskTest(unittest.TestCase):
                                   "f88e29ad8a1b2a778581b37453de7692"
         }
 
-        with os.popen('{} metadisk.py audit {} {}'.format(
+        with os.popen('{} __main__.py audit {} {}'.format(
                 self.metadisk_python_interpreter,
                 data_hash,
                 challenge_seed
@@ -313,7 +313,7 @@ class MetadiskTest(unittest.TestCase):
 
     def test_url_attribute_use(self):
         """
-        Test of the "--url" optional argument. The "metadisk.py" must use this
+        Test of the "--url" optional argument. The "__main__.py" must use this
         value like url of all responses.
         """
         host, port = 'localhost', 5467
@@ -327,7 +327,7 @@ class MetadiskTest(unittest.TestCase):
         # failing to look at the errors of local server.
         sys.stderr = StringIO()
         with os.popen(
-            '{} metadisk.py --url http://{}:{} info'.format(
+            '{} __main__.py --url http://{}:{} info'.format(
                 self.metadisk_python_interpreter, host, port)
         ) as file:
             info_response_status = file.read()[:3]
@@ -344,7 +344,7 @@ class MetadiskTest(unittest.TestCase):
 
     def test_url_attribute_default(self):
         """
-        Test of the default case for "metadisk.py" target server
+        Test of the default case for "__main__.py" target server
         (without "--url" positional attribute).
         Might be just like the value in environment variable "MEATADISKSERVER"
         """
@@ -360,7 +360,7 @@ class MetadiskTest(unittest.TestCase):
         # failing to look at the errors of local server.
         sys.stderr = StringIO()
         with os.popen(
-            '{} metadisk.py --url http://{}:{} info'.format(
+            '{} __main__.py --url http://{}:{} info'.format(
                 self.metadisk_python_interpreter, host, port)
         ) as file:
             info_response_status = file.read()[:3]
