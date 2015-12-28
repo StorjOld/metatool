@@ -5,7 +5,7 @@ welcome to the metatool help information
 ===========================================
 
 usage:
-metatool <action> [ appropriate | arguments | for actions ] [--url URL_ADDR]
+metatool [--url URL_ADDR] <action> [ appropriate | arguments | for actions ]
 
 "metatool" expect the main first positional argument <action> which define
 the action of the program. Must be one of:
@@ -21,7 +21,7 @@ Example:
 The "--url" optional argument define url address of the target server.
 In example:
 
-    metatool info --url http://dev.storj.anvil8.com
+    metatool --url http://dev.storj.anvil8.com info
 
 But by default the server is "http://dev.storj.anvil8.com/" as well :)
 You can either set an system environment variable "MEATADISKSERVER" to
@@ -54,7 +54,7 @@ the success result.
             the downloaded file.
 
 ... audit <data_hash> <challenge_seed>
-            This action purposed for checkout the existence of files on the
+            This action purposed for checking out the existence of files on the
             server (in opposite to plain serving hashes of files).
             Return a json file of three files with the response data:
                 {
@@ -68,7 +68,7 @@ the success result.
             This action fetch desired file from the server by the "hash name".
             Return nothing if the file downloaded successful.
 
-        <file_hash> - string with represent the "file hash".
+        <file_hash> - string which represents the "file hash".
 
         [--link] - will return the url GET request string instead of
                 executing the downloading.
@@ -100,13 +100,29 @@ CORE_NODES_URL = ('http://node2.metadisk.org/', 'http://node3.metadisk.org/')
 BTCTX_API = BtcTxStore(testnet=True, dryrun=True)
 
 
-def action_audit(sender_key, file_hash, seed, url_base, btcx_api):
+def action_audit(url_base, sender_key, btctx_api, file_hash, seed):
     """
-    Action method for audit command
-    :return: None
+    It performs an request to the server with a view of calculating
+    the SHA-256 hash of a file plus some seed.
+    It will return the response object with information about the server-error
+    when such has occurred.
+
+    :param url_base:  (str) URL string which defines the server will be used.
+    :param sender_key: (str) unique secret key which will be used for the
+                        generating credentials required by the access to the
+                        server.
+    :param btctx_api:  instance of the BtcTxStore class from btctxstore module.
+                        It will be used to generate credentials for server
+                        access. (https://pypi.python.org/pypi/btctxstore/4.6.0)
+    :param file_hash:  (str) hash-name of the file you are going to audit.
+    :param seed: (str) should be a SHA-256 hash of that you would like to add
+                        to the file data to generate a challenge response.
+    :return: response: (<class 'requests.models.Response'>) response instance
+                        with the results of challenge or with information about
+                        the server issue.
     """
-    signature = btcx_api.sign_unicode(sender_key, file_hash)
-    sender_address = btcx_api.get_address(sender_key)
+    signature = btctx_api.sign_unicode(sender_key, file_hash)
+    sender_address = btctx_api.get_address(sender_key)
     response = requests.post(
         urljoin(url_base, '/api/audit/'),
         data={
@@ -121,11 +137,43 @@ def action_audit(sender_key, file_hash, seed, url_base, btcx_api):
     return response
 
 
-def action_download(file_hash, url_base, sender_key, btcx_api,
+def action_download(url_base, sender_key, btctx_api, file_hash,
                     rename_file=None, decryption_key=None, link=False):
     """
-    Action method for download command
-    :return: response obj
+    It performs the downloading of the file from the server
+    by the given "file_hash".
+    If "link=True" will return GET-request URL-string instead of performing the
+    download, so you can use it like a simple URL address and download it
+    through the browser.
+        None: The "link=True" case implies non-authenticated access to the
+        file, available only for files with such values of "roles": 101, 001
+
+    Will return the response object with information about the server-error
+    when such has occurred.
+
+    :param url_base:  (str) URL string which defines the server will be used.
+    :param sender_key: (str) unique secret key which will be used for the
+                        generating credentials required by the access to the
+                        server.
+    :param btctx_api:  instance of the BtcTxStore class from btctxstore module.
+                        It will be used to generate credentials for server
+                        access. (https://pypi.python.org/pypi/btctxstore/4.6.0)
+    :param file_hash:  (str) hash-name of the file on the remote server.
+    :param rename_file:  (str) defines new name of the file after downloading.
+    :param decryption_key:  (str)  key value which will be used to decrypt file
+                            on the server before the downloading (if allowed by
+                            the role).
+    :param link: (boll) If True is given, function will generate and return
+                        the appropriate GET URL-string instead of performing
+                        the downloading process.
+    :return:
+        <file_path>: (str) will return full path to the file if downloaded
+                            done successfully.
+        <GET URL-string>: (str) if "link=True" will return GET-request
+                            URL-string, instead of processing the downloading.
+        response_object: (<class 'requests.models.Response'>) with information
+                            about the occurred error on the server while
+                            the downloading.
     """
     url_for_requests = urljoin(url_base, '/api/files/' + file_hash)
 
@@ -136,25 +184,20 @@ def action_download(file_hash, url_base, sender_key, btcx_api,
     if rename_file:
         params['file_alias'] = rename_file
 
+    data_for_requests = dict(params=params)
     if link:
-        data_for_requests = dict(
-            params=params
-        )
         request = requests.Request('GET', url_for_requests,
                                    **data_for_requests)
         request_string = request.prepare()
         return request_string.url
 
-    signature = btcx_api.sign_unicode(sender_key, file_hash)
-    sender_address = btcx_api.get_address(sender_key)
+    signature = btctx_api.sign_unicode(sender_key, file_hash)
+    sender_address = btctx_api.get_address(sender_key)
 
-    data_for_requests = dict(
-        params=params,
-        headers={
-            'sender-address': sender_address,
-            'signature': signature,
-        }
-    )
+    data_for_requests['headers'] = {
+        'sender-address': sender_address,
+        'signature': signature,
+    }
 
     response = requests.get(
         url_for_requests,
@@ -167,21 +210,38 @@ def action_download(file_hash, url_base, sender_key, btcx_api,
 
         with open(file_name, 'wb') as fp:
             fp.write(response.content)
-        return 'saved as {}'.format(file_name)
+        return file_name
     else:
         return response
 
 
-def action_upload(file, sender_key, btcx_api, url_base, file_role):
+def action_upload(url_base, sender_key, btctx_api, file, file_role):
     """
-    Action method for upload command
-    :return: response object
+    Core method of the METATOOL API which uploads local file to the server.
+    Max size of file is determined by the server. In the most of cases it is
+    restricted by the 128 MB.
+    Will return the response object with information about the server-error
+    when such has occurred.
+
+    :param url_base:  (str) URL string which defines the server will be used.
+    :param sender_key: (str) unique secret key which will be used for the
+                        generating credentials required by the access to the
+                        server.
+    :param btctx_api:  instance of the BtcTxStore class from btctxstore module.
+                        It will be used to generate credentials for server
+                        access. (https://pypi.python.org/pypi/btctxstore/4.6.0)
+    :param file:  file object opened in the 'rb' mode,
+                        which will be uploaded to the server.
+    :param file_role:  (str)  three numbers string which define future
+                        behavior of the file on the server. See more about
+                        it in the documentation.
+    :return: response: (<class 'requests.models.Response'>) response instance.
     """
     files = {'file_data': file}
     data_hash = sha256(file.read()).hexdigest()
     file.seek(0)
-    sender_address = btcx_api.get_address(sender_key)
-    signature = btcx_api.sign_unicode(sender_key, data_hash)
+    sender_address = btctx_api.get_address(sender_key)
+    signature = btctx_api.sign_unicode(sender_key, data_hash)
     response = requests.post(
         urljoin(url_base, '/api/files/'),
         data={
@@ -198,11 +258,12 @@ def action_upload(file, sender_key, btcx_api, url_base, file_role):
 
 
 def action_files(url_base):
-    """Action method for the "files" command.
+    """
+    It executes a request to the "Node" server and returns response object
+    with json-string - the list of hashes of downloaded files.
 
-    Return json-string which is the list of hashes of downloaded files.
-
-    :param url_base: (str) URL string which defines the server will be used.
+    :param url_base: (str) URL string which defines the server
+                        that will be used.
     :return: response object
     """
     response = requests.get(urljoin(url_base, '/api/files/'))
@@ -210,39 +271,21 @@ def action_files(url_base):
 
 
 def action_info(url_base):
-    """Action method for the info" command.
+    """
+    It executes a request to the "Node" server and returns response object
+    with json-string - the information about server state.
 
-    Return json-string which is the list of hashes of downloaded files.
-
-    :param url_base: (str) URL string which defines the server will be used.
-    :return: response object
+    :param url_base: (str) URL string which defines the server
+                        that will be used.
     """
     response = requests.get(urljoin(url_base, '/api/nodes/me/'))
     return response
 
 
-def get_all_func_args(function):
-    return function.__code__.co_varnames[:function.__code__.co_argcount]
-
-
-def url_normalize(url_string):
-    """
-    It puts the URL string into required format.
-
-    :param url_string: (str) URL string which defines the server will be used.
-
-    :return: string obj in http://<net location>
-    """
-    url_string = url_string.lstrip('/')
-    url_string = url_string.split('//')[-1]
-    url_string = url_string.lstrip('/')
-    url_string = url_string.split('/')[0]
-    return 'http://' + url_string
-
-
 def parse():
-    """Set parsing logic for the METATOOL.
-    Doesn't perform parsing, just fills the parser object with arguments.
+    """
+    Set of the parsing logic for the METATOOL.
+    It doesn't perform parsing, just fills the parser object with arguments.
 
     :return: argparse.ArgumentParser instance
     """
@@ -289,49 +332,65 @@ def parse():
     return main_parser
 
 
-def _show_data(data):
-        """
-        Method to show data in console
-        :param response: response from BtcTxStore node
-        :return: None
-        """
-        if isinstance(data, requests.Response):
-            print(data.status_code)
-            print(data.text)
-        else:
-            print(data)
+def show_data(data):
+    """
+    Method used to show a data in the console.
+    :param data: <response obj> / <str>
+    :return: None
+    """
+    if isinstance(data, requests.Response):
+        print(data.status_code)
+        print(data.text)
+    else:
+        print(data)
 
 
-def args_preparator(required_args, parsed_args):
+def args_prepare(required_args, parsed_args):
+    """
+
+    :param required_args:
+    :param parsed_args:
+    :return:
+    """
     prepared_args = {}
     args_base = dict(
         sender_key=BTCTX_API.create_key(),
-        btcx_api=BTCTX_API,
+        btctx_api=BTCTX_API,
     )
     for required_arg in required_args:
-        current_item = getattr(parsed_args, required_arg, 'must be generated!')
-        if current_item == 'must be generated!':
-            prepared_args[required_arg] = args_base[required_arg]
-        else:
+        try:
             prepared_args[required_arg] = getattr(parsed_args, required_arg)
+        except AttributeError:
+            prepared_args[required_arg] = args_base[required_arg]
     return prepared_args
+
+
+def get_all_func_args(function):
+    """
+    It finds out all available arguments of the given function.
+    :param function: function object to inspect.
+    :return: <list object>: with names of all available arguments.
+    """
+    return function.__code__.co_varnames[:function.__code__.co_argcount]
 
 
 def main():
     """
-    METATOOL
+    METATOOL main logic.
     """
     redirect_error_status = (400, 404, 500, 503)
     if len(sys.argv) == 1:
         parse().print_help()
         return
     args = parse().parse_args()
-    used_args = args_preparator(get_all_func_args(args.execute_case), args)
+    used_args = args_prepare(get_all_func_args(args.execute_case), args)
 
-    # Get the url from environment variable or from the "--url" parsed argument
+    # Get the url from the environment variable 
+    # or from the "--url" parsed argument
     env_node = os.getenv('MEATADISKSERVER', None)
     used_nodes = (env_node,) if env_node else CORE_NODES_URL
     used_nodes = (args.url_base,) if args.url_base else used_nodes
+
     result = "Sorry, nothing has done."
     for url_base in used_nodes:
         used_args['url_base'] = url_base
@@ -340,7 +399,7 @@ def main():
             break
         if result.status_code not in redirect_error_status:
             break
-    _show_data(result)
+    show_data(result)
 
 
 if __name__ == '__main__':
