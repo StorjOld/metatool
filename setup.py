@@ -1,7 +1,10 @@
+import sys
 from setuptools import setup
 
 
 required_packages = ['requests', 'btctxstore']
+if sys.version_info.major == 2:
+    required_packages.insert(0, 'mock')
 
 setup(
     name='metatool',

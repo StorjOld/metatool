@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import unittest
 
@@ -5,26 +6,35 @@ from metatool.__main__ import show_data
 
 if sys.version_info.major == 3:
     from io import StringIO
+    from unittest import mock
 else:
     from io import BytesIO as StringIO
+    import mock
 
 
-class MetadiskTest(unittest.TestCase):
+class Test__main__module(unittest.TestCase):
 
-    def test__show_data_string_type(self):
-        test_string_argument = 'status text string'
-        print_out = StringIO()
-        sys.stdout = print_out
-        show_data(test_string_argument)
-        sys.stdout = sys.__stdout__
-        print_out.seek(0)
+    def test_show_data_string_type(self):
+        test_string = 'test string value'
+        expected_printed_string = test_string + '\n'
+        with mock.patch('sys.stdout', new_callable=StringIO) as mock_print:
+            show_data(test_string)
+            real_printed_string = mock_print.getvalue()
         self.assertEqual(
-            print_out.read(),
-            test_string_argument + '\n',
-            'problem with printing out str type in the "_show_data" method!'
+            real_printed_string,
+            expected_printed_string,
+            'problem with printing out str type in the "show_data" method!'
         )
-        print_out.close()
 
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_show_data_response_type(self):
+        attrs = dict(text='text string', status_code='status code string')
+        mock_response = mock.Mock(**attrs)
+        expected_printed_string = '{status_code}\n{text}\n'.format(**attrs)
+        with mock.patch('sys.stdout', new_callable=StringIO) as mock_print:
+            show_data(mock_response)
+            real_printed_string = mock_print.getvalue()
+        self.assertEqual(
+            expected_printed_string,
+            real_printed_string,
+            'unexpected set of print() calls in the "show_data" method!'
+        )
