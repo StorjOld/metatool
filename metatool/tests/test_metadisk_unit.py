@@ -1,8 +1,11 @@
 from __future__ import print_function
+import os
 import sys
 import unittest
 
-from metatool.__main__ import show_data
+from metatool.__main__ import show_data, parse
+
+from metatool import metatool as metatool_core
 
 if sys.version_info.major == 3:
     from io import StringIO
@@ -12,7 +15,10 @@ else:
     import mock
 
 
-class Test__main__module(unittest.TestCase):
+class TestMainShowDataFunction(unittest.TestCase):
+    """
+    Test case of the metatool.__main__.show_data() function.
+    """
 
     def test_show_data_string_type(self):
         test_string = 'test string value'
@@ -38,3 +44,163 @@ class Test__main__module(unittest.TestCase):
             real_printed_string,
             'unexpected set of print() calls in the "show_data" method!'
         )
+
+
+class TestMainParseFunction(unittest.TestCase):
+    """
+    Test case of the metatool.__main__.parse() function.
+    """
+    def test_url_argument(self):
+
+        # testing of parsing "url_base" value by default
+        args_default = parse().parse_args('info'.split())
+        self.assertIsNone(args_default.url_base)
+
+        # testing of parsing given "url_base" value
+        args_passed_url = parse().parse_args('--url TEST_URL_STR info'.split())
+        self.assertEqual(args_passed_url.url_base, 'TEST_URL_STR')
+
+    def test_audit_argument(self):
+        # testing of raising exception when required arguments are not given
+        with mock.patch('sys.stderr', new_callable=StringIO):
+            with self.assertRaises(SystemExit):
+                parse().parse_args('audit'.split())
+
+        # testing of correct parse of all given arguments
+        args_list = 'audit FILE_HASH CHALLENGE_SEED'.split()
+        expected_args_dict = {
+            'execute_case': metatool_core.audit,
+            'file_hash': args_list[1],
+            'seed': args_list[2],
+            'url_base': None
+        }
+        parsed_args = parse().parse_args(args_list)
+        real_parsed_args_dict = dict(parsed_args._get_kwargs())
+        self.assertDictEqual(
+            real_parsed_args_dict,
+            expected_args_dict
+        )
+
+    def test_download_arguments(self):
+        # testing of raising exception when required arguments are not given
+        with mock.patch('sys.stderr', new_callable=StringIO):
+            with self.assertRaises(SystemExit):
+                parse().parse_args('download'.split())
+
+        # test on correctly parsing only "file_hash" argument.
+        # Expect correct default values of optional arguments.
+        args_list = 'download FILE_HASH'.split()
+        expected_args_dict = {
+            'decryption_key': None,
+            'execute_case': metatool_core.download,
+            'file_hash': args_list[1],
+            'link': False,
+            'rename_file': None,
+            'url_base': None
+        }
+        parsed_args = parse().parse_args(args_list)
+        real_parsed_args_dict = dict(parsed_args._get_kwargs())
+        self.assertDictEqual(
+            real_parsed_args_dict,
+            expected_args_dict
+        )
+
+        # test on correctly parsing of full set of available arguments
+        args_list = 'download FILE_HASH ' \
+                    '--decryption_key TEST_DECRYPTION_KEY ' \
+                    '--rename_file TEST_RENAME_FILE ' \
+                    '--link'.split()
+        expected_args_dict = {
+            'file_hash': args_list[1],
+            'decryption_key': args_list[3],
+            'rename_file': args_list[5],
+            'link': True,
+            'execute_case': metatool_core.download,
+            'url_base': None
+        }
+        parsed_args = parse().parse_args(args_list)
+        real_parsed_args_dict = dict(parsed_args._get_kwargs())
+        self.assertDictEqual(
+            real_parsed_args_dict,
+            expected_args_dict
+        )
+
+    def test_upload_arguments(self):
+        # Test fixture
+        full_file_path = os.path.join(os.path.dirname(__file__),
+                                      'temporary_test_file')
+
+        self.addCleanup(os.unlink, full_file_path)
+        # Testing of raising exception when required arguments are not given
+        with mock.patch('sys.stderr', new_callable=StringIO):
+            with self.assertRaises(SystemExit):
+                parse().parse_args('upload'.split())
+
+        # Test to the right opening file logic
+        test_file_content = [b'test data 1', b'test data 2']
+        with open(full_file_path, 'wb') as temp_file:
+            parsed_args = parse().parse_args(['upload', full_file_path])
+            temp_file.write(test_file_content[0])
+            temp_file.flush()
+            read_data = [parsed_args.file.read(), ]
+            temp_file.seek(0)
+            temp_file.truncate()
+            temp_file.write(test_file_content[1])
+            temp_file.flush()
+            parsed_args.file.seek(0)
+            read_data.append(parsed_args.file.read())
+            parsed_args.file.close()
+        self.assertListEqual(read_data, test_file_content)
+        self.assertEqual(parsed_args.file.mode, 'rb')
+
+        # Test on correctly parsing only "file" argument.
+        # Expect correct default values of optional arguments.
+        args_list = 'upload {}'.format(full_file_path).split()
+        parsed_args = parse().parse_args(args_list)
+        real_parsed_args_dict = dict(parsed_args._get_kwargs())
+        expected_args_dict = {
+            'file': parsed_args.file,
+            'file_role': '001',
+            'url_base': None,
+            'execute_case': metatool_core.upload,
+        }
+        self.assertDictEqual(
+            real_parsed_args_dict,
+            expected_args_dict
+        )
+        parsed_args.file.close()
+
+        # test on correctly parsing of full set of available arguments
+        args_list = '--url TEST_URL ' \
+                    'upload {} ' \
+                    '--file_role TEST_FILE_ROLE'.format(full_file_path).split()
+        parsed_args = parse().parse_args(args_list)
+        real_parsed_args_dict = dict(parsed_args._get_kwargs())
+        expected_args_dict = {
+            'file': parsed_args.file,
+            'file_role': args_list[5],
+            'url_base': args_list[1],
+            'execute_case': metatool_core.upload,
+        }
+        self.assertDictEqual(
+            real_parsed_args_dict,
+            expected_args_dict
+        )
+        parsed_args.file.close()
+
+        # test "-r" optional argument
+        args_list = 'upload {} ' \
+                    '-r TEST_FILE_ROLE'.format(full_file_path).split()
+        parsed_args = parse().parse_args(args_list)
+        self.assertEqual(parsed_args.file_role, args_list[3])
+        parsed_args.file.close()
+
+    def test_info_argument(self):
+        # test of parsing appropriate default "core function"
+        parsed_args = parse().parse_args('info'.split())
+        self.assertEqual(parsed_args.execute_case, metatool_core.info)
+
+    def test_files_argument(self):
+        # test of parsing appropriate default "core function"
+        parsed_args = parse().parse_args('files'.split())
+        self.assertEqual(parsed_args.execute_case, metatool_core.files)
