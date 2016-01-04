@@ -95,7 +95,6 @@ if not parent_dir in sys.path:
 import metatool
 
 CORE_NODES_URL = ('http://node2.metadisk.org/', 'http://node3.metadisk.org/')
-BTCTX_API = BtcTxStore(testnet=True, dryrun=True)
 
 
 def parse():
@@ -168,10 +167,11 @@ def args_prepare(required_args, parsed_args):
     :param parsed_args:
     :return:
     """
+    btctx_api = BtcTxStore(testnet=True, dryrun=True)
     prepared_args = {}
     args_base = dict(
-        sender_key=BTCTX_API.create_key(),
-        btctx_api=BTCTX_API,
+        sender_key=btctx_api.create_key(),
+        btctx_api=btctx_api,
     )
     for required_arg in required_args:
         try:

@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 
-from metatool.__main__ import show_data, parse
+from metatool.__main__ import show_data, parse, get_all_func_args, args_prepare
 
 from metatool import metatool as metatool_core
 
@@ -204,3 +204,57 @@ class TestMainParseFunction(unittest.TestCase):
         # test of parsing appropriate default "core function"
         parsed_args = parse().parse_args('files'.split())
         self.assertEqual(parsed_args.execute_case, metatool_core.files)
+
+
+class TestMainArgumentsPreparation(unittest.TestCase):
+    def test_get_all_func_args(self):
+        # test of accurate discovery of required arguments of the function
+        expected_args_set = ('arg_1', 'arg_2', 'arg_3')
+
+        self.assertTupleEqual(
+            get_all_func_args(lambda arg_1, arg_2, arg_3=True: None),
+            expected_args_set,
+            '"get_all_func_args" must return tuple like "expected_args_set" !'
+        )
+
+        # definition of the tested function
+        def test_function(one, two=True, *args, **kwargs):
+            local_variable = None
+        expected_args_set = ('one', 'two')
+        self.assertTupleEqual(
+            get_all_func_args(test_function),
+            expected_args_set,
+            '"get_all_func_args" must return tuple like "expected_args_set" !'
+        )
+
+    @mock.patch('metatool.__main__.BtcTxStore')
+    def test_args_prepare(self, MockBtcTxStore):
+        # test on accurate setting of omitted required arguments
+        # to the core function
+        MockBTCTX_API = MockBtcTxStore.return_value
+        MockBTCTX_API.create_key.return_value = 'TEST_SENDER_KEY'
+        expected_args_dict = dict(
+            one='TEST 1',
+            two='TEST 2'
+        )
+        given_required_names = ['one', 'two']
+        given_namespace = mock.Mock(
+            one='TEST 1',
+            two='TEST 2',
+            three='TEST 3'
+        )
+        del given_namespace.sender_key
+        del given_namespace.btctx_api
+        self.assertDictEqual(
+            args_prepare(given_required_names, given_namespace),
+            expected_args_dict
+        )
+        expected_args_dict['sender_key'] = 'TEST_SENDER_KEY'
+        expected_args_dict['btctx_api'] = MockBTCTX_API
+        given_required_names += ['sender_key', 'btctx_api']
+
+        self.assertDictEqual(
+            args_prepare(given_required_names, given_namespace),
+            expected_args_dict,
+            "don't work!!!!"
+        )
