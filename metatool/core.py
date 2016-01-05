@@ -57,8 +57,8 @@ def download(url_base, sender_key, btctx_api, file_hash,
     If "link=True" will return GET-request URL-string instead of performing the
     download, so you can use it like a simple URL address and download it
     through the browser.
-        None: The "link=True" case implies non-authenticated access to the
-        file, available only for files with such values of "roles": 101, 001
+    note:: The "link=True" case implies non-authenticated access to the
+    file, available only for files with such values of "roles": 101, 001
 
     Will return the response object with information about the server-error
     when such has occurred.

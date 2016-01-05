@@ -3,9 +3,9 @@ import os
 import sys
 import unittest
 
-from metatool.__main__ import show_data, parse, get_all_func_args, args_prepare
+from metatool.cli import show_data, parse, get_all_func_args, args_prepare
 
-from metatool import metatool as metatool_core
+from metatool import core
 
 if sys.version_info.major == 3:
     from io import StringIO
@@ -69,7 +69,7 @@ class TestMainParseFunction(unittest.TestCase):
         # testing of correct parse of all given arguments
         args_list = 'audit FILE_HASH CHALLENGE_SEED'.split()
         expected_args_dict = {
-            'execute_case': metatool_core.audit,
+            'execute_case': core.audit,
             'file_hash': args_list[1],
             'seed': args_list[2],
             'url_base': None
@@ -92,7 +92,7 @@ class TestMainParseFunction(unittest.TestCase):
         args_list = 'download FILE_HASH'.split()
         expected_args_dict = {
             'decryption_key': None,
-            'execute_case': metatool_core.download,
+            'execute_case': core.download,
             'file_hash': args_list[1],
             'link': False,
             'rename_file': None,
@@ -115,7 +115,7 @@ class TestMainParseFunction(unittest.TestCase):
             'decryption_key': args_list[3],
             'rename_file': args_list[5],
             'link': True,
-            'execute_case': metatool_core.download,
+            'execute_case': core.download,
             'url_base': None
         }
         parsed_args = parse().parse_args(args_list)
@@ -162,7 +162,7 @@ class TestMainParseFunction(unittest.TestCase):
             'file': parsed_args.file,
             'file_role': '001',
             'url_base': None,
-            'execute_case': metatool_core.upload,
+            'execute_case': core.upload,
         }
         self.assertDictEqual(
             real_parsed_args_dict,
@@ -180,7 +180,7 @@ class TestMainParseFunction(unittest.TestCase):
             'file': parsed_args.file,
             'file_role': args_list[5],
             'url_base': args_list[1],
-            'execute_case': metatool_core.upload,
+            'execute_case': core.upload,
         }
         self.assertDictEqual(
             real_parsed_args_dict,
@@ -198,12 +198,12 @@ class TestMainParseFunction(unittest.TestCase):
     def test_info_argument(self):
         # test of parsing appropriate default "core function"
         parsed_args = parse().parse_args('info'.split())
-        self.assertEqual(parsed_args.execute_case, metatool_core.info)
+        self.assertEqual(parsed_args.execute_case, core.info)
 
     def test_files_argument(self):
         # test of parsing appropriate default "core function"
         parsed_args = parse().parse_args('files'.split())
-        self.assertEqual(parsed_args.execute_case, metatool_core.files)
+        self.assertEqual(parsed_args.execute_case, core.files)
 
 
 class TestMainArgumentsPreparation(unittest.TestCase):
@@ -227,12 +227,12 @@ class TestMainArgumentsPreparation(unittest.TestCase):
             '"get_all_func_args" must return tuple like "expected_args_set" !'
         )
 
-    @mock.patch('metatool.__main__.BtcTxStore')
-    def test_args_prepare(self, MockBtcTxStore):
+    @mock.patch('metatool.cli.BtcTxStore')
+    def test_args_prepare(self, mock_btctx_store):
         # test on accurate setting of omitted required arguments
         # to the core function
-        MockBTCTX_API = MockBtcTxStore.return_value
-        MockBTCTX_API.create_key.return_value = 'TEST_SENDER_KEY'
+        mock_btctx_api = mock_btctx_store.return_value
+        mock_btctx_api.create_key.return_value = 'TEST_SENDER_KEY'
         expected_args_dict = dict(
             one='TEST 1',
             two='TEST 2'
@@ -250,7 +250,7 @@ class TestMainArgumentsPreparation(unittest.TestCase):
             expected_args_dict
         )
         expected_args_dict['sender_key'] = 'TEST_SENDER_KEY'
-        expected_args_dict['btctx_api'] = MockBTCTX_API
+        expected_args_dict['btctx_api'] = mock_btctx_api
         given_required_names += ['sender_key', 'btctx_api']
 
         self.assertDictEqual(
