@@ -1,5 +1,8 @@
 """
-Core MetaTool functions.
+This module represents MetaTool API - set of functions purposed for
+interaction with MetaCore cloud servers. Each function provides specific
+type of operation with the MetaCore server. Look through the functions for
+detailed specification.
 """
 import sys
 import os
@@ -16,7 +19,7 @@ else:
 
 
 def audit(url_base, sender_key, btctx_api, file_hash, seed):
-    """It performs an request to the server with a view of calculating
+    """It make an request to the server with a view of calculating
     the SHA-256 hash of a file plus some seed.
     Return the response object with information about the server-error
     when such has occurred.
@@ -89,14 +92,20 @@ def download(url_base, sender_key, btctx_api, file_hash,
     :type file_hash: string
 
     :param rename_file: defines new name of the file after downloading
+
+        (optional, default: None)
     :type rename_file: string
 
     :param decryption_key: key value which will be used to decrypt file
         on the server before the downloading (if allowed by the role)
+
+        (optional, default: None)
     :type decryption_key: string
 
     :param link: if ``True``, function doesn't perform the downloading but
         generate appropriate GET URL-string instead
+
+        (optional, default: False)
     :type link: boolean
 
     :returns: full path to the file if download done successfully
@@ -153,10 +162,9 @@ def download(url_base, sender_key, btctx_api, file_hash,
 
 def upload(url_base, sender_key, btctx_api, file, file_role):
     """
-    Core method of the METATOOL API which uploads local file to the server.
-    Max size of file is determined by the server. In the most of cases it is
-    restricted by the 128 MB.
-    Will return the response object with ``file_hash`` and ``file_role`` when
+    Upload local file to the server. Max size of file is determined by the
+    server. In the most of cases it is restricted by the 128 MB.
+    Return the response object with ``file_hash`` and ``file_role`` when
     have done successfully or the server-error when such has occurred.
 
     :param url_base: URL-string which defines the server will be used
