@@ -1,87 +1,110 @@
-"""\
-===========================================
-welcome to the metatool help information
-===========================================
+"""
+The ``metatool.cli`` module is a CLI application for the MetaCore service.
+``metatool`` package can be used from the command line like python module::
 
-usage:
-metatool [--url URL_ADDR] <action> [ appropriate | arguments | for actions ]
+    $ python -m metatool ...
 
-"metatool" expect the main first positional argument <action> which define
-the action of the program. Must be one of:
+or can be installed and used like usual CLI::
+
+    $ metatool ...
+
+======================
+``metatool`` CLI Usage
+======================
+Common syntax for all actions::
+
+   metatool [--url URL_ADDR] <action> [ appropriate | arguments | for actions ]
+
+"metatool" expect the main lead positional argument ``action`` which define
+the action of the program. Must be one of::
 
     files | info | upload | download | audit
 
 Each of actions expect an appropriate set of arguments after it. They are
 separately described below.
-Example:
+Example::
 
-    metatool upload ~/path/to/file.txt --file_role 002
+    $ metatool upload ~/path/to/file.txt --file_role 002
 
-The "--url" optional argument define url address of the target server.
-In example:
+The ``--url`` optional argument defines url address of the target server and
+can be defined only before the ``action``. In example::
 
-    metatool --url http://dev.storj.anvil8.com info
+    $ metatool --url http://dev.storj.anvil8.com info
 
-But by default the server is "http://dev.storj.anvil8.com/" as well :)
-You can either set an system environment variable "MEATADISKSERVER" to
+But by default the server is http://node2.metadisk.org .
+You can either set an system environment variable ``MEATADISKSERVER`` to
 provide target server instead of using the "--url" opt. argument.
-------------------------------------------------------------------------------
-SPECIFICATION THROUGH ALL OF ACTIONS
-Each action return response status as a first line and appropriate data for
-a specific action.
-When an error is occur whilst the response it will be shown instead of
-the success result.
 
-... files
-            Return the list of hash-codes of files uploaded at the server or
-            return an empty list in the files absence case.
+------------------------------------
 
-... info
-            Return a json file with an information about the data usage of
-            the node.
+Guide through all of the actions
+--------------------------------
 
-... upload <path_to_file> [-r | --file_role <FILE_ROLE>]
-            Upload file to the server.
+Every action except ``download`` returns response status as a first line and
+appropriate data for a specific action. When an error is occurs whilst the
+response it will be shown instead of the success result.
 
-        <path_to_file> - Name of the file from the working directory
-                         or a full/related path to the file.
+**metatool files**
+    Returns the list of hash-codes of files uploaded at the server or
+    returns an empty list in the files absence case.
 
-        [-r | --file_role <FILE_ROLE>]  -  Key "-r" or "--file_role" purposed
-                for the setting desired "file role". 001 by default.
+-------------------
 
-            Return a json file with two fields of the information about
-            the downloaded file.
+**metatool info**
+    Returns a json file with an information about the usage of data
+    on the node.
 
-... audit <data_hash> <challenge_seed>
-            This action purposed for checking out the existence of files on the
-            server (in opposite to plain serving hashes of files).
-            Return a json file of three files with the response data::
+-------------------
 
-                {
-                  "challenge_response": ... ,
-                  "challenge_seed": ... ,
-                  "data_hash": ... ,
-                }
+**metatool upload <path_to_file> [-r | --file_role FILE_ROLE]**
+    Upload file to the server.
 
-... download <file_hash> [--decryption_key KEY] [--rename_file NEW_NAME]
-                                                [--link]
+        ``path_to_file`` - Name of the file from the working directory
+        or a *full/related* path to the file.
 
-            This action fetch desired file from the server by the "hash name".
-            Return nothing if the file downloaded successful.
+        ``-r | --file_role FILE_ROLE``  -  Key **-r** or **--file_role**
+        purposed for the setting desired **file_role**. **001** by default.
 
-        <file_hash> - string which represents the "file hash".
+    Returns a json file with **data_hash** and **file_role**.
 
-        [--link] - will return the url GET request string instead of
-                executing the downloading.
+-------------------
 
-        [--decryption_key KEY] - Optional argument. When is defined the file
-                downloading from the server in decrypted state (if allowed for
-                this file).
+**metatool audit <data_hash> <challenge_seed>**
+    This action purposed for checking out the existence of files on the
+    server (in opposite to plain serving hashes of files).
+    Return a json file of three files with the response data::
 
-            !!!WARNING!!! - will rewrite existed files with the same name!
-        [--rename_file NEW_NAME] - Optional argument which define the NAME for
-                storing file on your disk. You can indicate an relative and
-                full path to the directory with this name as well.
+        {
+          "challenge_response": ... ,
+          "challenge_seed": ... ,
+          "data_hash": ... ,
+        }
+
+-------------------
+
+**metatool download <file_hash> [--decryption_key KEY]
+[--rename_file NEW_NAME] [--link]**
+
+    This action fetch desired file from the server by the **hash_name**.
+    Returns full path to the file if downloaded successful.
+
+        ``file_hash`` - string which represents the **file hash**.
+
+        ``--link`` - will return the url GET request string instead of
+        executing the downloading.
+
+        ``--decryption_key KEY`` - Optional argument. When defined the file si
+        going from the server in decrypted state (if allowed for this file).
+
+        :note: will rewrite existed file with the same name!
+
+        ``--rename_file NEW_NAME`` - Optional argument which defines
+        the **NEW_NAME** for the storing file on your disk. You can provide
+        an relative and full path to the directory with this name as well.
+
+=========================================
+``metatool.cli`` function's specification
+=========================================
 """
 import os.path
 import sys
@@ -103,56 +126,85 @@ def parse():
     Set of the parsing logic for the METATOOL.
     It doesn't perform parsing, just fills the parser object with arguments.
 
-    :return: argparse.ArgumentParser instance
+    :returns: fully configured ArgumentParser instance
+    :rtype: argparse.ArgumentParser object
     """
     # create the top-level parser
-    main_parser = argparse.ArgumentParser(prog='METATOOL')
-    main_parser.add_argument('--url', type=str, dest='url_base')
-    subparsers = main_parser.add_subparsers(help='sub-command help')
+    main_parser = argparse.ArgumentParser(
+        prog='METATOOL',
+        description="Console app for interacting with the MetaCore server."
+    )
+    main_parser.add_argument('--url', type=str, dest='url_base',
+                             help='URL-string which defines the '
+                                  'server will be used')
+    subparsers = main_parser.add_subparsers(
+            help='define the action to perform')
 
     # Create the parser for the "audit" command.
-    parser_audit = subparsers.add_parser('audit', help='define audit purpose!')
-    parser_audit.add_argument('file_hash', type=str, help="file hash")
-    parser_audit.add_argument('seed', type=str, help="challenge seed")
+    parser_audit = subparsers.add_parser(
+        'audit',
+        help='It make an request to the server with a view of calculating '
+             'the SHA-256 hash of a file plus some'
+    )
+    parser_audit.add_argument('file_hash', type=str,
+                              help="the hash of the challenged file")
+    parser_audit.add_argument('seed', type=str,
+                              help="hash-value for the challenging file")
     parser_audit.set_defaults(execute_case=metatool.core.audit)
 
     # Create the parser for the "download" command.
-    parser_download = subparsers.add_parser('download',
-                                            help='define download purpose!')
+    parser_download = subparsers.add_parser(
+        'download',
+        help='It performs the downloading of the file from the server'
+             'by the given file_hash'
+    )
     parser_download.add_argument('file_hash', type=str, help="file hash")
     parser_download.add_argument('--decryption_key', type=str,
-                                 help="decryption key")
-    parser_download.add_argument('--rename_file', type=str, help="rename file")
+                                 help="key for decrypt file before "
+                                      "the downloading")
+    parser_download.add_argument('--rename_file', type=str,
+                                 help="how to rename file while downloading")
     parser_download.add_argument('--link', action='store_true',
-                                 help='will return rust url for man. request')
+                                 help='will return url-sting for '
+                                      'the manual downloading')
     parser_download.set_defaults(execute_case=metatool.core.download)
 
     # create the parser for the "upload" command.
-    parser_upload = subparsers.add_parser('upload',
-                                          help='define upload purpose!')
+    parser_upload = subparsers.add_parser(
+        'upload',
+        help='Upload local file to the server.'
+    )
     parser_upload.add_argument('file', type=argparse.FileType('rb'),
                                help="path to file")
     parser_upload.add_argument('-r', '--file_role', type=str, default='001',
-                               help="set file role")
+                               help="define behaviour and access of the file")
     parser_upload.set_defaults(execute_case=metatool.core.upload)
 
     # create the parser for the "files" command.
-    parser_files = subparsers.add_parser('files', help='define files purpose!')
+    parser_files = subparsers.add_parser(
+        'files',
+        help="Get the list of hashes of files on the server.")
     parser_files.set_defaults(execute_case=metatool.core.files)
 
     # create the parser for the "info" command.
-    parser_info = subparsers.add_parser('info', help='define info purpose!')
+    parser_info = subparsers.add_parser(
+        'info',
+        help='Get the information about the server application state')
     parser_info.set_defaults(execute_case=metatool.core.info)
 
-    # parse the commands
     return main_parser
 
 
 def show_data(data):
     """
-    Method used to show a data in the console.
-    :param data: <response obj> / <str>
-    :return: None
+    Method used to show the action processing data in the console.
+
+    :param data: response object or string data generated
+        by the core API functions
+    :type data: string
+    :type data: requests.models.Response object
+
+    :returns: None
     """
     if isinstance(data, str):
         print(data)
@@ -163,10 +215,18 @@ def show_data(data):
 
 def args_prepare(required_args, parsed_args):
     """
+    Filling all missed but required by the core API function arguments.
+    Return dictionary that will be passed to the API function.
 
-    :param required_args:
-    :param parsed_args:
-    :return:
+    :param required_args: list of required argument's names for
+        the API function
+    :type required_args: list of stings
+    :param parsed_args: can be any object with appropriate names of attributes
+        required by the core API function
+    :type parsed_args: argparse.Namespace
+
+    :returns: dictionary that will be used like `**kwargs` argument
+    :rtype: dictionary
     """
     btctx_api = BtcTxStore(testnet=True, dryrun=True)
     prepared_args = {}
@@ -186,14 +246,19 @@ def get_all_func_args(function):
     """
     It finds out all available arguments of the given function.
     :param function: function object to inspect.
-    :return: <list object>: with names of all available arguments.
+    :type function: function object
+
+    :returns: list with names of all available arguments
+    :rtype: list of strings
     """
     return function.__code__.co_varnames[:function.__code__.co_argcount]
 
 
 def main():
     """
-    METATOOL main logic.
+    The main **MetaTool** CLI logic. It parses arguments, defines the type of
+    action an appropriate API function, prepares parsed arguments and call
+    the interact with appropriate Node MetaCore server.
     """
     redirect_error_status = (400, 404, 500, 503)
     if len(sys.argv) == 1:
