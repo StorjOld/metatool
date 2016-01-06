@@ -1,0 +1,403 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>metatool.cli module &mdash; MetaTool 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="MetaTool 1.0.0 documentation" href="index.html"/>
+        <link rel="prev" title="metatool.core module" href="core_module.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> MetaTool
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="core_module.html">metatool.core module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">metatool.cli module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-cli-usage"><code class="docutils literal"><span class="pre">metatool</span></code> CLI Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#guide-through-all-of-the-actions">Guide through all of the actions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-cli-function-s-specification"><code class="docutils literal"><span class="pre">metatool.cli</span></code> function&#8217;s specification</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">MetaTool</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>metatool.cli module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/cli_module.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-metatool.cli">
+<span id="metatool-cli-module"></span><h1>metatool.cli module<a class="headerlink" href="#module-metatool.cli" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="docutils literal"><span class="pre">metatool.cli</span></code> module is a CLI application for the MetaCore service.
+<code class="docutils literal"><span class="pre">metatool</span></code> package can be used from the command line like python module:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python -m metatool ...
+</pre></div>
+</div>
+<p>or can be installed and used like usual CLI:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool ...
+</pre></div>
+</div>
+<div class="section" id="metatool-cli-usage">
+<h2><code class="docutils literal"><span class="pre">metatool</span></code> CLI Usage<a class="headerlink" href="#metatool-cli-usage" title="Permalink to this headline">¶</a></h2>
+<p>Common syntax for all actions:</p>
+<div class="highlight-python"><div class="highlight"><pre>metatool [--url URL_ADDR] &lt;action&gt; [ appropriate | arguments | for actions ]
+</pre></div>
+</div>
+<p>&#8220;metatool&#8221; expect the main lead positional argument <code class="docutils literal"><span class="pre">action</span></code> which define
+the action of the program. Must be one of:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">files</span> <span class="o">|</span> <span class="n">info</span> <span class="o">|</span> <span class="n">upload</span> <span class="o">|</span> <span class="n">download</span> <span class="o">|</span> <span class="n">audit</span>
+</pre></div>
+</div>
+<p>Each of actions expect an appropriate set of arguments after it. They are
+separately described below.
+Example:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool upload ~/path/to/file.txt --file_role 002
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">--url</span></code> optional argument defines url address of the target server and
+can be defined only before the <code class="docutils literal"><span class="pre">action</span></code>. In example:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool --url http://dev.storj.anvil8.com info
+</pre></div>
+</div>
+<p>But by default the server is <a class="reference external" href="http://node2.metadisk.org">http://node2.metadisk.org</a> .
+You can either set an system environment variable <code class="docutils literal"><span class="pre">MEATADISKSERVER</span></code> to
+provide target server instead of using the &#8220;&#8211;url&#8221; opt. argument.</p>
+<hr class="docutils" />
+<div class="section" id="guide-through-all-of-the-actions">
+<h3>Guide through all of the actions<a class="headerlink" href="#guide-through-all-of-the-actions" title="Permalink to this headline">¶</a></h3>
+<p>Every action except <code class="docutils literal"><span class="pre">download</span></code> returns response status as a first line and
+appropriate data for a specific action. When an error is occurs whilst the
+response it will be shown instead of the success result.</p>
+<dl class="docutils">
+<dt><strong>metatool files</strong></dt>
+<dd>Returns the list of hash-codes of files uploaded at the server or
+returns an empty list in the files absence case.</dd>
+</dl>
+<hr class="docutils" />
+<dl class="docutils">
+<dt><strong>metatool info</strong></dt>
+<dd>Returns a json file with an information about the usage of data
+on the node.</dd>
+</dl>
+<hr class="docutils" />
+<dl class="docutils">
+<dt><strong>metatool upload &lt;path_to_file&gt; [-r | &#8211;file_role FILE_ROLE]</strong></dt>
+<dd><p class="first">Upload file to the server.</p>
+<blockquote>
+<div><p><code class="docutils literal"><span class="pre">path_to_file</span></code> - Name of the file from the working directory
+or a <em>full/related</em> path to the file.</p>
+<p><code class="docutils literal"><span class="pre">-r</span> <span class="pre">|</span> <span class="pre">--file_role</span> <span class="pre">FILE_ROLE</span></code>  -  Key <strong>-r</strong> or <strong>&#8211;file_role</strong>
+purposed for the setting desired <strong>file_role</strong>. <strong>001</strong> by default.</p>
+</div></blockquote>
+<p class="last">Returns a json file with <strong>data_hash</strong> and <strong>file_role</strong>.</p>
+</dd>
+</dl>
+<hr class="docutils" />
+<dl class="docutils">
+<dt><strong>metatool audit &lt;data_hash&gt; &lt;challenge_seed&gt;</strong></dt>
+<dd><p class="first">This action purposed for checking out the existence of files on the
+server (in opposite to plain serving hashes of files).
+Return a json file of three files with the response data:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;challenge_response&quot;</span><span class="p">:</span> <span class="o">...</span> <span class="p">,</span>
+  <span class="s">&quot;challenge_seed&quot;</span><span class="p">:</span> <span class="o">...</span> <span class="p">,</span>
+  <span class="s">&quot;data_hash&quot;</span><span class="p">:</span> <span class="o">...</span> <span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<hr class="docutils" />
+<p><strong>metatool download &lt;file_hash&gt; [&#8211;decryption_key KEY]
+[&#8211;rename_file NEW_NAME] [&#8211;link]</strong></p>
+<blockquote>
+<div><p>This action fetch desired file from the server by the <strong>hash_name</strong>.
+Returns full path to the file if downloaded successful.</p>
+<blockquote>
+<div><p><code class="docutils literal"><span class="pre">file_hash</span></code> - string which represents the <strong>file hash</strong>.</p>
+<p><code class="docutils literal"><span class="pre">--link</span></code> - will return the url GET request string instead of
+executing the downloading.</p>
+<p><code class="docutils literal"><span class="pre">--decryption_key</span> <span class="pre">KEY</span></code> - Optional argument. When defined the file si
+going from the server in decrypted state (if allowed for this file).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">note:</th><td class="field-body">will rewrite existed file with the same name!</td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal"><span class="pre">--rename_file</span> <span class="pre">NEW_NAME</span></code> - Optional argument which defines
+the <strong>NEW_NAME</strong> for the storing file on your disk. You can provide
+an relative and full path to the directory with this name as well.</p>
+</div></blockquote>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="metatool-cli-function-s-specification">
+<h2><code class="docutils literal"><span class="pre">metatool.cli</span></code> function&#8217;s specification<a class="headerlink" href="#metatool-cli-function-s-specification" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="metatool.cli.args_prepare">
+<code class="descclassname">metatool.cli.</code><code class="descname">args_prepare</code><span class="sig-paren">(</span><em>required_args</em>, <em>parsed_args</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.args_prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filling all missed but required by the core API function arguments.
+Return dictionary that will be passed to the API function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>required_args</strong> (<em>list of stings</em>) &#8211; list of required argument&#8217;s names for
+the API function</li>
+<li><strong>parsed_args</strong> (<em>argparse.Namespace</em>) &#8211; can be any object with appropriate names of attributes
+required by the core API function</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dictionary that will be used like <cite>**kwargs</cite> argument</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dictionary</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="metatool.cli.get_all_func_args">
+<code class="descclassname">metatool.cli.</code><code class="descname">get_all_func_args</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.get_all_func_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>It finds out all available arguments of the given function.
+:param function: function object to inspect.
+:type function: function object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list with names of all available arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of strings</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="metatool.cli.main">
+<code class="descclassname">metatool.cli.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main <strong>MetaTool</strong> CLI logic. It parses arguments, defines the type of
+action an appropriate API function, prepares parsed arguments and call
+the interact with appropriate Node MetaCore server.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="metatool.cli.parse">
+<code class="descclassname">metatool.cli.</code><code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set of the parsing logic for the METATOOL.
+It doesn&#8217;t perform parsing, just fills the parser object with arguments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">fully configured ArgumentParser instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">argparse.ArgumentParser object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="metatool.cli.show_data">
+<code class="descclassname">metatool.cli.</code><code class="descname">show_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.show_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method used to show the action processing data in the console.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>requests.models.Response object</em>) &#8211; response object or string data generated
+by the core API functions</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="core_module.html" class="btn btn-neutral" title="metatool.core module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Eugene Viktorov.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

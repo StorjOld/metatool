@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>metatool.core module &mdash; MetaTool 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="MetaTool 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="metatool.cli module" href="cli_module.html"/>
+        <link rel="prev" title="Welcome to MetaTool’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> MetaTool
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">metatool.core module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-metatool.core">MetaTool API specification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli_module.html">metatool.cli module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">MetaTool</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>metatool.core module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/core_module.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="metatool-core-module">
+<h1>metatool.core module<a class="headerlink" href="#metatool-core-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-metatool.core">
+<span id="metatool-api-specification"></span><h2>MetaTool API specification<a class="headerlink" href="#module-metatool.core" title="Permalink to this headline">¶</a></h2>
+<p>This module represents MetaTool API - set of functions purposed for
+interaction with MetaCore cloud servers. Each function provides specific
+type of operation with the MetaCore server. Look through the functions for
+detailed specification.</p>
+<dl class="function">
+<dt id="metatool.core.audit">
+<code class="descclassname">metatool.core.</code><code class="descname">audit</code><span class="sig-paren">(</span><em>url_base</em>, <em>sender_key</em>, <em>btctx_api</em>, <em>file_hash</em>, <em>seed</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.audit" title="Permalink to this definition">¶</a></dt>
+<dd><p>It make an request to the server with a view of calculating
+the SHA-256 hash of a file plus some seed.
+Return the response object with information about the server-error
+when such has occurred.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url_base</strong> (<em>string</em>) &#8211; URL string which defines the server will be used</li>
+<li><strong>sender_key</strong> (<em>string</em>) &#8211; unique secret key which will be used for the
+generating credentials required by the access to the server</li>
+<li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
+to generate credentials for the server access</li>
+<li><strong>file_hash</strong> (<em>string</em>) &#8211; hash-name of the file you are going to audit</li>
+<li><strong>seed</strong> (<em>string</em>) &#8211; (str) should be a SHA-256 hash of that you would like to add
+to the file data to generate a challenge response</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">response instance with the results of challenge or with
+information about the server issue</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">requests.models.Response object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="metatool.core.download">
+<code class="descclassname">metatool.core.</code><code class="descname">download</code><span class="sig-paren">(</span><em>url_base</em>, <em>sender_key</em>, <em>btctx_api</em>, <em>file_hash</em>, <em>rename_file=None</em>, <em>decryption_key=None</em>, <em>link=False</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>It performs the downloading of the file from the server
+by the given <code class="docutils literal"><span class="pre">file_hash</span></code>.
+If <code class="docutils literal"><span class="pre">link=True</span></code> will return GET-request URL-string instead of download,
+so you can use it like a simple URL address and download it through the
+browser.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">The &#8220;link=True&#8221; case implies non-authenticated access to the
+file, available only for files with such values of <code class="docutils literal"><span class="pre">roles</span></code>: 101, 001</td>
+</tr>
+</tbody>
+</table>
+<p>Will return the response object with information about the server-error
+when such has occurred.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url_base</strong> (<em>string</em>) &#8211; URL-string which defines the server will be used</li>
+<li><strong>sender_key</strong> (<em>string</em>) &#8211; unique secret key which will be used for the
+generating credentials required by the access to the server</li>
+<li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
+to generate credentials for the server access</li>
+<li><strong>file_hash</strong> (<em>string</em>) &#8211; hash-name of the file you are going to audit</li>
+<li><strong>rename_file</strong> (<em>string</em>) &#8211; <p>defines new name of the file after downloading</p>
+<p>(optional, default: None)</p>
+</li>
+<li><strong>decryption_key</strong> (<em>string</em>) &#8211; <p>key value which will be used to decrypt file
+on the server before the downloading (if allowed by the role)</p>
+<p>(optional, default: None)</p>
+</li>
+<li><strong>link</strong> (<em>boolean</em>) &#8211; <p>if <code class="docutils literal"><span class="pre">True</span></code>, function doesn&#8217;t perform the downloading but
+generate appropriate GET URL-string instead</p>
+<p>(optional, default: False)</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>full path to the file if download done successfully</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rtype:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>if <code class="docutils literal"><span class="pre">link=True</span></code>, will return GET-request
+URL-string, instead of processing the downloading</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rtype:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>object with information about the occurred error on the server
+while the downloading</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rtype:</th><td class="field-body">requests.models.Response object</td>
+</tr>
+</tbody>
+</table>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="metatool.core.files">
+<code class="descclassname">metatool.core.</code><code class="descname">files</code><span class="sig-paren">(</span><em>url_base</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.files" title="Permalink to this definition">¶</a></dt>
+<dd><p>It executes a request to the &#8220;Node&#8221; server and returns response object
+with json-string - the list of hashes of downloaded files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url_base</strong> (<em>string</em>) &#8211; URL-string which defines the server will be used</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response instance with a list of string - hashes of files
+available on the server or with information about the server issue</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">requests.models.Response object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="metatool.core.info">
+<code class="descclassname">metatool.core.</code><code class="descname">info</code><span class="sig-paren">(</span><em>url_base</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.info" title="Permalink to this definition">¶</a></dt>
+<dd><p>It executes a request to the &#8220;Node&#8221; server and returns response object
+with json-string - the information about server application state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url_base</strong> (<em>string</em>) &#8211; URL-string which defines the server will be used</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response instance with node state information or with
+information about the server issue</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">requests.models.Response object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="metatool.core.upload">
+<code class="descclassname">metatool.core.</code><code class="descname">upload</code><span class="sig-paren">(</span><em>url_base</em>, <em>sender_key</em>, <em>btctx_api</em>, <em>file</em>, <em>file_role</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload local file to the server. Max size of file is determined by the
+server. In the most of cases it is restricted by the 128 MB.
+Return the response object with <code class="docutils literal"><span class="pre">file_hash</span></code> and <code class="docutils literal"><span class="pre">file_role</span></code> when
+have done successfully or the server-error when such has occurred.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url_base</strong> (<em>string</em>) &#8211; URL-string which defines the server will be used</li>
+<li><strong>sender_key</strong> (<em>string</em>) &#8211; unique secret key which will be used for the
+generating credentials required by the access to the server</li>
+<li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
+to generate credentials for the server access</li>
+<li><strong>file</strong> (<em>file object opened in the 'rb' mode</em>) &#8211; file object which will be uploaded to the server</li>
+<li><strong>file_role</strong> (<em>string</em>) &#8211; three numbers string which define future behavior of the
+file on the server. See more about it in the documentation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">response instance with the results of uploading or with
+information about the server issue</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">requests.models.Response object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cli_module.html" class="btn btn-neutral float-right" title="metatool.cli module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to MetaTool’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Eugene Viktorov.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
