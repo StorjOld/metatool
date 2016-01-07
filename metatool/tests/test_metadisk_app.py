@@ -327,7 +327,7 @@ class MetadiskTest(unittest.TestCase):
         # failing to look at the errors of local server.
         sys.stderr = StringIO()
         with os.popen(
-            '{} __main__.py --url http://{}:{} info'.format(
+            '{} __main__.py info --url http://{}:{}'.format(
                 self.metadisk_python_interpreter, host, port)
         ) as file:
             info_response_status = file.read()[:3]
@@ -360,7 +360,7 @@ class MetadiskTest(unittest.TestCase):
         # failing to look at the errors of local server.
         sys.stderr = StringIO()
         with os.popen(
-            '{} __main__.py --url http://{}:{} info'.format(
+            '{} __main__.py info --url http://{}:{}'.format(
                 self.metadisk_python_interpreter, host, port)
         ) as file:
             info_response_status = file.read()[:3]

@@ -3,16 +3,18 @@ import os
 import sys
 import unittest
 
-from metatool.cli import show_data, parse, get_all_func_args, args_prepare
+from metatool.cli import (show_data, parse, get_all_func_args, args_prepare,
+                          main)
+
 
 from metatool import core
 
 if sys.version_info.major == 3:
     from io import StringIO
-    from unittest import mock
+    from unittest.mock import patch, Mock
 else:
     from io import BytesIO as StringIO
-    import mock
+    from mock import patch, Mock
 
 
 class TestMainShowDataFunction(unittest.TestCase):
@@ -23,7 +25,7 @@ class TestMainShowDataFunction(unittest.TestCase):
     def test_show_data_string_type(self):
         test_string = 'test string value'
         expected_printed_string = test_string + '\n'
-        with mock.patch('sys.stdout', new_callable=StringIO) as mock_print:
+        with patch('sys.stdout', new_callable=StringIO) as mock_print:
             show_data(test_string)
             real_printed_string = mock_print.getvalue()
         self.assertEqual(
@@ -34,9 +36,9 @@ class TestMainShowDataFunction(unittest.TestCase):
 
     def test_show_data_response_type(self):
         attrs = dict(text='text string', status_code='status code string')
-        mock_response = mock.Mock(**attrs)
+        mock_response = Mock(**attrs)
         expected_printed_string = '{status_code}\n{text}\n'.format(**attrs)
-        with mock.patch('sys.stdout', new_callable=StringIO) as mock_print:
+        with patch('sys.stdout', new_callable=StringIO) as mock_print:
             show_data(mock_response)
             real_printed_string = mock_print.getvalue()
         self.assertEqual(
@@ -57,12 +59,12 @@ class TestMainParseFunction(unittest.TestCase):
         self.assertIsNone(args_default.url_base)
 
         # testing of parsing given "url_base" value
-        args_passed_url = parse().parse_args('--url TEST_URL_STR info'.split())
+        args_passed_url = parse().parse_args('info --url TEST_URL_STR'.split())
         self.assertEqual(args_passed_url.url_base, 'TEST_URL_STR')
 
     def test_audit_argument(self):
         # testing of raising exception when required arguments are not given
-        with mock.patch('sys.stderr', new_callable=StringIO):
+        with patch('sys.stderr', new_callable=StringIO):
             with self.assertRaises(SystemExit):
                 parse().parse_args('audit'.split())
 
@@ -83,7 +85,7 @@ class TestMainParseFunction(unittest.TestCase):
 
     def test_download_arguments(self):
         # testing of raising exception when required arguments are not given
-        with mock.patch('sys.stderr', new_callable=StringIO):
+        with patch('sys.stderr', new_callable=StringIO):
             with self.assertRaises(SystemExit):
                 parse().parse_args('download'.split())
 
@@ -132,7 +134,7 @@ class TestMainParseFunction(unittest.TestCase):
 
         self.addCleanup(os.unlink, full_file_path)
         # Testing of raising exception when required arguments are not given
-        with mock.patch('sys.stderr', new_callable=StringIO):
+        with patch('sys.stderr', new_callable=StringIO):
             with self.assertRaises(SystemExit):
                 parse().parse_args('upload'.split())
 
@@ -171,15 +173,15 @@ class TestMainParseFunction(unittest.TestCase):
         parsed_args.file.close()
 
         # test on correctly parsing of full set of available arguments
-        args_list = '--url TEST_URL ' \
-                    'upload {} ' \
+        args_list = 'upload {} ' \
+                    '--url TEST_URL ' \
                     '--file_role TEST_FILE_ROLE'.format(full_file_path).split()
         parsed_args = parse().parse_args(args_list)
         real_parsed_args_dict = dict(parsed_args._get_kwargs())
         expected_args_dict = {
             'file': parsed_args.file,
             'file_role': args_list[5],
-            'url_base': args_list[1],
+            'url_base': args_list[3],
             'execute_case': core.upload,
         }
         self.assertDictEqual(
@@ -227,7 +229,7 @@ class TestMainArgumentsPreparation(unittest.TestCase):
             '"get_all_func_args" must return tuple like "expected_args_set" !'
         )
 
-    @mock.patch('metatool.cli.BtcTxStore')
+    @patch('metatool.cli.BtcTxStore')
     def test_args_prepare(self, mock_btctx_store):
         # test on accurate setting of omitted required arguments
         # to the core function
@@ -238,7 +240,7 @@ class TestMainArgumentsPreparation(unittest.TestCase):
             two='TEST 2'
         )
         given_required_names = ['one', 'two']
-        given_namespace = mock.Mock(
+        given_namespace = Mock(
             one='TEST 1',
             two='TEST 2',
             three='TEST 3'
@@ -257,4 +259,23 @@ class TestMainArgumentsPreparation(unittest.TestCase):
             args_prepare(given_required_names, given_namespace),
             expected_args_dict,
             "don't work!!!!"
+        )
+
+
+class TestMainStarter(unittest.TestCase):
+    @patch('metatool.cli.sys')
+    def test_mock_args(self, mock_sys):
+        mock_sys.argv = ['my args!!!', ]
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            main()
+            mock_stdout.seek(0)
+            main_print_out = mock_stdout.read()
+            mock_stdout.seek(0)
+            mock_stdout.truncate()
+            parse().print_help()
+            mock_stdout.seek(0)
+            manual_help_print = mock_stdout.read()
+        self.assertEqual(
+            main_print_out,
+            manual_help_print,
         )

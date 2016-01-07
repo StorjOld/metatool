@@ -36,7 +36,8 @@ In example:
     $ metatool info
     
 
-The `--url` optional argument define url address of the *target server*:
+The ``--url`` is the optional argument common for all the actions and defines
+the URL-address of the *target server*:
 
     metatool info --url http://node2.metadisk.org/
 
@@ -45,12 +46,12 @@ You can either set an system *environment variable* **MEATADISKSERVER** to
 provide target server instead of using the `--url` opt. argument.
 
 
-All of actions define set of original required arguments.
+All of the actions defines set of original required arguments.
 Let us go through all of them!
 
 ---
 
-There are two the most simple **actions** with no arguments after:
+There are two the most simple **actions** with no arguments after, but mentioned above optional ``--url``:
 
 
 ### `$ metatool files`

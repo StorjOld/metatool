@@ -9,11 +9,11 @@ or can be installed and used like usual CLI::
     $ metatool ...
 
 ======================
-``metatool`` CLI Usage
+`metatool` CLI Usage
 ======================
 Common syntax for all actions::
 
-   metatool [--url URL_ADDR] <action> [ appropriate | arguments | for actions ]
+   metatool <action> [--url URL_ADDR] [ appropriate | arguments | for actions ]
 
 "metatool" expect the main lead positional argument ``action`` which define
 the action of the program. Must be one of::
@@ -26,10 +26,10 @@ Example::
 
     $ metatool upload ~/path/to/file.txt --file_role 002
 
-The ``--url`` optional argument defines url address of the target server and
-can be defined only before the ``action``. In example::
+The ``--url`` is the optional argument common for all the actions and defines
+the URL-address of the target server. In example::
 
-    $ metatool --url http://dev.storj.anvil8.com info
+    $ metatool info --url http://dev.storj.anvil8.com
 
 But by default the server is http://node2.metadisk.org .
 You can either set an system environment variable ``MEATADISKSERVER`` to
@@ -103,7 +103,7 @@ response it will be shown instead of the success result.
         an relative and full path to the directory with this name as well.
 
 =========================================
-``metatool.cli`` function's specification
+`metatool.cli` function's specification
 =========================================
 """
 import os.path
@@ -129,67 +129,84 @@ def parse():
     :returns: fully configured ArgumentParser instance
     :rtype: argparse.ArgumentParser object
     """
-    # create the top-level parser
+    # Create the top-level parser.
     main_parser = argparse.ArgumentParser(
         prog='METATOOL',
-        description="Console app for interacting with the MetaCore server."
+        description="This is the console app intended for interacting with "
+                    "the MetaCore server.",
+        epilog="    Note: Use -h or --help argument with any of actions "
+               "to show detailed help info."
     )
-    main_parser.add_argument('--url', type=str, dest='url_base',
-                             help='URL-string which defines the '
-                                  'server will be used')
     subparsers = main_parser.add_subparsers(
-            help='define the action to perform')
+            help="It's a choose which action to perform.")
+
+    # Create a parent parser with common ``--url`` optional argument.
+    parent_url_parser = argparse.ArgumentParser(
+        add_help=None
+    )
+    parent_url_parser.add_argument('--url', type=str, dest='url_base',
+                             help='The URL-string which defines the '
+                                  'server will be used.')
+
 
     # Create the parser for the "audit" command.
     parser_audit = subparsers.add_parser(
         'audit',
-        help='It make an request to the server with a view of calculating '
-             'the SHA-256 hash of a file plus some'
+        parents=[parent_url_parser],
+        help='It makes an request to the server with a view of calculating '
+             'the SHA-256 hash of a file plus some seed.'
     )
     parser_audit.add_argument('file_hash', type=str,
-                              help="the hash of the challenged file")
+                              help="The hash of the challenged file.")
     parser_audit.add_argument('seed', type=str,
-                              help="hash-value for the challenging file")
+                              help="Hash-value that will be added to "
+                                   "the file's data to challenging the file.")
     parser_audit.set_defaults(execute_case=metatool.core.audit)
 
     # Create the parser for the "download" command.
     parser_download = subparsers.add_parser(
         'download',
+        parents=[parent_url_parser],
         help='It performs the downloading of the file from the server'
-             'by the given file_hash'
+             'by a given file_hash.'
     )
-    parser_download.add_argument('file_hash', type=str, help="file hash")
+    parser_download.add_argument('file_hash', type=str, help="A file's hash.")
     parser_download.add_argument('--decryption_key', type=str,
-                                 help="key for decrypt file before "
-                                      "the downloading")
+                                 help="The key to decrypt the file "
+                                      "while downloading.")
     parser_download.add_argument('--rename_file', type=str,
-                                 help="how to rename file while downloading")
+                                 help="It defines how to rename the file "
+                                      "while downloading.")
     parser_download.add_argument('--link', action='store_true',
-                                 help='will return url-sting for '
-                                      'the manual downloading')
+                                 help='If argument is present it will return '
+                                      'an URL-string for a manual downloading')
     parser_download.set_defaults(execute_case=metatool.core.download)
 
     # create the parser for the "upload" command.
     parser_upload = subparsers.add_parser(
         'upload',
-        help='Upload local file to the server.'
+        parents=[parent_url_parser],
+        help='It uploads a local file to the server.'
     )
     parser_upload.add_argument('file', type=argparse.FileType('rb'),
-                               help="path to file")
+                               help="A path to the file")
     parser_upload.add_argument('-r', '--file_role', type=str, default='001',
-                               help="define behaviour and access of the file")
+                               help="It defines behaviour and access "
+                                    "of the file.")
     parser_upload.set_defaults(execute_case=metatool.core.upload)
 
     # create the parser for the "files" command.
     parser_files = subparsers.add_parser(
         'files',
-        help="Get the list of hashes of files on the server.")
+        parents=[parent_url_parser],
+        help="It gets the list with hashes of files on the server.")
     parser_files.set_defaults(execute_case=metatool.core.files)
 
     # create the parser for the "info" command.
     parser_info = subparsers.add_parser(
         'info',
-        help='Get the information about the server application state')
+        parents=[parent_url_parser],
+        help="It gets the information about the server's application state.")
     parser_info.set_defaults(execute_case=metatool.core.info)
 
     return main_parser
