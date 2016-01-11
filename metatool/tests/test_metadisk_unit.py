@@ -363,16 +363,17 @@ class TestMainStarter(unittest.TestCase):
         mock_response = mock_requests_get.return_value
         mock_response.status_code = 500
         del mock_response.text
-        with patch('sys.argv', ['', 'info']):
-            try:
-                main()
-            except AttributeError:
-                pass
-            self.assertEqual(
-                mock_requests_get.call_args_list,
-                [call('{}api/nodes/me/'.format(CORE_NODES_URL[0])),
-                 call('{}api/nodes/me/'.format(CORE_NODES_URL[1]))]
-            )
+        with patch('os.getenv', Mock(return_value=None)):
+            with patch('sys.argv', ['', 'info']):
+                try:
+                    main()
+                except AttributeError:
+                    pass
+                self.assertEqual(
+                    mock_requests_get.call_args_list,
+                    [call('{}api/nodes/me/'.format(CORE_NODES_URL[0])),
+                     call('{}api/nodes/me/'.format(CORE_NODES_URL[1]))]
+                )
 
     @patch('requests.get', side_effect=SystemExit)
     def test_url_parser_providing(self, mock_requests_get):
