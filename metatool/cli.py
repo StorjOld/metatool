@@ -106,6 +106,7 @@ response it will be shown instead of the success result.
 `metatool.cli` function's specification
 =========================================
 """
+from __future__ import print_function
 import os.path
 import sys
 import argparse
@@ -226,8 +227,7 @@ def show_data(data):
     if isinstance(data, str):
         print(data)
     else:
-        print(data.status_code)
-        print(data.text)
+        print(data.status_code, data.text, sep='\n')
 
 
 def args_prepare(required_args, parsed_args):
@@ -282,7 +282,7 @@ def main():
         parse().print_help()
         return
     args = parse().parse_args()
-    used_args = args_prepare(get_all_func_args(args.execute_case), args)
+    parsed_args = args_prepare(get_all_func_args(args.execute_case), args)
 
     # Get the url from the environment variable
     # or from the "--url" parsed argument
@@ -292,8 +292,8 @@ def main():
 
     result = "Sorry, nothing has done."
     for url_base in used_nodes:
-        used_args['url_base'] = url_base
-        result = args.execute_case(**used_args)
+        parsed_args['url_base'] = url_base
+        result = args.execute_case(**parsed_args)
         if isinstance(result, str):
             break
         if result.status_code not in redirect_error_status:

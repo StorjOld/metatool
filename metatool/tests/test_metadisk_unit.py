@@ -4,17 +4,17 @@ import sys
 import unittest
 
 from metatool.cli import (show_data, parse, get_all_func_args, args_prepare,
-                          main)
+                          main, CORE_NODES_URL)
 
 
 from metatool import core
 
 if sys.version_info.major == 3:
     from io import StringIO
-    from unittest.mock import patch, Mock
+    from unittest.mock import patch, Mock, call
 else:
     from io import BytesIO as StringIO
-    from mock import patch, Mock
+    from mock import patch, Mock, call
 
 
 class TestMainShowDataFunction(unittest.TestCase):
@@ -299,7 +299,6 @@ class TestMainStarter(unittest.TestCase):
         """
         Set of tests for providing the help information for all of terminal
         commands.
-        :return: None
         """
         # Tuple of tuples with subtest's variant of terminal's command. The
         # first list is tested `sys.argv` value and second list is arguments
@@ -333,4 +332,61 @@ class TestMainStarter(unittest.TestCase):
                     manual_print_info_help,
                     'Unexpected result of the help printout with the '
                     'sys.argv={}'.format(test_[0])
+                )
+
+    @patch('requests.get', side_effect=SystemExit)
+    def test_url_env_providing(self, mock_requests_get):
+        """
+        Test to getting the `--url` argument from the environment variable
+        `MEATADISKSERVER`.
+        :param mock_requests_get: mocked argument provided by the `@patch()`
+        """
+        with patch('os.getenv', Mock(return_value='http://mock.com')):
+            with patch('sys.argv', ['', 'info']):
+                try:
+                    main()
+                except SystemExit:
+                    pass
+                self.assertEqual(
+                    mock_requests_get.call_args_list,
+                    [call('http://mock.com/api/nodes/me/')],
+                )
+
+    @patch('requests.get')
+    def test_url_default_providing(self, mock_requests_get):
+        """
+        Test on default using the `--url` argument from the CORE_NODES_URL
+        list.
+        :param mock_requests_get: mocked argument provided by the `@patch()`
+        :return:
+        """
+        mock_response = mock_requests_get.return_value
+        mock_response.status_code = 500
+        del mock_response.text
+        with patch('sys.argv', ['', 'info']):
+            try:
+                main()
+            except AttributeError:
+                pass
+            self.assertEqual(
+                mock_requests_get.call_args_list,
+                [call('{}api/nodes/me/'.format(CORE_NODES_URL[0])),
+                 call('{}api/nodes/me/'.format(CORE_NODES_URL[1]))]
+            )
+
+    @patch('requests.get', side_effect=SystemExit)
+    def test_url_parser_providing(self, mock_requests_get):
+        """
+        Test on priority using of `--url` provided in the terminal.
+        :param mock_requests_get: mocked argument provided by the `@patch()`
+        """
+        with patch('os.getenv', Mock(return_value='http://mock.com')):
+            with patch('sys.argv', ['', 'info', '--url', 'http://args.url']):
+                try:
+                    main()
+                except SystemExit:
+                    pass
+                self.assertEqual(
+                    mock_requests_get.call_args_list,
+                    [call('http://args.url/api/nodes/me/')],
                 )
