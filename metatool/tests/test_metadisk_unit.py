@@ -263,19 +263,74 @@ class TestMainArgumentsPreparation(unittest.TestCase):
 
 
 class TestMainStarter(unittest.TestCase):
-    @patch('metatool.cli.sys')
-    def test_mock_args(self, mock_sys):
-        mock_sys.argv = ['my args!!!', ]
+
+    @staticmethod
+    def sys_stdout_help_run(tested_callable, etalon_callable, *args):
+        """
+        It's run passed callable and return their intercepted print-out.
+        :note: While the running passed callable SystemExit is excepted,
+        like normal exit for providing the help information.
+        :param tested_callable: callable that may print help info
+        :param etalon_callable: callable for the desired print-out
+        :param args: argumets needed to be passed to the etalon callable
+        :return: tuple of strings with first tested print and the second
+        expected print
+        """
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            main()
+            # get tested result
+            try:
+                tested_callable()
+            except SystemExit:
+                pass
             mock_stdout.seek(0)
-            main_print_out = mock_stdout.read()
+            tested_result = mock_stdout.read()
+            # get etalon result
             mock_stdout.seek(0)
             mock_stdout.truncate()
-            parse().print_help()
+            try:
+                etalon_callable(*args)
+            except SystemExit:
+                pass
             mock_stdout.seek(0)
-            manual_help_print = mock_stdout.read()
-        self.assertEqual(
-            main_print_out,
-            manual_help_print,
+            etalon_result = mock_stdout.read()
+        return tested_result, etalon_result
+
+    def test_subtest_through_all_help_info(self):
+        """
+        Set of tests for providing the help information for all of terminal
+        commands.
+        :return: None
+        """
+        # Tuple of tuples with subtest's variant of terminal's command. The
+        # first list is tested `sys.argv` value and second list is arguments
+        # for the `parse().parse_args()` used like the etalon call result.
+        tests_set = (
+            (['', ], ['--help', ]),
+            (['', '-h'], ['-h', ]),
+            (['', '--help'], ['--help']),
+            (['', 'info', '-h'], ['info', '-h']),
+            (['', 'files', '-h'], ['files', '-h']),
+            (['', 'download', '-h'], ['download', '-h']),
+            (['', 'audit', '-h'], ['audit', '-h']),
+            (['', 'upload', '-h'], ['upload', '-h']),
+            (['', 'info', '--help'], ['info', '--help']),
+            (['', 'files', '--help'], ['files', '--help']),
+            (['', 'download', '--help'], ['download', '--help']),
+            (['', 'audit', '--help'], ['audit', '--help']),
+            (['', 'upload', '--help'], ['upload', '--help']),
         )
+
+        for i, test_ in enumerate(tests_set, start=1):
+            with patch('metatool.cli.sys.argv', test_[0]):
+                main_print_info_help, manual_print_info_help = \
+                    self.sys_stdout_help_run(
+                        main,
+                        parse().parse_args,
+                        *test_[1:]
+                    )
+                self.assertEqual(
+                    main_print_info_help,
+                    manual_print_info_help,
+                    'Unexpected result of the help printout with the '
+                    'sys.argv={}'.format(test_[0])
+                )
