@@ -12,10 +12,10 @@ from metatool import core
 
 if sys.version_info.major == 3:
     from io import StringIO
-    from unittest.mock import patch, Mock, call
+    from unittest.mock import patch, Mock, call, mock_open
 else:
     from io import BytesIO as StringIO
-    from mock import patch, Mock, call
+    from mock import patch, Mock, call, mock_open
 
 
 class TestMainShowDataFunction(unittest.TestCase):
@@ -57,14 +57,32 @@ class TestMainParseFunction(unittest.TestCase):
     Test case of the metatool.__main__.parse() function.
     """
     def test_url_argument(self):
+        """
+        Test of presence and correct processing of the `--url` argument,
+        inherited by all subparsers.
+        """
+        actions = (
+            'audit FILE_HASH SEED',
+            'download FILE_HASH',
+            'upload {}'.format(os.path.abspath(__file__)),
+            'files',
+            'info',
+        )
+        # get `builtins` module name with respect to python version
+        builtin_module_names = ('', '', '__builtin__', 'builtins')
+        version_name = builtin_module_names[sys.version_info.major]
 
-        # testing of parsing "url_base" value by default
-        args_default = parse().parse_args('info'.split())
-        self.assertIsNone(args_default.url_base)
+        with patch('{}.open'.format(version_name), mock_open(), create=False):
+            for action in actions:
+                # testing of parsing "url_base" value by default
+                args_default = parse().parse_args('{}'.format(action).split())
+                self.assertIsNone(args_default.url_base)
 
-        # testing of parsing given "url_base" value
-        args_passed_url = parse().parse_args('info --url TEST_URL_STR'.split())
-        self.assertEqual(args_passed_url.url_base, 'TEST_URL_STR')
+                # testing of parsing given "url_base" value
+                args_passed_url = parse().parse_args(
+                        '{} --url TEST_URL_STR'.format(action).split()
+                )
+                self.assertEqual(args_passed_url.url_base, 'TEST_URL_STR')
 
     def test_audit_argument(self):
         # testing of raising exception when required arguments are not given
@@ -88,6 +106,9 @@ class TestMainParseFunction(unittest.TestCase):
         )
 
     def test_download_arguments(self):
+        """
+        Test for all features of the `download` subparser.
+        """
         # testing of raising exception when required arguments are not given
         with patch('sys.stderr', new_callable=StringIO):
             with self.assertRaises(SystemExit):
@@ -132,10 +153,12 @@ class TestMainParseFunction(unittest.TestCase):
         )
 
     def test_upload_arguments(self):
+        """
+
+        """
         # Test fixture
         full_file_path = os.path.join(os.path.dirname(__file__),
                                       'temporary_test_file')
-
         self.addCleanup(os.unlink, full_file_path)
         # Testing of raising exception when required arguments are not given
         with patch('sys.stderr', new_callable=StringIO):
@@ -172,7 +195,7 @@ class TestMainParseFunction(unittest.TestCase):
         }
         self.assertDictEqual(
             real_parsed_args_dict,
-            expected_args_dict
+            expected_args_dict,
         )
         parsed_args.file.close()
 
@@ -202,7 +225,9 @@ class TestMainParseFunction(unittest.TestCase):
         parsed_args.file.close()
 
     def test_info_argument(self):
-        # test of parsing appropriate default "core function"
+        """
+        Test of parsing appropriate default "core function".
+        """
         parsed_args = parse().parse_args('info'.split())
         self.assertEqual(parsed_args.execute_case, core.info)
 
@@ -214,7 +239,9 @@ class TestMainParseFunction(unittest.TestCase):
 
 class TestMainArgumentsPreparation(unittest.TestCase):
     def test_get_all_func_args(self):
-        # test of accurate discovery of required arguments of the function
+        """
+        Test of accurate discovery of required arguments of the function.
+        """
         expected_args_set = ('arg_1', 'arg_2', 'arg_3')
 
         self.assertTupleEqual(
@@ -235,10 +262,13 @@ class TestMainArgumentsPreparation(unittest.TestCase):
 
     @patch('metatool.cli.BtcTxStore')
     def test_args_prepare(self, mock_btctx_store):
-        # test on accurate setting of omitted required arguments
-        # to the core function
+        """
+        Test on accurate setting-up all omitted required arguments
+        to the core function.
+        """
         mock_btctx_api = mock_btctx_store.return_value
         mock_btctx_api.create_key.return_value = 'TEST_SENDER_KEY'
+        # testing for minimal providing arguments
         expected_args_dict = dict(
             one='TEST 1',
             two='TEST 2'
@@ -251,8 +281,11 @@ class TestMainArgumentsPreparation(unittest.TestCase):
         )
         self.assertDictEqual(
             args_prepare(given_required_names, given_namespace),
-            expected_args_dict
+            expected_args_dict,
+            "Should provide only `one` and `two` arguments"
         )
+
+        # test of max providing omitted arguments
         expected_args_dict['sender_key'] = 'TEST_SENDER_KEY'
         expected_args_dict['btctx_api'] = mock_btctx_api
         given_required_names += ['sender_key', 'btctx_api']
@@ -260,7 +293,7 @@ class TestMainArgumentsPreparation(unittest.TestCase):
         self.assertDictEqual(
             args_prepare(given_required_names, given_namespace),
             expected_args_dict,
-            "don't work!!!!"
+            "The `args_prepare()` should provide the full set of arguments!"
         )
 
 
@@ -272,6 +305,7 @@ class TestMainStarter(unittest.TestCase):
         It's run passed callable and return their intercepted print-out.
         :note: While the running passed callable SystemExit is excepted,
         like normal exit for providing the help information.
+
         :param tested_callable: callable that may print help info
         :param etalon_callable: callable for the desired print-out
         :param args: argumets needed to be passed to the etalon callable
@@ -343,7 +377,7 @@ class TestMainStarter(unittest.TestCase):
         `MEATADISKSERVER` if it's set.
         :param mock_requests_get: mocked argument provided by the `@patch()`
         """
-        with patch('os.getenv', Mock(return_value='http://mock.com')):
+        with patch('os.getenv', Mock(return_value='http://env.var.com')):
             with patch('sys.argv', ['', 'info']):
                 try:
                     main()
@@ -351,27 +385,30 @@ class TestMainStarter(unittest.TestCase):
                     pass
                 self.assertEqual(
                     mock_requests_get.call_args_list,
-                    [call('http://mock.com/api/nodes/me/')],
+                    [call('http://env.var.com/api/nodes/me/')],
+                    "Request should use the http://env.var.com address"
                 )
 
     @patch('requests.get')
     def test_url_default_providing(self, mock_requests_get):
         """
-        Test on default using the `urs_base` argument from the CORE_NODES_URL
+        Test on default using the `url_base` argument from the CORE_NODES_URL
         list.
         :param mock_requests_get: auto-provided by the `@patch()` mocked arg
-        :return:
         """
         mock_response = mock_requests_get.return_value
         mock_response.status_code = 500
+        expected_calls = [
+            call('{}api/nodes/me/'.format(url)) for url in CORE_NODES_URL
+        ]
         with patch('os.getenv', Mock(return_value=None)):
             with patch('metatool.cli.show_data'):
                 with patch('sys.argv', ['', 'info']):
                     main()
         self.assertEqual(
             mock_requests_get.call_args_list,
-            [call('{}api/nodes/me/'.format(CORE_NODES_URL[0])),
-             call('{}api/nodes/me/'.format(CORE_NODES_URL[1]))]
+            expected_calls,
+            "Must be called in the order of `CORE_NODES_URL` list items"
         )
 
     @patch('requests.get', side_effect=SystemExit)
@@ -389,44 +426,98 @@ class TestMainStarter(unittest.TestCase):
                 self.assertEqual(
                     mock_requests_get.call_args_list,
                     [call('http://test.url/api/nodes/me/')],
+                    "Request must be sent to the http://test.url/api/nodes/me/"
                 )
 
+    @staticmethod
     @patch('metatool.cli.parse')
     @patch('metatool.cli.show_data')
     @patch('metatool.cli.get_all_func_args', Mock(return_value=['url_base', ]))
-    def test_walk_through_addresses(self, mock_show_data, mock_parse):
+    def walk_through_addresses(exit_point_result, mock_show_data, mock_parse):
         """
-        Test on walking through the default addresses until the success
-        response will be gotten or all addresses will be used.
+        This is the static method for the testing the metatool.cli.main()
+        function to walking through the list of addresses.
+        It forges the process of walking through default addresses until
+        the acceptable result will be returned from the core function call, or
+        all addresses will be used.
+        It returns the list of calls of a core function, expected call-list,
+        and show_data call-list in the course of executing the main() function.
+
+        :param exit_point_result: return-value of the `core_func()` that should
+            stop the walking
+        :type exit_point_result: requests.models.Response object
+        :type exit_point_result: string object
+
+        :param mock_show_data: auto-provided by the `@patch()` mocked arg
+        :param mock_parse: auto-provided by the `@patch()` mocked arg
+
+        :returns: tuple of lists with calls of mocked objects to make assertion
+        :rtype: tuple of lists
         """
-        # Forging the argument's parse logic
-        mock_bad_response = Mock(
-            __class__=Response,
-            status_code=500
-        )
-        mock_success_response = Mock(
-            __class__=Response,
-            status_code=200
-        )
-        # set up the tested response's status codes sequence
+        bad_response_result = Mock(__class__=Response, status_code=500)
+        # Set up the order of the core function call's results.
         core_func = Mock(
-                side_effect=[mock_bad_response, mock_bad_response,
-                             mock_success_response, mock_bad_response])
+                side_effect=[bad_response_result, bad_response_result,
+                             exit_point_result, bad_response_result]
+        )
+        # mocking the parsing logic
         parser = mock_parse.return_value
         parser.parse_args.return_value = Namespace(execute_case=core_func,
                                                    url_base=None)
-        
-        url_bases_list = ['first.fail.url', 'second.fail.url',
-                          'third.success.finish.url', 'forth.unreached.url']
+        # Mocking the list of default URL-addresses.
+        # Walking should retrieve an acceptable result on the third address.
+        url_list = ['first.fail.url', 'second.fail.url',
+                    'third.success.stop.url', 'forth.unreached.url']
         with patch('os.getenv', Mock(return_value=None)):
-            with patch('metatool.cli.CORE_NODES_URL', url_bases_list):
+            with patch('metatool.cli.CORE_NODES_URL', url_list):
                 with patch('sys.argv', ['', '']):
                     main()
+        # Preparing the return data
+        tested_core_func_calls = core_func.call_args_list
+        expected_core_func_calls = [call(url_base=url) for url in url_list[:3]]
+        show_data_calls = mock_show_data.call_args_list
+
+        return (tested_core_func_calls, expected_core_func_calls,
+                show_data_calls)
+
+    def test_stop_on_success_response(self):
+        """
+        Test the walking through the URL-addresses until the successful
+        response will be occurred.
+        """
+        success_response = Mock(__class__=Response, status_code=200)
+        # Getting the calls of a core function during the walking process
+        real_calls, expected_calls, show_data_calls = \
+            self.walk_through_addresses(success_response)
         self.assertListEqual(
-            core_func.call_args_list,
-            [call(url_base=url) for url in url_bases_list[:3]]
+            real_calls,
+            expected_calls,
+            "List must be called three times with expected URL-addresses!"
         )
         self.assertListEqual(
-            mock_show_data.call_args_list,
-            [call(mock_success_response)]
+            show_data_calls,
+            [call(success_response)],
+            'the show_data() obj must be called once with `success_response` '
+            'object!'
+        )
+
+    def test_stop_on_the_string_return(self):
+        """
+        Test of walking through the URL-addresses until the string object
+        will be returned from a core function.
+        """
+        success_response = "string data, when the file downloaded successful"
+        # Getting the calls of a core function during the walking process
+        real_calls, expected_calls, show_data_calls = \
+            self.walk_through_addresses(success_response)
+        self.assertListEqual(
+            real_calls,
+            expected_calls,
+            "List must be called three times with expected URL-addresses!"
+        )
+        self.assertListEqual(
+            show_data_calls,
+            [call(success_response)],
+            'the show_data() obj must be called once with `success_response` '
+            'object!'
         )
