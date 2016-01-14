@@ -112,6 +112,7 @@ import sys
 import argparse
 
 from btctxstore import BtcTxStore
+from requests.models import Response
 
 # makes available to import package from the source directory
 parent_dir = os.path.dirname(os.path.dirname(__file__))
@@ -213,21 +214,21 @@ def parse():
     return main_parser
 
 
-def show_data(data):
+def show_data(source):
     """
-    Method used to show the action processing data in the console.
+    Method used to show the action's processing data in the console.
 
-    :param data: response object or string data generated
+    :param source: response object or string data generated
         by the core API functions
-    :type data: string
-    :type data: requests.models.Response object
+    :type source: string
+    :type source: requests.models.Response object
 
     :returns: None
     """
-    if isinstance(data, str):
-        print(data)
+    if isinstance(source, Response):
+        print(source.status_code, source.text, sep='\n')
     else:
-        print(data.status_code, data.text, sep='\n')
+        print(source)
 
 
 def args_prepare(required_args, parsed_args):
@@ -290,12 +291,15 @@ def main():
     used_nodes = (env_node,) if env_node else CORE_NODES_URL
     used_nodes = (args.url_base,) if args.url_base else used_nodes
 
-    result = "Sorry, nothing has done."
+    result = "Sorry, no one server was visited. Check the provided `--url` " \
+             "argument or the `MEATADISKSERVER` environment variable"
     for url_base in used_nodes:
         parsed_args['url_base'] = url_base
         result = args.execute_case(**parsed_args)
         if isinstance(result, str):
             break
-        if result.status_code not in redirect_error_status:
-            break
+        elif isinstance(result, Response):
+            if result.status_code not in redirect_error_status:
+                break
+        continue
     show_data(result)

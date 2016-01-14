@@ -2,11 +2,12 @@ from __future__ import print_function
 import os
 import sys
 import unittest
+from argparse import Namespace
+
+from requests.models import Response
 
 from metatool.cli import (show_data, parse, get_all_func_args, args_prepare,
                           main, CORE_NODES_URL)
-
-
 from metatool import core
 
 if sys.version_info.major == 3:
@@ -36,7 +37,10 @@ class TestMainShowDataFunction(unittest.TestCase):
 
     def test_show_data_response_type(self):
         attrs = dict(text='text string', status_code='status code string')
-        mock_response = Mock(**attrs)
+        mock_response = Mock(
+            __class__=Response,
+            **attrs
+        )
         expected_printed_string = '{status_code}\n{text}\n'.format(**attrs)
         with patch('sys.stdout', new_callable=StringIO) as mock_print:
             show_data(mock_response)
@@ -240,13 +244,11 @@ class TestMainArgumentsPreparation(unittest.TestCase):
             two='TEST 2'
         )
         given_required_names = ['one', 'two']
-        given_namespace = Mock(
+        given_namespace = Namespace(
             one='TEST 1',
             two='TEST 2',
             three='TEST 3'
         )
-        del given_namespace.sender_key
-        del given_namespace.btctx_api
         self.assertDictEqual(
             args_prepare(given_required_names, given_namespace),
             expected_args_dict
@@ -337,8 +339,8 @@ class TestMainStarter(unittest.TestCase):
     @patch('requests.get', side_effect=SystemExit)
     def test_url_env_providing(self, mock_requests_get):
         """
-        Test to getting the `--url` argument from the environment variable
-        `MEATADISKSERVER`.
+        Test to getting the `url_base` argument from the environment variable
+        `MEATADISKSERVER` if it's set.
         :param mock_requests_get: mocked argument provided by the `@patch()`
         """
         with patch('os.getenv', Mock(return_value='http://mock.com')):
@@ -355,39 +357,76 @@ class TestMainStarter(unittest.TestCase):
     @patch('requests.get')
     def test_url_default_providing(self, mock_requests_get):
         """
-        Test on default using the `--url` argument from the CORE_NODES_URL
+        Test on default using the `urs_base` argument from the CORE_NODES_URL
         list.
-        :param mock_requests_get: mocked argument provided by the `@patch()`
+        :param mock_requests_get: auto-provided by the `@patch()` mocked arg
         :return:
         """
         mock_response = mock_requests_get.return_value
         mock_response.status_code = 500
-        del mock_response.text
         with patch('os.getenv', Mock(return_value=None)):
-            with patch('sys.argv', ['', 'info']):
-                try:
+            with patch('metatool.cli.show_data'):
+                with patch('sys.argv', ['', 'info']):
                     main()
-                except AttributeError:
-                    pass
-                self.assertEqual(
-                    mock_requests_get.call_args_list,
-                    [call('{}api/nodes/me/'.format(CORE_NODES_URL[0])),
-                     call('{}api/nodes/me/'.format(CORE_NODES_URL[1]))]
-                )
+        self.assertEqual(
+            mock_requests_get.call_args_list,
+            [call('{}api/nodes/me/'.format(CORE_NODES_URL[0])),
+             call('{}api/nodes/me/'.format(CORE_NODES_URL[1]))]
+        )
 
     @patch('requests.get', side_effect=SystemExit)
     def test_url_parser_providing(self, mock_requests_get):
         """
-        Test on priority using of `--url` provided in the terminal.
-        :param mock_requests_get: mocked argument provided by the `@patch()`
+        Test on priority of using the `--url` provided in the terminal.
+        :param mock_requests_get: auto-provided by the `@patch()` mocked arg
         """
-        with patch('os.getenv', Mock(return_value='http://mock.com')):
-            with patch('sys.argv', ['', 'info', '--url', 'http://args.url']):
+        with patch('os.getenv', Mock(return_value='http://spam.eggs')):
+            with patch('sys.argv', ['', 'info', '--url', 'http://test.url']):
                 try:
                     main()
                 except SystemExit:
                     pass
                 self.assertEqual(
                     mock_requests_get.call_args_list,
-                    [call('http://args.url/api/nodes/me/')],
+                    [call('http://test.url/api/nodes/me/')],
                 )
+
+    @patch('metatool.cli.parse')
+    @patch('metatool.cli.show_data')
+    @patch('metatool.cli.get_all_func_args', Mock(return_value=['url_base', ]))
+    def test_walk_through_addresses(self, mock_show_data, mock_parse):
+        """
+        Test on walking through the default addresses until the success
+        response will be gotten or all addresses will be used.
+        """
+        # Forging the argument's parse logic
+        mock_bad_response = Mock(
+            __class__=Response,
+            status_code=500
+        )
+        mock_success_response = Mock(
+            __class__=Response,
+            status_code=200
+        )
+        # set up the tested response's status codes sequence
+        core_func = Mock(
+                side_effect=[mock_bad_response, mock_bad_response,
+                             mock_success_response, mock_bad_response])
+        parser = mock_parse.return_value
+        parser.parse_args.return_value = Namespace(execute_case=core_func,
+                                                   url_base=None)
+        
+        url_bases_list = ['first.fail.url', 'second.fail.url',
+                          'third.success.finish.url', 'forth.unreached.url']
+        with patch('os.getenv', Mock(return_value=None)):
+            with patch('metatool.cli.CORE_NODES_URL', url_bases_list):
+                with patch('sys.argv', ['', '']):
+                    main()
+        self.assertListEqual(
+            core_func.call_args_list,
+            [call(url_base=url) for url in url_bases_list[:3]]
+        )
+        self.assertListEqual(
+            mock_show_data.call_args_list,
+            [call(mock_success_response)]
+        )

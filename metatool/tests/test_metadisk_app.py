@@ -13,8 +13,12 @@ else:
     from urlparse import urlparse, parse_qs
     from urllib import urlencode
 
-from metatool.tests.testing_server import MyRequestHandler, ThreadedTCPServer
+# make the parent tests package importable for the direct running
+parent_dir = os.path.dirname(os.path.dirname(__file__))
+if not parent_dir in sys.path:
+    sys.path.insert(0, parent_dir)
 
+from tests.testing_server import MyRequestHandler, ThreadedTCPServer
 
 class MetadiskTest(unittest.TestCase):
 
