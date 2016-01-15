@@ -83,11 +83,11 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="core_module.html">metatool.core module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">metatool.cli module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#metatool-cli-usage"><code class="docutils literal"><span class="pre">metatool</span></code> CLI Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-cli-usage"><strong>metatool</strong> CLI Usage</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#guide-through-all-of-the-actions">Guide through all of the actions</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#metatool-cli-function-s-specification"><code class="docutils literal"><span class="pre">metatool.cli</span></code> function&#8217;s specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-cli-function-s-specification"><strong>metatool.cli</strong> function&#8217;s specification</a></li>
 </ul>
 </li>
 </ul>
@@ -146,9 +146,9 @@
 </pre></div>
 </div>
 <div class="section" id="metatool-cli-usage">
-<h2><code class="docutils literal"><span class="pre">metatool</span></code> CLI Usage<a class="headerlink" href="#metatool-cli-usage" title="Permalink to this headline">¶</a></h2>
+<h2><strong>metatool</strong> CLI Usage<a class="headerlink" href="#metatool-cli-usage" title="Permalink to this headline">¶</a></h2>
 <p>Common syntax for all actions:</p>
-<div class="highlight-python"><div class="highlight"><pre>metatool [--url URL_ADDR] &lt;action&gt; [ appropriate | arguments | for actions ]
+<div class="highlight-python"><div class="highlight"><pre>metatool &lt;action&gt; [--url URL_ADDR] [ appropriate | arguments | for actions ]
 </pre></div>
 </div>
 <p>&#8220;metatool&#8221; expect the main lead positional argument <code class="docutils literal"><span class="pre">action</span></code> which define
@@ -162,9 +162,9 @@ Example:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ metatool upload ~/path/to/file.txt --file_role 002
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">--url</span></code> optional argument defines url address of the target server and
-can be defined only before the <code class="docutils literal"><span class="pre">action</span></code>. In example:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ metatool --url http://dev.storj.anvil8.com info
+<p>The <code class="docutils literal"><span class="pre">--url</span></code> is the optional argument common for all the actions and defines
+the URL-address of the target server. In example:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool info --url http://dev.storj.anvil8.com
 </pre></div>
 </div>
 <p>But by default the server is <a class="reference external" href="http://node2.metadisk.org">http://node2.metadisk.org</a> .
@@ -243,7 +243,7 @@ an relative and full path to the directory with this name as well.</p>
 </div>
 </div>
 <div class="section" id="metatool-cli-function-s-specification">
-<h2><code class="docutils literal"><span class="pre">metatool.cli</span></code> function&#8217;s specification<a class="headerlink" href="#metatool-cli-function-s-specification" title="Permalink to this headline">¶</a></h2>
+<h2><strong>metatool.cli</strong> function&#8217;s specification<a class="headerlink" href="#metatool-cli-function-s-specification" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="metatool.cli.args_prepare">
 <code class="descclassname">metatool.cli.</code><code class="descname">args_prepare</code><span class="sig-paren">(</span><em>required_args</em>, <em>parsed_args</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.args_prepare" title="Permalink to this definition">¶</a></dt>
@@ -274,16 +274,16 @@ required by the core API function</li>
 <dl class="function">
 <dt id="metatool.cli.get_all_func_args">
 <code class="descclassname">metatool.cli.</code><code class="descname">get_all_func_args</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.get_all_func_args" title="Permalink to this definition">¶</a></dt>
-<dd><p>It finds out all available arguments of the given function.
-:param function: function object to inspect.
-:type function: function object</p>
+<dd><p>It finds out all available arguments of the given function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list with names of all available arguments</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>function</strong> (<em>function object</em>) &#8211; function object to inspect</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of strings</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list with names of all available arguments</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of strings</td>
 </tr>
 </tbody>
 </table>
@@ -316,13 +316,13 @@ It doesn&#8217;t perform parsing, just fills the parser object with arguments.</
 
 <dl class="function">
 <dt id="metatool.cli.show_data">
-<code class="descclassname">metatool.cli.</code><code class="descname">show_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.show_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Method used to show the action processing data in the console.</p>
+<code class="descclassname">metatool.cli.</code><code class="descname">show_data</code><span class="sig-paren">(</span><em>source</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.show_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method used to show the action&#8217;s processing data in the console.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>requests.models.Response object</em>) &#8211; response object or string data generated
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source</strong> (<em>requests.models.Response object</em>) &#8211; response object or string data generated
 by the core API functions</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>

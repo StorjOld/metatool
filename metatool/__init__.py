@@ -7,3 +7,5 @@ at the http://node2.metadisk.org/ page, but have some future, like walking
 through several **Nodes** looking for a file, or generating GET HTTP request
 string to download file through browser for example.
 """
+
+from . import core, cli

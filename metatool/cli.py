@@ -9,7 +9,7 @@ or can be installed and used like usual CLI::
     $ metatool ...
 
 ======================
-`metatool` CLI Usage
+**metatool** CLI Usage
 ======================
 Common syntax for all actions::
 
@@ -103,7 +103,7 @@ response it will be shown instead of the success result.
         an relative and full path to the directory with this name as well.
 
 =========================================
-`metatool.cli` function's specification
+**metatool.cli** function's specification
 =========================================
 """
 from __future__ import print_function
@@ -263,7 +263,8 @@ def args_prepare(required_args, parsed_args):
 def get_all_func_args(function):
     """
     It finds out all available arguments of the given function.
-    :param function: function object to inspect.
+
+    :param function: function object to inspect
     :type function: function object
 
     :returns: list with names of all available arguments

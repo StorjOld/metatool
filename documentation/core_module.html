@@ -84,6 +84,10 @@
                 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="">metatool.core module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-metatool.core">MetaTool API specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-api-guide">MetaTool API Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cli_module.html">metatool.cli module</a></li>
@@ -333,6 +337,66 @@ information about the server issue</p>
 </table>
 </dd></dl>
 
+</div>
+<div class="section" id="metatool-api-guide">
+<h2>MetaTool API Guide<a class="headerlink" href="#metatool-api-guide" title="Permalink to this headline">¶</a></h2>
+<p>This part of the documentation gives thorough knowledge of the MetaTool API usage.</p>
+<div class="section" id="introduction">
+<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h3>
+<p>All API functions are placed in the <code class="docutils literal"><span class="pre">metatool.core</span></code> module which is described on the <strong>MetaTool API specification</strong>,
+so here we&#8217;ll look on their use.</p>
+<p>To start using the MetaTool API you should get the source code from the <a class="reference external" href="https://github.com/Storj/metatool.git">https://github.com/Storj/metatool.git</a> and
+either install the package with the <code class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code> command or make sure that the directory nested the <code class="docutils literal"><span class="pre">metatool</span></code> package
+is present at your <code class="docutils literal"><span class="pre">sys.path</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">The <code class="docutils literal"><span class="pre">metatool</span></code> python package is not the same as root repository directory. The <code class="docutils literal"><span class="pre">metatool</span></code> package is the
+<strong>metatool</strong> subdirectory of this repository.</td>
+</tr>
+</tbody>
+</table>
+<p>Let&#8217;s try to use it just installed required packages - clone the repo, open it, check the requirements and try to import package:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ git clone https://github.com/Storj/metatool.git
+Cloning into &#39;metatool&#39;...
+remote: Counting objects: 504, done.
+remote: Total 504 (delta 0), reused 0 (delta 0), pack-reused 504
+Receiving objects: 100% (504/504), 950.65 KiB | 770.00 KiB/s, done.
+Resolving deltas: 100% (279/279), done.
+Checking connectivity... done.
+$
+$ cd metatool
+$ pip install -r metatool/requirements.txt
+Ignoring mock: markers &quot;python_version == &#39;2.7&#39;&quot; don&#39;t match your environment
+Collecting btctxstore (from -r metatool/requirements.txt (line 2))
+Collecting requests (from -r metatool/requirements.txt (line 3))
+  Using cached requests-2.9.1-py2.py3-none-any.whl
+Collecting future&gt;=0.15.2 (from btctxstore-&gt;-r metatool/requirements.txt (line 2))
+Collecting pycoin&gt;=0.52 (from btctxstore-&gt;-r metatool/requirements.txt (line 2))
+Collecting six&gt;=1.10.0 (from btctxstore-&gt;-r metatool/requirements.txt (line 2))
+  Using cached six-1.10.0-py2.py3-none-any.whl
+Collecting ecdsa&gt;=0.13 (from btctxstore-&gt;-r metatool/requirements.txt (line 2))
+  Using cached ecdsa-0.13-py2.py3-none-any.whl
+Installing collected packages: future, pycoin, six, ecdsa, btctxstore, requests
+Successfully installed btctxstore-4.6.1 ecdsa-0.13 future-0.15.2 pycoin-0.62 requests-2.9.1 six-1.10.0
+$
+$ python
+Python 3.4.3 (default, Oct 14 2015, 20:28:29)
+[GCC 4.8.4] on linux
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; import metatool
+&gt;&gt;&gt; metatool.core.files(&#39;http://node3.metadisk.org&#39;).text
+&#39;[&quot;1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645&quot;,
+&quot;e3ae2933e83015368e3eb72d6de99442bde5195ae317dc9591ad9feaabdaebc8&quot;]&#39;
+&gt;&gt;&gt;
+</pre></div>
+</div>
+<p>This is the simplest use o MetaTool API. We&#8217;ve imported package from the current working directory,
+called the core <code class="docutils literal"><span class="pre">files</span></code> function with desired URL and look at the <code class="docutils literal"><span class="pre">text</span></code> attribute of the returned Response object.
+Ass result we see some json string with hash-names of the files uploaded to the server.</p>
+<hr class="docutils" />
+</div>
 </div>
 </div>
 
