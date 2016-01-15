@@ -86,6 +86,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-metatool.core">MetaTool API specification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#metatool-api-guide">MetaTool API Guide</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#review-of-common-arguments">Review of common arguments</a></li>
 </ul>
 </li>
 </ul>
@@ -343,7 +344,7 @@ information about the server issue</p>
 <p>This part of the documentation gives thorough knowledge of the MetaTool API usage.</p>
 <div class="section" id="introduction">
 <h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h3>
-<p>All API functions are placed in the <code class="docutils literal"><span class="pre">metatool.core</span></code> module which is described on the <strong>MetaTool API specification</strong>,
+<p>All API functions are placed in the <code class="docutils literal"><span class="pre">metatool.core</span></code> module which is described on the <a class="reference internal" href="#metatool-api-specification">MetaTool API specification</a>,
 so here we&#8217;ll look on their use.</p>
 <p>To start using the MetaTool API you should get the source code from the <a class="reference external" href="https://github.com/Storj/metatool.git">https://github.com/Storj/metatool.git</a> and
 either install the package with the <code class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code> command or make sure that the directory nested the <code class="docutils literal"><span class="pre">metatool</span></code> package
@@ -379,7 +380,8 @@ Collecting six&gt;=1.10.0 (from btctxstore-&gt;-r metatool/requirements.txt (lin
 Collecting ecdsa&gt;=0.13 (from btctxstore-&gt;-r metatool/requirements.txt (line 2))
   Using cached ecdsa-0.13-py2.py3-none-any.whl
 Installing collected packages: future, pycoin, six, ecdsa, btctxstore, requests
-Successfully installed btctxstore-4.6.1 ecdsa-0.13 future-0.15.2 pycoin-0.62 requests-2.9.1 six-1.10.0
+Successfully installed btctxstore-4.6.1 ecdsa-0.13 future-0.15.2 pycoin-0.62
+requests-2.9.1 six-1.10.0
 $
 $ python
 Python 3.4.3 (default, Oct 14 2015, 20:28:29)
@@ -395,7 +397,83 @@ Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;licen
 <p>This is the simplest use o MetaTool API. We&#8217;ve imported package from the current working directory,
 called the core <code class="docutils literal"><span class="pre">files</span></code> function with desired URL and look at the <code class="docutils literal"><span class="pre">text</span></code> attribute of the returned Response object.
 Ass result we see some json string with hash-names of the files uploaded to the server.</p>
-<hr class="docutils" />
+<p>Next we will look at all API function closely.</p>
+</div>
+<div class="section" id="review-of-common-arguments">
+<h3>Review of common arguments<a class="headerlink" href="#review-of-common-arguments" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">url_base:</th><td class="field-body"><p class="first">Each API function require this argument to define the server to send a request.
+This is the <code class="docutils literal"><span class="pre">string</span></code> value in format <code class="docutils literal"><span class="pre">'http://your.server.com'</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">btctx_api:</th><td class="field-body"><p class="first">This is an instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used to generate credentials for the server access.</p>
+<p><a class="reference external" href="https://pypi.python.org/pypi/btctxstore">btctxstore</a> is a site-package Library to read/write data to bitcoin transaction outputs.
+The reason to pass this argument is that the core function prepares appropriate request&#8217;s data for actions which
+can be done in the <em>test</em> and <em>real</em> mode. This mode is defined in passed <code class="docutils literal"><span class="pre">BtcTxStore</span></code> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">The <code class="docutils literal"><span class="pre">sender_key</span></code> argument can be gained from this instance with <code class="docutils literal"><span class="pre">create_key()</span></code> method.</td>
+</tr>
+</tbody>
+</table>
+<p>To get this instance in the <strong>test</strong> mode you can use next command:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">btctx_api</span> <span class="o">=</span> <span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">sender_key:</th><td class="field-body"><p class="first">Unique private key that will be used for the generating credentials, required by the access to the server.</p>
+<p>To get <strong>test</strong> <code class="docutils literal"><span class="pre">sender_key</span></code> you can use such a code:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">btctxstore</span> <span class="kn">import</span> <span class="n">BtcTxStore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">btctx_api</span> <span class="o">=</span> <span class="n">btctxstore</span><span class="o">.</span><span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sender_key</span> <span class="o">=</span> <span class="n">btctx_api</span><span class="o">.</span><span class="n">create_key</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sender_key</span>
+<span class="go">&#39;cRVY2joZQcdSumgAmCNkKYfZQjGchsNdQK1hG1hviLjBGAr8Y2Fa&#39;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">file_hash:</th><td class="field-body"><p class="first">It&#8217;s a string value - hash of the file&#8217;s data.
+This value is used like name of the file on the server.
+It ensures that the data passed to the endpoint has not been modified in transit.
+<code class="docutils literal"><span class="pre">file_hash</span></code> should be the SHA-256 hash of file_data.</p>
+<p>To get a proper <code class="docutils literal"><span class="pre">file_hash</span></code> from the file you can do next:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha256</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># file object should be opened in the binary mode.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;eggs.txt&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># check that the file object has the start stream position</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># if it is used somewhere else.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># get the proper data-hash</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_hash</span> <span class="o">=</span> <span class="n">sha256</span><span class="p">(</span><span class="nb">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_hash</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;cRVY2joZQcdSumgAmCNkKYfZQjGchsNdQK1hG1hviLjBGAr8Y2Fa&#39;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>

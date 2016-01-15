@@ -17,7 +17,7 @@ This part of the documentation gives thorough knowledge of the MetaTool API usag
 Introduction
 """"""""""""
 
-All API functions are placed in the ``metatool.core`` module which is described on the **MetaTool API specification**,
+All API functions are placed in the ``metatool.core`` module which is described on the `MetaTool API specification`_,
 so here we'll look on their use.
 
 To start using the MetaTool API you should get the source code from the https://github.com/Storj/metatool.git and
@@ -50,7 +50,8 @@ Let's try to use it just installed required packages - clone the repo, open it, 
     Collecting ecdsa>=0.13 (from btctxstore->-r metatool/requirements.txt (line 2))
       Using cached ecdsa-0.13-py2.py3-none-any.whl
     Installing collected packages: future, pycoin, six, ecdsa, btctxstore, requests
-    Successfully installed btctxstore-4.6.1 ecdsa-0.13 future-0.15.2 pycoin-0.62 requests-2.9.1 six-1.10.0
+    Successfully installed btctxstore-4.6.1 ecdsa-0.13 future-0.15.2 pycoin-0.62
+    requests-2.9.1 six-1.10.0
     $
     $ python
     Python 3.4.3 (default, Oct 14 2015, 20:28:29)
@@ -66,5 +67,65 @@ This is the simplest use o MetaTool API. We've imported package from the current
 called the core ``files`` function with desired URL and look at the ``text`` attribute of the returned Response object.
 Ass result we see some json string with hash-names of the files uploaded to the server.
 
--------------------
+Next we will look at all API function closely.
+
+Review of common arguments
+""""""""""""""""""""""""""
+
+:url_base:
+    Each API function require this argument to define the server to send a request.
+    This is the ``string`` value in format ``'http://your.server.com'``
+
+:btctx_api:
+    This is an instance of the ``BtcTxStore`` class which will be used to generate credentials for the server access.
+
+    btctxstore_ is a site-package Library to read/write data to bitcoin transaction outputs.
+    The reason to pass this argument is that the core function prepares appropriate request's data for actions which
+    can be done in the *test* and *real* mode. This mode is defined in passed ``BtcTxStore`` instance.
+
+    .. _btctxstore: https://pypi.python.org/pypi/btctxstore
+
+    :Note: The ``sender_key`` argument can be gained from this instance with ``create_key()`` method.
+
+    To get this instance in the **test** mode you can use next command::
+
+        btctx_api = BtcTxStore(testnet=True, dryrun=True)
+
+..
+
+:sender_key:
+    Unique private key that will be used for the generating credentials, required by the access to the server.
+
+    To get **test** ``sender_key`` you can use such a code::
+
+        >>> from btctxstore import BtcTxStore
+        >>> btctx_api = btctxstore.BtcTxStore(testnet=True, dryrun=True)
+        >>> sender_key = btctx_api.create_key()
+        >>> sender_key
+        'cRVY2joZQcdSumgAmCNkKYfZQjGchsNdQK1hG1hviLjBGAr8Y2Fa'
+
+..
+
+:file_hash:
+    It's a string value - hash of the file's data.
+    This value is used like name of the file on the server.
+    It ensures that the data passed to the endpoint has not been modified in transit.
+    ``file_hash`` should be the SHA-256 hash of file_data.
+
+    To get a proper ``file_hash`` from the file you can do next::
+
+        >>> from hashlib import sha256
+        >>>
+        >>> # file object should be opened in the binary mode.
+        >>> file = open('eggs.txt', 'rb')
+        >>>
+        >>> # check that the file object has the start stream position
+        >>> # if it is used somewhere else.
+        >>> file.seek(0)
+        >>>
+        >>> # get the proper data-hash
+        >>> data_hash = sha256(file.read()).hexdigest()
+        >>> data_hash
+        >>> 'cRVY2joZQcdSumgAmCNkKYfZQjGchsNdQK1hG1hviLjBGAr8Y2Fa'
+
 
