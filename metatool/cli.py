@@ -8,9 +8,10 @@ or can be installed and used like usual CLI::
 
     $ metatool ...
 
-======================
-**metatool** CLI Usage
-======================
+
+metatool CLI Usage
+------------------
+
 Common syntax for all actions::
 
    metatool <action> [--url URL_ADDR] [ appropriate | arguments | for actions ]
@@ -35,12 +36,12 @@ But by default the server is http://node2.metadisk.org .
 You can either set an system environment variable ``MEATADISKSERVER`` to
 provide target server instead of using the "--url" opt. argument.
 
-------------------------------------
+-------------------
 
-Guide through all of the actions
---------------------------------
+Brief guide for actions
+-----------------------
 
-Every action except ``download`` returns response status as a first line and
+Every action excepts ``download`` returns response status as a first line and
 appropriate data for a specific action. When an error is occurs whilst the
 response it will be shown instead of the success result.
 
@@ -102,9 +103,11 @@ response it will be shown instead of the success result.
         the **NEW_NAME** for the storing file on your disk. You can provide
         an relative and full path to the directory with this name as well.
 
-=========================================
-**metatool.cli** function's specification
-=========================================
+-------------------
+
+metatool.cli function's specification
+-------------------------------------
+
 """
 from __future__ import print_function
 import os.path

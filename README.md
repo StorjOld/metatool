@@ -16,12 +16,13 @@ In general for running the application you may use the `metatool` terminal comma
 For help **information** run `metatool` without arguments or with `-h`, `-help`, `--help`:
 
     $ metatool
-    ===========================================
-    welcome to the metatool help information
-    ===========================================
-
-    usage:
-    <-- the help information -->
+    $ metatool
+    usage: METATOOL [-h] {audit,download,upload,files,info} ...
+    
+    This is the console app intended for interacting with the MetaCore server.
+    
+    positional arguments:
+    ...
     
 ---
 
@@ -98,7 +99,7 @@ Other commands expect additional arguments after the `action`:
 
 ### `$ metatool upload <path_to_file> [-r | --file_role <FILE_ROLE>]`
 
-This command is *upload* the __file__ specified like required positional argument into the server with the default value of __role__ - __`001`__:
+This command uploads the __file__ specified like required positional argument into the server with the default value of __role__ - __`001`__:
 
     $ metatool upload README.md 
     201

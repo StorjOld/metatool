@@ -46,6 +46,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   package_reference
    core_module
    cli_module
 

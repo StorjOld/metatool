@@ -32,7 +32,7 @@
   
     <link rel="top" title="MetaTool 1.0.0 documentation" href="index.html"/>
         <link rel="next" title="metatool.cli module" href="cli_module.html"/>
-        <link rel="prev" title="Welcome to MetaTool’s documentation!" href="index.html"/> 
+        <link rel="prev" title="metatool reference" href="package_reference.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,11 +82,14 @@
             
             
                 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="package_reference.html">metatool reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">metatool.core module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-metatool.core">MetaTool API specification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#metatool-api-guide">MetaTool API Guide</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#review-of-common-arguments">Review of common arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#status-info">Status Info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-info">File Info</a></li>
 </ul>
 </li>
 </ul>
@@ -346,7 +349,7 @@ information about the server issue</p>
 <h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h3>
 <p>All API functions are placed in the <code class="docutils literal"><span class="pre">metatool.core</span></code> module which is described on the <a class="reference internal" href="#metatool-api-specification">MetaTool API specification</a>,
 so here we&#8217;ll look on their use.</p>
-<p>To start using the MetaTool API you should get the source code from the <a class="reference external" href="https://github.com/Storj/metatool.git">https://github.com/Storj/metatool.git</a> and
+<p>To start using the MetaTool API you should get the source code from the <a class="reference external" href="https://github.com/Storj/metatool.git">repository</a> and
 either install the package with the <code class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code> command or make sure that the directory nested the <code class="docutils literal"><span class="pre">metatool</span></code> package
 is present at your <code class="docutils literal"><span class="pre">sys.path</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -362,27 +365,13 @@ is present at your <code class="docutils literal"><span class="pre">sys.path</sp
 <div class="highlight-python"><div class="highlight"><pre>$ git clone https://github.com/Storj/metatool.git
 Cloning into &#39;metatool&#39;...
 remote: Counting objects: 504, done.
-remote: Total 504 (delta 0), reused 0 (delta 0), pack-reused 504
-Receiving objects: 100% (504/504), 950.65 KiB | 770.00 KiB/s, done.
-Resolving deltas: 100% (279/279), done.
-Checking connectivity... done.
-$
+...
 $ cd metatool
 $ pip install -r metatool/requirements.txt
 Ignoring mock: markers &quot;python_version == &#39;2.7&#39;&quot; don&#39;t match your environment
 Collecting btctxstore (from -r metatool/requirements.txt (line 2))
 Collecting requests (from -r metatool/requirements.txt (line 3))
-  Using cached requests-2.9.1-py2.py3-none-any.whl
-Collecting future&gt;=0.15.2 (from btctxstore-&gt;-r metatool/requirements.txt (line 2))
-Collecting pycoin&gt;=0.52 (from btctxstore-&gt;-r metatool/requirements.txt (line 2))
-Collecting six&gt;=1.10.0 (from btctxstore-&gt;-r metatool/requirements.txt (line 2))
-  Using cached six-1.10.0-py2.py3-none-any.whl
-Collecting ecdsa&gt;=0.13 (from btctxstore-&gt;-r metatool/requirements.txt (line 2))
-  Using cached ecdsa-0.13-py2.py3-none-any.whl
-Installing collected packages: future, pycoin, six, ecdsa, btctxstore, requests
-Successfully installed btctxstore-4.6.1 ecdsa-0.13 future-0.15.2 pycoin-0.62
-requests-2.9.1 six-1.10.0
-$
+...
 $ python
 Python 3.4.3 (default, Oct 14 2015, 20:28:29)
 [GCC 4.8.4] on linux
@@ -475,6 +464,63 @@ It ensures that the data passed to the endpoint has not been modified in transit
 </tbody>
 </table>
 </div>
+<div class="section" id="status-info">
+<h3>Status Info<a class="headerlink" href="#status-info" title="Permalink to this headline">¶</a></h3>
+<p>To do a quick glance at the nodes data usage use the <code class="docutils literal"><span class="pre">metatoo.core.info()</span></code> API function.
+Only required argument is a host to use - string value in the next form:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="s">&#39;http://your.host.org&#39;</span>
+</pre></div>
+</div>
+<p>The return value is a <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> with the JSON object containing a data usage and limits for the node.
+The same result you can get if you visit node server on the server by the <strong>api/nodes/me/</strong> on the browser,
+i.e. - <a class="reference external" href="http://node2.metadisk.org/api/nodes/me/">http://node2.metadisk.org/api/nodes/me/</a>.</p>
+<p>Here&#8217;s an example of usage the <code class="docutils literal"><span class="pre">metatool.core.info()</span></code> API function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;http://node2.metadisk.org/&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="go">{</span>
+<span class="go">  &quot;bandwidth&quot;: {</span>
+<span class="go">    &quot;current&quot;: {</span>
+<span class="go">      &quot;incoming&quot;: 0,</span>
+<span class="go">      &quot;outgoing&quot;: 0</span>
+<span class="go">    },</span>
+<span class="go">    &quot;limits&quot;: {</span>
+<span class="go">      &quot;incoming&quot;: null,</span>
+<span class="go">      &quot;outgoing&quot;: null</span>
+<span class="go">    },</span>
+<span class="go">    &quot;total&quot;: {</span>
+<span class="go">      &quot;incoming&quot;: 0,</span>
+<span class="go">      &quot;outgoing&quot;: 0</span>
+<span class="go">    }</span>
+<span class="go">  },</span>
+<span class="go">  &quot;public_key&quot;: &quot;13LWbTkeuu4Pz7nFd6jCEEAwLfYZsDJSnK&quot;,</span>
+<span class="go">  &quot;storage&quot;: {</span>
+<span class="go">    &quot;capacity&quot;: 524288000,</span>
+<span class="go">    &quot;max_file_size&quot;: 924391,</span>
+<span class="go">    &quot;used&quot;: 992874</span>
+<span class="go">  }</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="file-info">
+<h3>File Info<a class="headerlink" href="#file-info" title="Permalink to this headline">¶</a></h3>
+<p>You can get all files currently listed on the node by use the <code class="docutils literal"><span class="pre">metatool.core.files()</span></code> API function.
+All are the same as in previous function - provide an URL and you get <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> with the JSON object,
+but this time it&#8217;s a list of hashes available on the node. Use they for access to the files.
+The same result will be as you visit <a class="reference external" href="http://your.host.org/api/files">http://your.host.org/api/files</a> .</p>
+<p>In example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s">&#39;http://node2.metadisk.org/&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="go">[&#39;1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645&#39;,</span>
+<span class="go">&#39;103de8978a393c6479a092ce22cf04a6dd8876039c53b66df8384f361f60163c&#39;,</span>
+<span class="go">&#39;6f9745658c158a8b61b340164c9b899f26afbc0d823f5e4d2d92872b53eda9b0&#39;,</span>
+<span class="go">&#39;6da1054eef20b8949622f2acc5a89c3243ff3b3d7aa8c2bb8fa5c04d15113c00&#39;,</span>
+<span class="go">&#39;1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e&#39;,</span>
+<span class="go">&#39;51484ac97ae37f52655160d714eb2c6ac56909aa2d170cd7812e01c35544db23&#39;]</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
@@ -488,7 +534,7 @@ It ensures that the data passed to the endpoint has not been modified in transit
         <a href="cli_module.html" class="btn btn-neutral float-right" title="metatool.cli module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Welcome to MetaTool’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="package_reference.html" class="btn btn-neutral" title="metatool reference" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

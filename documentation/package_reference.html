@@ -1,0 +1,463 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>metatool reference &mdash; MetaTool 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="MetaTool 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="metatool.core module" href="core_module.html"/>
+        <link rel="prev" title="Welcome to MetaTool’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> MetaTool
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">metatool reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-file">metatool file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-info">metatool info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-upload">metatool upload</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-audit">metatool audit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-download">metatool download</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="core_module.html">metatool.core module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_module.html">metatool.cli module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">MetaTool</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>metatool reference</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/package_reference.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="metatool-reference">
+<h1>metatool reference<a class="headerlink" href="#metatool-reference" title="Permalink to this headline">¶</a></h1>
+<p>In general for running the application you may use the <strong>metatool</strong> terminal command with specified required arguments.
+For help <strong>information</strong> run <code class="docutils literal"><span class="pre">metatool</span></code> without arguments or with <code class="docutils literal"><span class="pre">-h</span></code>, <code class="docutils literal"><span class="pre">-help</span></code>, <code class="docutils literal"><span class="pre">--help</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool
+usage: METATOOL [-h] {audit,download,upload,files,info} ...
+
+This is the console app intended for interacting with the MetaCore server.
+
+positional arguments:
+...
+</pre></div>
+</div>
+<hr class="docutils" />
+<p>Syntax for usage of <strong>metatool</strong> is:</p>
+<div class="highlight-python"><div class="highlight"><pre>metatool &lt;action&gt; [ appropriate | arguments | for actions ] [--url URL_ADDRESS]
+</pre></div>
+</div>
+<p>The first required argument after <code class="docutils literal"><span class="pre">metatool</span></code> is an <strong>action</strong>. Namely one of
+<code class="docutils literal"><span class="pre">audit</span></code>,``download``,``files``,``info``,``upload``, each for an appropriate task.
+In example:</p>
+<div class="highlight-python"><div class="highlight"><pre>metatool info
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">--url</span></code> is the optional argument common for all the actions and defines
+the URL-address of the <strong>target server</strong>:</p>
+<div class="highlight-python"><div class="highlight"><pre>metatool info --url http://node2.metadisk.org/
+</pre></div>
+</div>
+<p>This example in truth don&#8217;t bring any obvious difference in results - by default the target server
+is <strong>http://node2.metadisk.org/</strong> as well.
+You can either set an system <em>environment variable - MEATADISKSERVER*</em> to
+provide target server instead of using the <code class="docutils literal"><span class="pre">--url</span></code> opt. argument.</p>
+<p>All of the actions defines set of original required arguments.
+Let us go through all of them!</p>
+<hr class="docutils" />
+<p>There are two the most simple <strong>actions</strong> with no arguments after, but mentioned above optional <code class="docutils literal"><span class="pre">--url</span></code>:</p>
+<div class="section" id="metatool-file">
+<h2>metatool file<a class="headerlink" href="#metatool-file" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool files
+200
+[&quot;d4a9cbadec60988e1da65ed7af31c538abada9cd663d7ac3091a00479e57ad5a&quot;]
+</pre></div>
+</div>
+<p>This command outputs the <em>response code</em> - <cite>200</cite> and all <em>hash-names</em> of uploaded files -
+<code class="docutils literal"><span class="pre">&quot;d4a9cbadec60988e1da65ed7af31c538abada9cd663d7ac3091a00479e57ad5a&quot;</span></code>.</p>
+</div>
+<div class="section" id="metatool-info">
+<h2>metatool info<a class="headerlink" href="#metatool-info" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool info
+200
+{
+  &quot;bandwidth&quot;: {
+    &quot;current&quot;: {
+      &quot;incoming&quot;: 0,
+      &quot;outgoing&quot;: 0
+    },
+    &quot;limits&quot;: {
+      &quot;incoming&quot;: null,
+      &quot;outgoing&quot;: null
+    },
+    &quot;total&quot;: {
+      &quot;incoming&quot;: 0,
+      &quot;outgoing&quot;: 0
+    }
+  },
+  &quot;public_key&quot;: &quot;13LWbTkeuu4Pz7nFd6jCEEAwLfYZsDJSnK&quot;,
+  &quot;storage&quot;: {
+    &quot;capacity&quot;: 524288000,
+    &quot;max_file_size&quot;: 18,
+    &quot;used&quot;: 18
+  }
+}
+</pre></div>
+</div>
+<p>Such a command outputs the <strong>response code</strong> - <code class="docutils literal"><span class="pre">200</span></code> and a content of the json file with the data usage of nodes, capacity, and public key.</p>
+<hr class="docutils" />
+<p>Other commands expect additional arguments after the <code class="docutils literal"><span class="pre">action</span></code>:</p>
+</div>
+<div class="section" id="metatool-upload">
+<h2>metatool upload<a class="headerlink" href="#metatool-upload" title="Permalink to this headline">¶</a></h2>
+<p>Common form:</p>
+<div class="highlight-python"><div class="highlight"><pre>metatool upload &lt;path_to_file&gt; [-r | --file_role &lt;FILE_ROLE&gt;]
+</pre></div>
+</div>
+<p>This command uploads the __file__ specified like required positional argument into the server
+with the default value of <code class="docutils literal"><span class="pre">__role__</span></code> - <strong>001</strong>:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool upload README.md
+201
+{
+  &quot;data_hash&quot;: &quot;fcd533cd12aa8a9e9ffc7ee0f53198cf76da551e211aff85d2a2ef35639f99e9&quot;,
+  &quot;file_role&quot;: &quot;001&quot;
+}
+</pre></div>
+</div>
+<p>Returned data is a printout of the <strong>response code</strong> - <code class="docutils literal"><span class="pre">201</span></code> and content of the json file with <strong>data_hash</strong> and <strong>role</strong> of the
+uploaded file.</p>
+<p>If you want to set the other value of <strong>file_role</strong> use optional argument <code class="docutils literal"><span class="pre">-r</span></code> or <code class="docutils literal"><span class="pre">--file_role</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool upload README.md --file_role 001
+201
+{
+  &quot;data_hash&quot;: &quot;76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695&quot;,
+  &quot;file_role&quot;: &quot;001&quot;
+}
+</pre></div>
+</div>
+<p>Metatool allow you to define behavior and accessibility of the file, while the uploading to the server.
+The way to do this is to define the <code class="docutils literal"><span class="pre">file_role</span></code> mentioned above, which is the set of three significant numbers:</p>
+<div class="highlight-python"><div class="highlight"><pre>[ &lt;payment&gt;  &lt;access&gt;  &lt;servable&gt; ]
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="32%" />
+<col width="44%" />
+<col width="14%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td rowspan="2">value</td>
+<td colspan="3">sort of the meaning</td>
+</tr>
+<tr class="row-even"><td>Payment</td>
+<td>Access</td>
+<td>Servable</td>
+</tr>
+<tr class="row-odd"><td>0</td>
+<td>Free</td>
+<td>Anyone can access</td>
+<td>False</td>
+</tr>
+<tr class="row-even"><td>1</td>
+<td>Paid by downloader</td>
+<td>Specified users can access</td>
+<td>True</td>
+</tr>
+<tr class="row-odd"><td>2</td>
+<td>Paid by owner</td>
+<td>Only owner can access</td>
+<td>&#8211;//&#8211;</td>
+</tr>
+</tbody>
+</table>
+<ol class="arabic">
+<li><p class="first"><strong>Payment value</strong> - defines who must pay for the downloading.</p>
+</li>
+<li><p class="first"><strong>Access value</strong> - defines who can access to the file on the server.</p>
+</li>
+<li><dl class="first docutils">
+<dt><strong>Servable value</strong> - defines whether the served data will be decrypted or not while the downloading.</dt>
+<dd><p class="first last">(it will be used only when decryption key is passed)</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>Under the above guidelines we create PAS codes to determine how a file is treated.
+For example, <strong>001</strong> would be a free public file that can be downloaded in plaintext.</p>
+</div>
+<div class="section" id="metatool-audit">
+<h2>metatool audit<a class="headerlink" href="#metatool-audit" title="Permalink to this headline">¶</a></h2>
+<p>Common usage:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool audit &lt;data_hash&gt; &lt;challenge_seed&gt;
+</pre></div>
+</div>
+<p>This <strong>action</strong> ensures the existence of files on the server.
+It requires two positional arguments (both compulsory):</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first"><code class="docutils literal"><span class="pre">file_hash</span></code> - hash-name of the file which you want to check out</p>
+</li>
+<li><dl class="first docutils">
+<dt><code class="docutils literal"><span class="pre">seed</span></code> - <strong>__challenge seed__</strong>, which is just a snippet of the data, purposed for generation a new original <strong>hash-sum</strong></dt>
+<dd><p class="first last">from <strong>file</strong> plus <strong>seed</strong>.</p>
+</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+<p>Be sure to put this arguments in the right order:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool audit 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 \
+&gt; 19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b
+201
+{
+  &quot;challenge_response&quot;: &quot;46ca26590762503ebe34fb44728536e295da480dcdc260088524321721b6ad93&quot;,
+  &quot;challenge_seed&quot;: &quot;19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b&quot;,
+  &quot;data_hash&quot;: &quot;76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695&quot;
+}
+</pre></div>
+</div>
+<p>Responce for the command is the <em>response code</em> - <code class="docutils literal"><span class="pre">201</span></code> and json with the data you was enter with the one additional item -
+<strong>`challenge_response`</strong> - the original <strong>hash</strong> mentioned above. You can compare it with an expected value.</p>
+</div>
+<div class="section" id="metatool-download">
+<h2>metatool download<a class="headerlink" href="#metatool-download" title="Permalink to this headline">¶</a></h2>
+<p>Common usage:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool download &lt;file_hash&gt; [--decryption_key KEY] [--rename_file NEW_NAME] [--link]
+</pre></div>
+</div>
+<p><strong>download</strong> action fetches the file from server. Here is one required argument - <strong>`file_hash`</strong> and two optional -
+<strong>`&#8211;decryption_key`</strong> and <strong>`&#8211;rename_file`</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>`file_hash`</strong> - hash-name of the needed file.</li>
+<li><strong>`&#8211;decryption_key`</strong> - key for the decryption file.</li>
+<li><strong>`&#8211;rename_file`</strong> - desired saving name (included path) of the downloaded file.</li>
+<li><strong>`&#8211;link`</strong> &#8211; will return the url GET request string instead of performing the downloading.</li>
+</ul>
+</div></blockquote>
+<p>Below is the example of commands and explanation for it.</p>
+<p>This command saves the file at the current directory under the hash-name; returns nothing in the console
+while operation complete successfully, otherwise shows an occured error:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool download 1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645
+/home/user/1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645
+</pre></div>
+</div>
+<p>This does the same but saves <strong>decrypted</strong> file:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 \
+ &gt; --decryption_key=%A3%B4e%EA%82%00%22%3A%C3%86%C0hn1%B3%F7%F7%F8%8EL7S%F3D%28%7C%85%95%CE%9D%D5B
+ /home/user/76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695
+</pre></div>
+</div>
+<p>In this case it will set a new name for the downloaded file:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool download 1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645 \
+&gt; --rename_file just_file.txt
+/home/user/just_file.txt
+</pre></div>
+</div>
+<p>You can either indicate a relative or full path to the directory with this name to save it:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ cd some_dir
+$ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 \
+&gt; --rename_file ../just_file.txt
+/home/user/just_file.txt
+
+$ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 \
+&gt; --rename_file /home/user/download/just_file.txt
+/home/user/download/just_file.txt
+</pre></div>
+</div>
+<p>You can even fetch the <strong>http request string</strong> and perform the downloading in example through
+the browser by passing <code class="docutils literal"><span class="pre">--link</span></code> optional argument.
+<strong>metatool</strong> than will not execute the downloading but will generate the appropriate <strong>URL</strong> string:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 --rename_file just_file.txt --link
+http://your.node.com/api/files/76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695?file_alias=just_file.md
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">Be careful with the choosing a name for saving - the program will rewrite files with the same name without warning!</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="core_module.html" class="btn btn-neutral float-right" title="metatool.core module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to MetaTool’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Eugene Viktorov.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

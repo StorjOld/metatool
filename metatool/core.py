@@ -150,9 +150,12 @@ def download(url_base, sender_key, btctx_api, file_hash,
     )
 
     if response.status_code == 200:
-        file_name = os.path.join(os.getcwd(),
-                                 response.headers['X-Sendfile'])
-
+        download_dir = os.path.dirname(response.headers['X-Sendfile'])
+        if download_dir:
+            if not os.path.exists(download_dir):
+                os.mkdir(download_dir)
+        file_name = os.path.join(os.path.abspath(
+                response.headers['X-Sendfile']))
         with open(file_name, 'wb') as fp:
             fp.write(response.content)
         return file_name
