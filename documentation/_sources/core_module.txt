@@ -87,7 +87,7 @@ Review of common arguments
     To get **test** ``sender_key`` you can use such a code::
 
         >>> from btctxstore import BtcTxStore
-        >>> btctx_api = btctxstore.BtcTxStore(testnet=True, dryrun=True)
+        >>> btctx_api = BtcTxStore(testnet=True, dryrun=True)
         >>> sender_key = btctx_api.create_key()
         >>> sender_key
         'cRVY2joZQcdSumgAmCNkKYfZQjGchsNdQK1hG1hviLjBGAr8Y2Fa'
@@ -127,7 +127,7 @@ Only required argument is a host to use - string value in the next form::
     'http://your.host.org'
 
 The return value is a response_ with the JSON object containing a data usage and limits for the node.
-The same result you can get if you visit node server on the server by the **api/nodes/me/** on the browser,
+The same result you can get if you visit the **/api/nodes/me/** path of the node server in browser,
 i.e. - http://node2.metadisk.org/api/nodes/me/.
 
 .. _response: http://docs.python-requests.org/en/latest/api/#requests.Response
@@ -167,13 +167,13 @@ File Info
 
 You can get all files currently listed on the node by use the ``metatool.core.files()`` API function.
 All are the same as in previous function - provide an URL and you get response_ with the JSON object,
-but this time it's a list of hashes available on the node. Use they for access to the files.
-The same result will be as you visit http://your.host.org/api/files .
+but this time it's a list of hash-names of files available on the node. Use they for access to the files.
+The same list will be represented if you visit http://your.host.org/api/files URL.
 
-.. _response: http://docs.python-requests.org/en/latest/api/#requests.Response
 
 In example::
 
+    >>> import json
     >>> response = metatool.core.files('http://node2.metadisk.org/')
     >>> json.loads(response.text)
     ['1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645',
@@ -183,3 +183,53 @@ In example::
     '1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e',
     '51484ac97ae37f52655160d714eb2c6ac56909aa2d170cd7812e01c35544db23']
 
+..
+
+POST Data
+"""""""""
+
+You can upload data via POST to an node with ``metatool.core.upload()`` function.
+It require ``url_base``, ``sender_key``, ``btctx_api`` arguments described at `Review of common arguments`_
+and two original arguments:
+
+:file:
+    It's a file object opened in the ``'rb'`` mode::
+
+        # file object should be opened in the binary mode!
+        file_obj = open('eggs.txt', 'rb')
+
+    :Note: File should not be larger than 128 MB.
+
+:file_role:
+    It's a string or integer of three numbers which define future behavior of the file on the server.
+    For example, ``'001'`` would be a free public file that can be downloaded in plaintext.
+    Look more at the :ref:`file-roles`.
+
+It returns the response_ object with such a JSON string::
+
+    {
+      "data_hash": "72937d081099a3326b05228e30e7ee8a0a05efac68ec2e8d3c6bf1ee4e5bda69",
+      "file_role": "101"
+    }
+
+Let's look at the example::
+
+    >>> import metatool
+    >>> from btctxstore import BtcTxStore
+    >>> import json
+    >>> file_obj = open('some_file.txt', 'rb')
+    >>> api = BtcTxStore(testnet=True, dryrun=True)
+    >>> sender_key = btctx_api.create_key()
+    >>> response = metatool.core.upload(
+    ...     url_base='http://localhost:5000',
+    ...     sender_key=sender_key,
+    ...     btctx_api=api,
+    ...     file=file_obj,
+    ...     file_role=101
+    ... )
+    >>> json.loads(response.text)
+    {'file_role': '101', 'data_hash': '76a97c878c9c7a8321bb395c2b44d3fe2f8d81314d219b20138ed0e2dddd5182'}
+
+:Note: repeated upload the file don't bring any effect - you will get the same response object,
+    like you're doing it in the very first time, but transmission wouldn't be performed, and
+    the old ``file_role`` **value will be retained**!!!

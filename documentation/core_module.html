@@ -32,7 +32,7 @@
   
     <link rel="top" title="MetaTool 1.0.0 documentation" href="index.html"/>
         <link rel="next" title="metatool.cli module" href="cli_module.html"/>
-        <link rel="prev" title="metatool reference" href="package_reference.html"/> 
+        <link rel="prev" title="metatool CLI reference" href="package_reference.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,7 +82,7 @@
             
             
                 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="package_reference.html">metatool reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package_reference.html">metatool CLI reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">metatool.core module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-metatool.core">MetaTool API specification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#metatool-api-guide">MetaTool API Guide</a><ul>
@@ -90,6 +90,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#review-of-common-arguments">Review of common arguments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#status-info">Status Info</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#file-info">File Info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post-data">POST Data</a></li>
 </ul>
 </li>
 </ul>
@@ -325,8 +326,8 @@ generating credentials required by the access to the server</li>
 <li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
 to generate credentials for the server access</li>
 <li><strong>file</strong> (<em>file object opened in the 'rb' mode</em>) &#8211; file object which will be uploaded to the server</li>
-<li><strong>file_role</strong> (<em>string</em>) &#8211; three numbers string which define future behavior of the
-file on the server. See more about it in the documentation</li>
+<li><strong>file_role</strong> (<em>integer</em>) &#8211; integer or string of three numbers which define future
+behavior of the file on the server (look more it in the documentation)</li>
 </ul>
 </td>
 </tr>
@@ -425,7 +426,7 @@ can be done in the <em>test</em> and <em>real</em> mode. This mode is defined in
 <tr class="field-odd field"><th class="field-name">sender_key:</th><td class="field-body"><p class="first">Unique private key that will be used for the generating credentials, required by the access to the server.</p>
 <p>To get <strong>test</strong> <code class="docutils literal"><span class="pre">sender_key</span></code> you can use such a code:</p>
 <div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">btctxstore</span> <span class="kn">import</span> <span class="n">BtcTxStore</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">btctx_api</span> <span class="o">=</span> <span class="n">btctxstore</span><span class="o">.</span><span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">btctx_api</span> <span class="o">=</span> <span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sender_key</span> <span class="o">=</span> <span class="n">btctx_api</span><span class="o">.</span><span class="n">create_key</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sender_key</span>
 <span class="go">&#39;cRVY2joZQcdSumgAmCNkKYfZQjGchsNdQK1hG1hviLjBGAr8Y2Fa&#39;</span>
@@ -472,7 +473,7 @@ Only required argument is a host to use - string value in the next form:</p>
 </pre></div>
 </div>
 <p>The return value is a <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> with the JSON object containing a data usage and limits for the node.
-The same result you can get if you visit node server on the server by the <strong>api/nodes/me/</strong> on the browser,
+The same result you can get if you visit the <strong>/api/nodes/me/</strong> path of the node server in browser,
 i.e. - <a class="reference external" href="http://node2.metadisk.org/api/nodes/me/">http://node2.metadisk.org/api/nodes/me/</a>.</p>
 <p>Here&#8217;s an example of usage the <code class="docutils literal"><span class="pre">metatool.core.info()</span></code> API function:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">json</span>
@@ -507,10 +508,11 @@ i.e. - <a class="reference external" href="http://node2.metadisk.org/api/nodes/m
 <h3>File Info<a class="headerlink" href="#file-info" title="Permalink to this headline">¶</a></h3>
 <p>You can get all files currently listed on the node by use the <code class="docutils literal"><span class="pre">metatool.core.files()</span></code> API function.
 All are the same as in previous function - provide an URL and you get <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> with the JSON object,
-but this time it&#8217;s a list of hashes available on the node. Use they for access to the files.
-The same result will be as you visit <a class="reference external" href="http://your.host.org/api/files">http://your.host.org/api/files</a> .</p>
+but this time it&#8217;s a list of hash-names of files available on the node. Use they for access to the files.
+The same list will be represented if you visit <a class="reference external" href="http://your.host.org/api/files">http://your.host.org/api/files</a> URL.</p>
 <p>In example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s">&#39;http://node2.metadisk.org/&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s">&#39;http://node2.metadisk.org/&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 <span class="go">[&#39;1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645&#39;,</span>
 <span class="go">&#39;103de8978a393c6479a092ce22cf04a6dd8876039c53b66df8384f361f60163c&#39;,</span>
@@ -520,6 +522,73 @@ The same result will be as you visit <a class="reference external" href="http://
 <span class="go">&#39;51484ac97ae37f52655160d714eb2c6ac56909aa2d170cd7812e01c35544db23&#39;]</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="post-data">
+<h3>POST Data<a class="headerlink" href="#post-data" title="Permalink to this headline">¶</a></h3>
+<p>You can upload data via POST to an node with <code class="docutils literal"><span class="pre">metatool.core.upload()</span></code> function.
+It require <code class="docutils literal"><span class="pre">url_base</span></code>, <code class="docutils literal"><span class="pre">sender_key</span></code>, <code class="docutils literal"><span class="pre">btctx_api</span></code> arguments described at <a class="reference internal" href="#review-of-common-arguments">Review of common arguments</a>
+and two original arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">file:</th><td class="field-body"><p class="first">It&#8217;s a file object opened in the <code class="docutils literal"><span class="pre">'rb'</span></code> mode:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># file object should be opened in the binary mode!</span>
+<span class="n">file_obj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;eggs.txt&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">File should not be larger than 128 MB.</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">file_role:</th><td class="field-body"><p class="first last">It&#8217;s a string or integer of three numbers which define future behavior of the file on the server.
+For example, <code class="docutils literal"><span class="pre">'001'</span></code> would be a free public file that can be downloaded in plaintext.
+Look more at the <a class="reference internal" href="package_reference.html#file-roles"><span>file roles</span></a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>It returns the <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> object with such a JSON string:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;data_hash&quot;</span><span class="p">:</span> <span class="s">&quot;72937d081099a3326b05228e30e7ee8a0a05efac68ec2e8d3c6bf1ee4e5bda69&quot;</span><span class="p">,</span>
+  <span class="s">&quot;file_role&quot;</span><span class="p">:</span> <span class="s">&quot;101&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Let&#8217;s look at the example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">metatool</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">btctxstore</span> <span class="kn">import</span> <span class="n">BtcTxStore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file_obj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;some_file.txt&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">api</span> <span class="o">=</span> <span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sender_key</span> <span class="o">=</span> <span class="n">btctx_api</span><span class="o">.</span><span class="n">create_key</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://localhost:5000&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sender_key</span><span class="o">=</span><span class="n">sender_key</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">btctx_api</span><span class="o">=</span><span class="n">api</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="nb">file</span><span class="o">=</span><span class="n">file_obj</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">file_role</span><span class="o">=</span><span class="mi">101</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="go">{&#39;file_role&#39;: &#39;101&#39;, &#39;data_hash&#39;: &#39;76a97c878c9c7a8321bb395c2b44d3fe2f8d81314d219b20138ed0e2dddd5182&#39;}</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">repeated upload the file don&#8217;t bring any effect - you will get the same response object,
+like you&#8217;re doing it in the very first time, but transmission wouldn&#8217;t be performed, and
+the old <code class="docutils literal"><span class="pre">file_role</span></code> <strong>value will be retained</strong>!!!</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -534,7 +603,7 @@ The same result will be as you visit <a class="reference external" href="http://
         <a href="cli_module.html" class="btn btn-neutral float-right" title="metatool.cli module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="package_reference.html" class="btn btn-neutral" title="metatool reference" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="package_reference.html" class="btn btn-neutral" title="metatool CLI reference" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

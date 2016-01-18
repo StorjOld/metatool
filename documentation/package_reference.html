@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>metatool reference &mdash; MetaTool 1.0.0 documentation</title>
+  <title>metatool CLI reference &mdash; MetaTool 1.0.0 documentation</title>
   
 
   
@@ -82,10 +82,13 @@
             
             
                 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">metatool reference</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="">metatool CLI reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#metatool-file">metatool file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#metatool-info">metatool info</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#metatool-upload">metatool upload</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metatool-upload">metatool upload</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-roles">file roles</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#metatool-audit">metatool audit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#metatool-download">metatool download</a></li>
 </ul>
@@ -122,7 +125,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>metatool reference</li>
+    <li>metatool CLI reference</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -136,8 +139,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="metatool-reference">
-<h1>metatool reference<a class="headerlink" href="#metatool-reference" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="metatool-cli-reference">
+<span id="id1"></span><h1>metatool CLI reference<a class="headerlink" href="#metatool-cli-reference" title="Permalink to this headline">¶</a></h1>
 <p>In general for running the application you may use the <strong>metatool</strong> terminal command with specified required arguments.
 For help <strong>information</strong> run <code class="docutils literal"><span class="pre">metatool</span></code> without arguments or with <code class="docutils literal"><span class="pre">-h</span></code>, <code class="docutils literal"><span class="pre">-help</span></code>, <code class="docutils literal"><span class="pre">--help</span></code>:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ metatool
@@ -242,6 +245,8 @@ uploaded file.</p>
 }
 </pre></div>
 </div>
+<div class="section" id="file-roles">
+<span id="id2"></span><h3>file roles<a class="headerlink" href="#file-roles" title="Permalink to this headline">¶</a></h3>
 <p>Metatool allow you to define behavior and accessibility of the file, while the uploading to the server.
 The way to do this is to define the <code class="docutils literal"><span class="pre">file_role</span></code> mentioned above, which is the set of three significant numbers:</p>
 <div class="highlight-python"><div class="highlight"><pre>[ &lt;payment&gt;  &lt;access&gt;  &lt;servable&gt; ]
@@ -293,6 +298,7 @@ The way to do this is to define the <code class="docutils literal"><span class="
 </ol>
 <p>Under the above guidelines we create PAS codes to determine how a file is treated.
 For example, <strong>001</strong> would be a free public file that can be downloaded in plaintext.</p>
+</div>
 </div>
 <div class="section" id="metatool-audit">
 <h2>metatool audit<a class="headerlink" href="#metatool-audit" title="Permalink to this headline">¶</a></h2>

@@ -103,6 +103,8 @@ response it will be shown instead of the success result.
         the **NEW_NAME** for the storing file on your disk. You can provide
         an relative and full path to the directory with this name as well.
 
+For more information about CLI look at the :ref:`metatool-CLI-reference`.
+
 -------------------
 
 metatool.cli function's specification

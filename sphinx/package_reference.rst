@@ -1,5 +1,7 @@
-metatool reference
-==================
+.. _metatool-CLI-reference:
+
+metatool CLI reference
+======================
 
 In general for running the application you may use the **metatool** terminal command with specified required arguments.
 For help **information** run ``metatool`` without arguments or with ``-h``, ``-help``, ``--help``::
@@ -119,6 +121,11 @@ If you want to set the other value of **file_role** use optional argument ``-r``
       "data_hash": "76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695",
       "file_role": "001"
     }
+
+.. _file-roles:
+
+file roles
+''''''''''
 
 Metatool allow you to define behavior and accessibility of the file, while the uploading to the server.
 The way to do this is to define the ``file_role`` mentioned above, which is the set of three significant numbers::
