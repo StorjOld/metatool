@@ -57,6 +57,8 @@ Ass result we see some json string with hash-names of the files uploaded to the 
 
 Next we will look at all API function closely.
 
+.. _common-arguments:
+
 Review of common arguments
 """"""""""""""""""""""""""
 
@@ -233,3 +235,137 @@ Let's look at the example::
 :Note: repeated upload the file don't bring any effect - you will get the same response object,
     like you're doing it in the very first time, but transmission wouldn't be performed, and
     the old ``file_role`` **value will be retained**!!!
+
+Download Data
+"""""""""""""
+
+``metatool.core.download()`` is the API MetaTool function, which downloads
+data from the node server. Type of returned data is depends on download status -
+if file is downloaded successfully returned data will be a **full path** to the saved file,
+otherwise it will be a response_ object with a response status code.
+
+Also, if the ``link`` optional argument will be provided like ``True``, instead of downloading
+appropriate GET URL-request string will be returned to perform the downloading manually,
+but available only for non-authenticated access, defined for each file by the ``file_role``::
+
+    >>> metatool.core.download(
+    ...     url_base='http://node2.metadisk.org',
+    ...     file_hash='1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e',
+    ...     link=True
+    ... )
+    ...
+    'http://node2.metadisk.org/api/files/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e'
+
+This mode of ``download()`` supports rendering of provided ``rename_file`` and ``decryption_key`` arguments::
+
+    >>> metatool.core.download(
+    ...     url_base='http://node2.metadisk.org',
+    ...     file_hash='1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e',
+    ...     rename_file='new_name.eggs',
+    ...     decryption_key='%A3%B4e%EA%82%00%22%3A%C3%86%C0hn1%B3%F7%F7%F8%8EL7S%F3D%28%7C%85%95%CE%9D%D5B',
+    ...     link=True
+    ... )
+    'http://node2.metadisk.org/api/files/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e?decryption_key=%25A3%25B4e%25EA%2582%2500%2522%253A%25C3%2586%25C0hn1%25B3%25F7%25F7%25F8%258EL7S%25F3D%2528%257C%2585%2595%25CE%259D%25D5B&file_alias=new_name.eggs'
+
+This function have all of the `common-arguments`_ and three additional arguments:
+
+:rename_file:
+    Optional argument which is a string value that defines a new name and place where to save the file:
+
+    - ``'new_name.txt'`` - downloaded file will be saved in the current work directory under this name
+    - ``'../love_me_tender.mp3'`` - the file will be saved at the parend directory under given name
+    - ``'/home/user/reptiles/eggs/spam.py'`` - file will be saved by the path regardless to the current
+      directory, but recursively creating intermediate directories in given path.
+
+    :Note: this operation can be restricted by the access-permissions (chmode_)
+
+    By default file will be saved under the ``file_hash`` value as name in the current directory.
+
+    .. _chmode: https://en.wikipedia.org/wiki/Chmod
+
+:decryption_key:
+    This is the optional argument - string which is a key to decrypt data in the course of downloading.
+
+    :Note: it require appropriate :ref:`file-roles` value - available only for the ``**1`` role variants
+
+:link:
+    It defines behaviour of the function:
+    - ``False`` - the default value, when the function performs the downloading
+    - ``True`` - function will generate the GET-request string for the given arguments
+
+        :Note:
+            ``True`` value implies free access to the file - the ``file_role`` should be
+            one of ``101``, ``001``.
+
+    Look for examples with ``link`` above.
+
+The most simple way of use is provide only required positional arguments, but as mentioned above - it's available
+only for the files with non-authenticated access (``'001', '101'`` role values)::
+
+    >>> import metatool
+    >>> metatool.core.download('http://node2.metadisk.org', '1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e')
+    '/home/jeka/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e'
+
+To download files with other ``file_role`` you should pass ``sender_key`` and  ``btctx_api`` optional `common-arguments`_:
+
+    >>> import metatool
+    >>> from btctxstore import BtcTxStore
+    >>> btctx_api = BtcTxStore(testnet=True, dryrun=True)
+    >>> sender_key = btctx_api.create_key()
+    >>> metatool.core.download(
+    ...    url_base='http://localhost:5000',
+    ...    file_hash="374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38",
+    ...    sender_key=sender_key,
+    ...    btctx_api=btctx_api
+    ... )
+    '/home/user/374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38'
+
+Because of arguments ``sender_key`` and ``btctx_api`` in this function are optional they can be omitted,
+but you can't provide only one of them, they should be given at the same time.
+
+If you try to download file with invalid credentials function will return response object with occurred error status::
+
+    >>> response = metatool.core.download(
+    ...    url_base='http://localhost:5000',
+    ...    file_hash="374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38",
+    ...    sender_key=lame_sender_key,
+    ...    btctx_api=btctx_api
+    ... )
+    >>> print(response.text)
+    {
+      "error_code": 401
+    }
+
+File Audit
+""""""""""
+
+This function calculates the SHA-256 hash of a file plus some seed.
+The reason for this is to ensure the existence of files on the server.
+
+It requires all of the `common-arguments`_ and one original argument:
+
+:seed:
+    Challenge seed should be a SHA-256 hash of that you would like to add
+    to the file data to generate a challenge response.
+
+Here is an example of usage ``metatool.core.audit()``::
+
+    >>> response = metatool.core.audit(
+    ...     url_base='http://localhost:5000',
+    ...     file_hash="374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38",
+    ...     sender_key=sender_key,
+    ...     btctx_api=btctx_api,
+    ...     seed='19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b')
+    ... )
+    >>> print(response.text)
+    {
+      "challenge_response": "b766fa69c14d453433af277ea56a82253f7fd8fa17c286f028f154533ce60d56",
+      "challenge_seed": "19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b",
+      "data_hash": "374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38"
+    }
+
+..
+
+-------------------
+
+That's it, for the detailed specification look at the `MetaTool API specification`_ .

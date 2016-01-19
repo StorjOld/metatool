@@ -146,8 +146,8 @@ The way to do this is to define the ``file_role`` mentioned above, which is the 
 
 1. **Payment value** - defines who must pay for the downloading.
 2. **Access value** - defines who can access to the file on the server.
-3. **Servable value** - defines whether the served data will be decrypted or not while the downloading.
-                        (it will be used only when decryption key is passed)
+3. **Servable value** - defines whether the served data will be decrypted
+   or not while the downloading (it will be used only when decryption key is passed)
 
 Under the above guidelines we create PAS codes to determine how a file is treated.
 For example, **001** would be a free public file that can be downloaded in plaintext.
@@ -162,9 +162,9 @@ Common usage::
 This **action** ensures the existence of files on the server.
 It requires two positional arguments (both compulsory):
 
-    1. ``file_hash`` - hash-name of the file which you want to check out
-    2. ``seed`` - **__challenge seed__**, which is just a snippet of the data, purposed for generation a new original **hash-sum**
-        from **file** plus **seed**.
+    1. ``file_hash`` - hash-name of the file which you want to check out.
+    2. ``seed`` - challenge seed, which is just a snippet of the data,
+       purposed for generation a new original **hash-sum** from **file** plus **seed**.
 
 Be sure to put this arguments in the right order::
 

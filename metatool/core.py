@@ -62,7 +62,7 @@ def audit(url_base, sender_key, btctx_api, file_hash, seed):
     return response
 
 
-def download(url_base, sender_key, btctx_api, file_hash,
+def download(url_base, file_hash, sender_key=None, btctx_api=None,
              rename_file=None, decryption_key=None, link=False):
     """
     It performs the downloading of the file from the server
@@ -82,10 +82,14 @@ def download(url_base, sender_key, btctx_api, file_hash,
 
     :param sender_key: unique secret key which will be used for the
         generating credentials required by the access to the server
+
+        (optional, default: None)
     :type sender_key: string
 
     :param btctx_api: instance of the ``BtcTxStore`` class which will be used
         to generate credentials for the server access
+
+        (optional, default: None)
     :type btctx_api: btctxstore.BtcTxStore object
 
     :param file_hash: hash-name of the file you are going to audit
@@ -122,6 +126,7 @@ def download(url_base, sender_key, btctx_api, file_hash,
     """
     url_for_requests = urljoin(url_base, '/api/files/' + file_hash)
 
+    # dict where to collect GET parameters
     params = {}
     if decryption_key:
         params['decryption_key'] = decryption_key
@@ -136,13 +141,17 @@ def download(url_base, sender_key, btctx_api, file_hash,
         request_string = request.prepare()
         return request_string.url
 
-    signature = btctx_api.sign_unicode(sender_key, file_hash)
-    sender_address = btctx_api.get_address(sender_key)
-
-    data_for_requests['headers'] = {
-        'sender-address': sender_address,
-        'signature': signature,
-    }
+    if sender_key or btctx_api:
+        if not (sender_key and btctx_api):
+            raise TypeError("arguments 'sender_key' and 'btctx_api' "
+                            "should be provided together")
+        else:
+            signature = btctx_api.sign_unicode(sender_key, file_hash)
+            sender_address = btctx_api.get_address(sender_key)
+            data_for_requests['headers'] = {
+                'sender-address': sender_address,
+                'signature': signature,
+            }
 
     response = requests.get(
         url_for_requests,
@@ -155,7 +164,7 @@ def download(url_base, sender_key, btctx_api, file_hash,
         download_dir = os.path.dirname(file_name)
         if download_dir:
             if not os.path.exists(download_dir):
-                os.mkdir(download_dir)
+                os.makedirs(download_dir)
         with open(file_name, 'wb') as fp:
             fp.write(response.content)
         return file_name

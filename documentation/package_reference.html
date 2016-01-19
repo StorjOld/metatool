@@ -284,17 +284,11 @@ The way to do this is to define the <code class="docutils literal"><span class="
 </tr>
 </tbody>
 </table>
-<ol class="arabic">
-<li><p class="first"><strong>Payment value</strong> - defines who must pay for the downloading.</p>
-</li>
-<li><p class="first"><strong>Access value</strong> - defines who can access to the file on the server.</p>
-</li>
-<li><dl class="first docutils">
-<dt><strong>Servable value</strong> - defines whether the served data will be decrypted or not while the downloading.</dt>
-<dd><p class="first last">(it will be used only when decryption key is passed)</p>
-</dd>
-</dl>
-</li>
+<ol class="arabic simple">
+<li><strong>Payment value</strong> - defines who must pay for the downloading.</li>
+<li><strong>Access value</strong> - defines who can access to the file on the server.</li>
+<li><strong>Servable value</strong> - defines whether the served data will be decrypted
+or not while the downloading (it will be used only when decryption key is passed)</li>
 </ol>
 <p>Under the above guidelines we create PAS codes to determine how a file is treated.
 For example, <strong>001</strong> would be a free public file that can be downloaded in plaintext.</p>
@@ -309,15 +303,10 @@ For example, <strong>001</strong> would be a free public file that can be downlo
 <p>This <strong>action</strong> ensures the existence of files on the server.
 It requires two positional arguments (both compulsory):</p>
 <blockquote>
-<div><ol class="arabic">
-<li><p class="first"><code class="docutils literal"><span class="pre">file_hash</span></code> - hash-name of the file which you want to check out</p>
-</li>
-<li><dl class="first docutils">
-<dt><code class="docutils literal"><span class="pre">seed</span></code> - <strong>__challenge seed__</strong>, which is just a snippet of the data, purposed for generation a new original <strong>hash-sum</strong></dt>
-<dd><p class="first last">from <strong>file</strong> plus <strong>seed</strong>.</p>
-</dd>
-</dl>
-</li>
+<div><ol class="arabic simple">
+<li><code class="docutils literal"><span class="pre">file_hash</span></code> - hash-name of the file which you want to check out.</li>
+<li><code class="docutils literal"><span class="pre">seed</span></code> - challenge seed, which is just a snippet of the data,
+purposed for generation a new original <strong>hash-sum</strong> from <strong>file</strong> plus <strong>seed</strong>.</li>
 </ol>
 </div></blockquote>
 <p>Be sure to put this arguments in the right order:</p>

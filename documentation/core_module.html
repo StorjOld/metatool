@@ -91,6 +91,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#status-info">Status Info</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#file-info">File Info</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#post-data">POST Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-data">Download Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-audit">File Audit</a></li>
 </ul>
 </li>
 </ul>
@@ -184,7 +186,7 @@ information about the server issue</p>
 
 <dl class="function">
 <dt id="metatool.core.download">
-<code class="descclassname">metatool.core.</code><code class="descname">download</code><span class="sig-paren">(</span><em>url_base</em>, <em>sender_key</em>, <em>btctx_api</em>, <em>file_hash</em>, <em>rename_file=None</em>, <em>decryption_key=None</em>, <em>link=False</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.download" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">metatool.core.</code><code class="descname">download</code><span class="sig-paren">(</span><em>url_base</em>, <em>file_hash</em>, <em>sender_key=None</em>, <em>btctx_api=None</em>, <em>rename_file=None</em>, <em>decryption_key=None</em>, <em>link=False</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.download" title="Permalink to this definition">¶</a></dt>
 <dd><p>It performs the downloading of the file from the server
 by the given <code class="docutils literal"><span class="pre">file_hash</span></code>.
 If <code class="docutils literal"><span class="pre">link=True</span></code> will return GET-request URL-string instead of download,
@@ -207,10 +209,14 @@ when such has occurred.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>url_base</strong> (<em>string</em>) &#8211; URL-string which defines the server will be used</li>
-<li><strong>sender_key</strong> (<em>string</em>) &#8211; unique secret key which will be used for the
-generating credentials required by the access to the server</li>
-<li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
-to generate credentials for the server access</li>
+<li><strong>sender_key</strong> (<em>string</em>) &#8211; <p>unique secret key which will be used for the
+generating credentials required by the access to the server</p>
+<p>(optional, default: None)</p>
+</li>
+<li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; <p>instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
+to generate credentials for the server access</p>
+<p>(optional, default: None)</p>
+</li>
 <li><strong>file_hash</strong> (<em>string</em>) &#8211; hash-name of the file you are going to audit</li>
 <li><strong>rename_file</strong> (<em>string</em>) &#8211; <p>defines new name of the file after downloading</p>
 <p>(optional, default: None)</p>
@@ -390,7 +396,7 @@ Ass result we see some json string with hash-names of the files uploaded to the 
 <p>Next we will look at all API function closely.</p>
 </div>
 <div class="section" id="review-of-common-arguments">
-<h3>Review of common arguments<a class="headerlink" href="#review-of-common-arguments" title="Permalink to this headline">¶</a></h3>
+<span id="common-arguments"></span><h3>Review of common arguments<a class="headerlink" href="#review-of-common-arguments" title="Permalink to this headline">¶</a></h3>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -589,6 +595,158 @@ the old <code class="docutils literal"><span class="pre">file_role</span></code>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="section" id="download-data">
+<h3>Download Data<a class="headerlink" href="#download-data" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">metatool.core.download()</span></code> is the API MetaTool function, which downloads
+data from the node server. Type of returned data is depends on download status -
+if file is downloaded successfully returned data will be a <strong>full path</strong> to the saved file,
+otherwise it will be a <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> object with a response status code.</p>
+<p>Also, if the <code class="docutils literal"><span class="pre">link</span></code> optional argument will be provided like <code class="docutils literal"><span class="pre">True</span></code>, instead of downloading
+appropriate GET URL-request string will be returned to perform the downloading manually,
+but available only for non-authenticated access, defined for each file by the <code class="docutils literal"><span class="pre">file_role</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">download</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://node2.metadisk.org&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">file_hash</span><span class="o">=</span><span class="s">&#39;1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">link</span><span class="o">=</span><span class="bp">True</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">&#39;http://node2.metadisk.org/api/files/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e&#39;</span>
+</pre></div>
+</div>
+<p>This mode of <code class="docutils literal"><span class="pre">download()</span></code> supports rendering of provided <code class="docutils literal"><span class="pre">rename_file</span></code> and <code class="docutils literal"><span class="pre">decryption_key</span></code> arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">download</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://node2.metadisk.org&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">file_hash</span><span class="o">=</span><span class="s">&#39;1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">rename_file</span><span class="o">=</span><span class="s">&#39;new_name.eggs&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">decryption_key</span><span class="o">=</span><span class="s">&#39;%A3%B4e</span><span class="si">%E</span><span class="s">A</span><span class="si">%82%</span><span class="s">00</span><span class="si">%22%</span><span class="s">3A%C3</span><span class="si">%86%</span><span class="s">C0hn1%B3</span><span class="si">%F</span><span class="s">7</span><span class="si">%F</span><span class="s">7</span><span class="si">%F</span><span class="s">8</span><span class="si">%8E</span><span class="s">L7S</span><span class="si">%F</span><span class="s">3D</span><span class="si">%28%</span><span class="s">7C</span><span class="si">%85%</span><span class="s">95%CE%9D%D5B&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">link</span><span class="o">=</span><span class="bp">True</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">&#39;http://node2.metadisk.org/api/files/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e?decryption_key=%25A3%25B4e%25EA%2582%2500%2522%253A%25C3%2586%25C0hn1%25B3%25F7%25F7%25F8%258EL7S%25F3D%2528%257C%2585%2595%25CE%259D%25D5B&amp;file_alias=new_name.eggs&#39;</span>
+</pre></div>
+</div>
+<p>This function have all of the <a class="reference internal" href="#common-arguments">common-arguments</a> and three additional arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rename_file:</th><td class="field-body"><p class="first">Optional argument which is a string value that defines a new name and place where to save the file:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">'new_name.txt'</span></code> - downloaded file will be saved in the current work directory under this name</li>
+<li><code class="docutils literal"><span class="pre">'../love_me_tender.mp3'</span></code> - the file will be saved at the parend directory under given name</li>
+<li><code class="docutils literal"><span class="pre">'/home/user/reptiles/eggs/spam.py'</span></code> - file will be saved by the path regardless to the current
+directory, but recursively creating intermediate directories in given path.</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">this operation can be restricted by the access-permissions (<a class="reference external" href="https://en.wikipedia.org/wiki/Chmod">chmode</a>)</td>
+</tr>
+</tbody>
+</table>
+<p>By default file will be saved under the <code class="docutils literal"><span class="pre">file_hash</span></code> value as name in the current directory.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">decryption_key:</th><td class="field-body"><p class="first">This is the optional argument - string which is a key to decrypt data in the course of downloading.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">it require appropriate <a class="reference internal" href="package_reference.html#file-roles"><span>file roles</span></a> value - available only for the <code class="docutils literal"><span class="pre">**1</span></code> role variants</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">link:</th><td class="field-body"><p class="first">It defines behaviour of the function:
+- <code class="docutils literal"><span class="pre">False</span></code> - the default value, when the function performs the downloading
+- <code class="docutils literal"><span class="pre">True</span></code> - function will generate the GET-request string for the given arguments</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body"><code class="docutils literal"><span class="pre">True</span></code> value implies free access to the file - the <code class="docutils literal"><span class="pre">file_role</span></code> should be
+one of <code class="docutils literal"><span class="pre">101</span></code>, <code class="docutils literal"><span class="pre">001</span></code>.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p class="last">Look for examples with <code class="docutils literal"><span class="pre">link</span></code> above.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The most simple way of use is provide only required positional arguments, but as mentioned above - it&#8217;s available
+only for the files with non-authenticated access (<code class="docutils literal"><span class="pre">'001',</span> <span class="pre">'101'</span></code> role values):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">metatool</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s">&#39;http://node2.metadisk.org&#39;</span><span class="p">,</span> <span class="s">&#39;1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e&#39;</span><span class="p">)</span>
+<span class="go">&#39;/home/jeka/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e&#39;</span>
+</pre></div>
+</div>
+<p>To download files with other <code class="docutils literal"><span class="pre">file_role</span></code> you should pass <code class="docutils literal"><span class="pre">sender_key</span></code> and  <code class="docutils literal"><span class="pre">btctx_api</span></code> optional <a class="reference internal" href="#common-arguments">common-arguments</a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">metatool</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">btctxstore</span> <span class="kn">import</span> <span class="n">BtcTxStore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">btctx_api</span> <span class="o">=</span> <span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sender_key</span> <span class="o">=</span> <span class="n">btctx_api</span><span class="o">.</span><span class="n">create_key</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">download</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://localhost:5000&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">file_hash</span><span class="o">=</span><span class="s">&quot;374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38&quot;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">sender_key</span><span class="o">=</span><span class="n">sender_key</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">btctx_api</span><span class="o">=</span><span class="n">btctx_api</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">&#39;/home/user/374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38&#39;</span>
+</pre></div>
+</div>
+<p>Because of arguments <code class="docutils literal"><span class="pre">sender_key</span></code> and <code class="docutils literal"><span class="pre">btctx_api</span></code> in this function are optional they can be omitted,
+but you can&#8217;t provide only one of them, they should be given at the same time.</p>
+<p>If you try to download file with invalid credentials function will return response object with occurred error status:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">download</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://localhost:5000&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">file_hash</span><span class="o">=</span><span class="s">&quot;374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38&quot;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">sender_key</span><span class="o">=</span><span class="n">lame_sender_key</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">btctx_api</span><span class="o">=</span><span class="n">btctx_api</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="go">{</span>
+<span class="go">  &quot;error_code&quot;: 401</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="file-audit">
+<h3>File Audit<a class="headerlink" href="#file-audit" title="Permalink to this headline">¶</a></h3>
+<p>This function calculates the SHA-256 hash of a file plus some seed.
+The reason for this is to ensure the existence of files on the server.</p>
+<p>It requires all of the <a class="reference internal" href="#common-arguments">common-arguments</a> and one original argument:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">seed:</th><td class="field-body">Challenge seed should be a SHA-256 hash of that you would like to add
+to the file data to generate a challenge response.</td>
+</tr>
+</tbody>
+</table>
+<p>Here is an example of usage <code class="docutils literal"><span class="pre">metatool.core.audit()</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">audit</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://localhost:5000&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">file_hash</span><span class="o">=</span><span class="s">&quot;374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sender_key</span><span class="o">=</span><span class="n">sender_key</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">btctx_api</span><span class="o">=</span><span class="n">btctx_api</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">seed</span><span class="o">=</span><span class="s">&#39;19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b&#39;</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="go">{</span>
+<span class="go">  &quot;challenge_response&quot;: &quot;b766fa69c14d453433af277ea56a82253f7fd8fa17c286f028f154533ce60d56&quot;,</span>
+<span class="go">  &quot;challenge_seed&quot;: &quot;19b25856e1c150ca834cffc8b59b23adbd0ec0389e58eb22b3b64768098d002b&quot;,</span>
+<span class="go">  &quot;data_hash&quot;: &quot;374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38&quot;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<hr class="docutils" />
+<p>That&#8217;s it, for the detailed specification look at the <a class="reference internal" href="#metatool-api-specification">MetaTool API specification</a> .</p>
 </div>
 </div>
 </div>
