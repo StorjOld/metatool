@@ -207,6 +207,10 @@ and two original arguments:
     For example, ``'001'`` would be a free public file that can be downloaded in plaintext.
     Look more at the :ref:`file-roles`.
 
+    :Note: Be sure to use strings - if you pass the role like integer ``001``
+        instead of ``'001'`` passed value will be ``1`` and upload will fail.
+        It can confuse, because the integer value ``101`` will be processed fine.
+
 It returns the response_ object with such a JSON string::
 
     {

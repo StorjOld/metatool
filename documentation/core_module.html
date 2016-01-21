@@ -332,7 +332,7 @@ generating credentials required by the access to the server</li>
 <li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
 to generate credentials for the server access</li>
 <li><strong>file</strong> (<em>file object opened in the 'rb' mode</em>) &#8211; file object which will be uploaded to the server</li>
-<li><strong>file_role</strong> (<em>integer</em>) &#8211; string of three numbers which define future
+<li><strong>file_role</strong> (<em>string</em>) &#8211; string of three numbers which define future
 behavior of the file on the server (look more it in the documentation)</li>
 </ul>
 </td>
@@ -553,9 +553,19 @@ and two original arguments:</p>
 </table>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">file_role:</th><td class="field-body"><p class="first last">It&#8217;s a string of three numbers which define future behavior of the file on the server.
+<tr class="field-even field"><th class="field-name">file_role:</th><td class="field-body"><p class="first">It&#8217;s a string of three numbers which define future behavior of the file on the server.
 For example, <code class="docutils literal"><span class="pre">'001'</span></code> would be a free public file that can be downloaded in plaintext.
 Look more at the <a class="reference internal" href="package_reference.html#file-roles"><span>file roles</span></a>.</p>
+<table class="last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">Be sure to use strings - if you pass the role like integer <code class="docutils literal"><span class="pre">001</span></code>
+instead of <code class="docutils literal"><span class="pre">'001'</span></code> passed value will be <code class="docutils literal"><span class="pre">1</span></code> and upload will fail.
+It can confuse, because the integer value <code class="docutils literal"><span class="pre">101</span></code> will be processed fine.</td>
+</tr>
+</tbody>
+</table>
 </td>
 </tr>
 </tbody>

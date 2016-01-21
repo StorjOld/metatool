@@ -82,16 +82,15 @@ class TestCoreInfo(unittest.TestCase):
             '``requests.get()``'
         )
 
+
 class TestCoreUpload(unittest.TestCase):
     """
     Test of the ``metatool.core.upload()`` API function.
     """
-
     def setUp(self):
         self.post_patch = patch('requests.post')
         self.mock_post = self.post_patch.start()
         self.mock_post.return_value = Response()
-        self.maxDiff = None
 
     def tearDown(self):
         self.post_patch.stop()
@@ -120,7 +119,7 @@ class TestCoreUpload(unittest.TestCase):
             upload_call_result = core.upload(test_url_address, sender_key,
                                              btctx_api, temp_file_obj,
                                              file_role)
-            expected_call = [call(
+            expected_calls = [call(
                     urljoin(test_url_address, '/api/files/'),
                     data={
                         'data_hash': data_hash,
@@ -136,7 +135,9 @@ class TestCoreUpload(unittest.TestCase):
 
         self.assertListEqual(
             self.mock_post.call_args_list,
-            expected_call
+            expected_calls,
+            'In the upload() function requests.post() calls are unexpected'
+
         )
         self.assertIs(
             self.mock_post.return_value,
@@ -145,16 +146,15 @@ class TestCoreUpload(unittest.TestCase):
             '``requests.get()``'
         )
 
+
 class TestCoreAudit(unittest.TestCase):
     """
     Test of the ``metatool.core.audit()`` API function.
     """
-
     def setUp(self):
         self.post_patch = patch('requests.post')
         self.mock_post = self.post_patch.start()
         self.mock_post.return_value = Response()
-        self.maxDiff = None
 
     def tearDown(self):
         self.post_patch.stop()
@@ -170,9 +170,9 @@ class TestCoreAudit(unittest.TestCase):
         btctx_api = BtcTxStore(testnet=True, dryrun=True)
         sender_key = btctx_api.create_key()
         audit_call_result = core.audit(test_url_address, sender_key,
-                                         btctx_api, file_hash, seed)
+                                       btctx_api, file_hash, seed)
 
-        expected_call = [call(
+        expected_calls = [call(
                 urljoin(test_url_address, '/api/audit/'),
                 data={
                     'data_hash': file_hash,
@@ -183,10 +183,10 @@ class TestCoreAudit(unittest.TestCase):
                     'signature': btctx_api.sign_unicode(sender_key, file_hash),
                 }
         )]
-
         self.assertListEqual(
             self.mock_post.call_args_list,
-            expected_call
+            expected_calls,
+            'In the audit() function requests.post() calls are unexpected'
         )
         self.assertIs(
             self.mock_post.return_value,
@@ -194,3 +194,45 @@ class TestCoreAudit(unittest.TestCase):
             'Returned value must be the object returned by the '
             '``requests.get()``'
         )
+
+
+class TestCoreDownload(unittest.TestCase):
+    """
+    Test case for the ``metatool.core.download()`` API function.
+    """
+    def setUp(self):
+        self.post_patch = patch('requests.get')
+        self.mock_post = self.post_patch.start()
+        self.mock_post.return_value = Response()
+
+    def tearDown(self):
+        self.post_patch.stop()
+
+    def test_bad_response(self):
+        """
+        Test of returning gotten response object when it's status is not 200.
+        """
+        test_url_address = 'http://test.url.com'
+        file_hash = sha256(b'some test data').hexdigest()
+        test_data_for_requests = dict(params={})
+
+        download_call_result = core.download(test_url_address, file_hash)
+        expected_calls = [call(
+            urljoin(test_url_address, '/api/files/' + file_hash),
+            **test_data_for_requests
+        )]
+
+        self.assertListEqual(
+            self.mock_post.call_args_list,
+            expected_calls,
+            'In the download() function requests.post() calls are unexpected'
+
+        )
+        self.assertIs(
+            self.mock_post.return_value,
+            download_call_result,
+            'Returned value must be the object returned by the '
+            '``requests.get()``'
+        )
+
+
