@@ -203,7 +203,7 @@ and two original arguments:
     :Note: File should not be larger than 128 MB.
 
 :file_role:
-    It's a string or integer of three numbers which define future behavior of the file on the server.
+    It's a string of three numbers which define future behavior of the file on the server.
     For example, ``'001'`` would be a free public file that can be downloaded in plaintext.
     Look more at the :ref:`file-roles`.
 
@@ -214,25 +214,25 @@ It returns the response_ object with such a JSON string::
       "file_role": "101"
     }
 
-Let's look at the example::
+Let's look at the example:
 
     >>> import metatool
     >>> from btctxstore import BtcTxStore
     >>> import json
     >>> file_obj = open('some_file.txt', 'rb')
-    >>> api = BtcTxStore(testnet=True, dryrun=True)
+    >>> btctx_api = BtcTxStore(testnet=True, dryrun=True)
     >>> sender_key = btctx_api.create_key()
     >>> response = metatool.core.upload(
     ...     url_base='http://localhost:5000',
     ...     sender_key=sender_key,
-    ...     btctx_api=api,
+    ...     btctx_api=btctx_api,
     ...     file=file_obj,
-    ...     file_role=101
+    ...     file_role='101'
     ... )
     >>> json.loads(response.text)
     {'file_role': '101', 'data_hash': '76a97c878c9c7a8321bb395c2b44d3fe2f8d81314d219b20138ed0e2dddd5182'}
 
-:Note: repeated upload the file don't bring any effect - you will get the same response object,
+:Note: reload of any file don't bring any effect - you will get the same response object,
     like you're doing it in the very first time, but transmission wouldn't be performed, and
     the old ``file_role`` **value will be retained**!!!
 

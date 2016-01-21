@@ -193,9 +193,8 @@ def upload(url_base, sender_key, btctx_api, file, file_role):
     :param file: file object which will be uploaded to the server
     :type file: file object opened in the 'rb' mode
 
-    :param file_role: integer or string of three numbers which define future
+    :param file_role: string of three numbers which define future
         behavior of the file on the server (look more it in the documentation)
-    :type file_role: string
     :type file_role: integer
 
     :returns: response instance with the results of uploading or with

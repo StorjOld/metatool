@@ -18,7 +18,7 @@ else:
     from mock import patch, Mock, call, mock_open
 
 
-class TestMainShowDataFunction(unittest.TestCase):
+class TestCliShowDataFunction(unittest.TestCase):
     """
     Test case of the metatool.__main__.show_data() function.
     """
@@ -52,7 +52,7 @@ class TestMainShowDataFunction(unittest.TestCase):
         )
 
 
-class TestMainParseFunction(unittest.TestCase):
+class TestCliParseFunction(unittest.TestCase):
     """
     Test case of the metatool.__main__.parse() function.
     """
@@ -237,7 +237,7 @@ class TestMainParseFunction(unittest.TestCase):
         self.assertEqual(parsed_args.execute_case, core.files)
 
 
-class TestMainArgumentsPreparation(unittest.TestCase):
+class TestCliArgumentsPreparation(unittest.TestCase):
     def test_get_all_func_args(self):
         """
         Test of accurate discovery of required arguments of the function.
@@ -297,7 +297,7 @@ class TestMainArgumentsPreparation(unittest.TestCase):
         )
 
 
-class TestMainStarter(unittest.TestCase):
+class TestCliStarter(unittest.TestCase):
 
     @staticmethod
     def sys_stdout_help_run(tested_callable, etalon_callable, *args):

@@ -332,7 +332,7 @@ generating credentials required by the access to the server</li>
 <li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
 to generate credentials for the server access</li>
 <li><strong>file</strong> (<em>file object opened in the 'rb' mode</em>) &#8211; file object which will be uploaded to the server</li>
-<li><strong>file_role</strong> (<em>integer</em>) &#8211; integer or string of three numbers which define future
+<li><strong>file_role</strong> (<em>integer</em>) &#8211; string of three numbers which define future
 behavior of the file on the server (look more it in the documentation)</li>
 </ul>
 </td>
@@ -553,7 +553,7 @@ and two original arguments:</p>
 </table>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">file_role:</th><td class="field-body"><p class="first last">It&#8217;s a string or integer of three numbers which define future behavior of the file on the server.
+<tr class="field-even field"><th class="field-name">file_role:</th><td class="field-body"><p class="first last">It&#8217;s a string of three numbers which define future behavior of the file on the server.
 For example, <code class="docutils literal"><span class="pre">'001'</span></code> would be a free public file that can be downloaded in plaintext.
 Look more at the <a class="reference internal" href="package_reference.html#file-roles"><span>file roles</span></a>.</p>
 </td>
@@ -572,14 +572,14 @@ Look more at the <a class="reference internal" href="package_reference.html#file
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">btctxstore</span> <span class="kn">import</span> <span class="n">BtcTxStore</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">json</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">file_obj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;some_file.txt&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">api</span> <span class="o">=</span> <span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">btctx_api</span> <span class="o">=</span> <span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sender_key</span> <span class="o">=</span> <span class="n">btctx_api</span><span class="o">.</span><span class="n">create_key</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://localhost:5000&#39;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">sender_key</span><span class="o">=</span><span class="n">sender_key</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">btctx_api</span><span class="o">=</span><span class="n">api</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">btctx_api</span><span class="o">=</span><span class="n">btctx_api</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="nb">file</span><span class="o">=</span><span class="n">file_obj</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">file_role</span><span class="o">=</span><span class="mi">101</span>
+<span class="gp">... </span>    <span class="n">file_role</span><span class="o">=</span><span class="s">&#39;101&#39;</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 <span class="go">{&#39;file_role&#39;: &#39;101&#39;, &#39;data_hash&#39;: &#39;76a97c878c9c7a8321bb395c2b44d3fe2f8d81314d219b20138ed0e2dddd5182&#39;}</span>
@@ -589,7 +589,7 @@ Look more at the <a class="reference internal" href="package_reference.html#file
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">repeated upload the file don&#8217;t bring any effect - you will get the same response object,
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">reload of any file don&#8217;t bring any effect - you will get the same response object,
 like you&#8217;re doing it in the very first time, but transmission wouldn&#8217;t be performed, and
 the old <code class="docutils literal"><span class="pre">file_role</span></code> <strong>value will be retained</strong>!!!</td>
 </tr>
