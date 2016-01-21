@@ -195,12 +195,13 @@ def upload(url_base, sender_key, btctx_api, file, file_role):
 
     :param file_role: string of three numbers which define future
         behavior of the file on the server (look more it in the documentation)
-    :type file_role: integer
+    :type file_role: string
 
     :returns: response instance with the results of uploading or with
         information about the server issue
     :rtype: requests.models.Response object
     """
+    file.seek(0)
     files_header = {'file_data': file}
     data_hash = sha256(file.read()).hexdigest()
     file.seek(0)
