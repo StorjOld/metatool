@@ -8,11 +8,12 @@ from hashlib import sha256
 from metatool import core
 
 if sys.version_info.major == 3:
-    from unittest.mock import patch, Mock, call, mock_open
-    from urllib.parse import urljoin
+    from unittest.mock import patch, Mock, call
+    from urllib.parse import urljoin, quote_plus, urlparse
 else:
-    from mock import patch, Mock, call, mock_open
-    from urlparse import urljoin
+    from mock import patch, Mock, call
+    from urlparse import urljoin, urlparse
+    from urllib import quote_plus
 
 # make the parent tests package importable for the direct running
 parent_dir = os.path.dirname(os.path.dirname(__file__))
@@ -143,7 +144,7 @@ class TestCoreUpload(unittest.TestCase):
             self.mock_post.return_value,
             upload_call_result,
             'Returned value must be the object returned by the '
-            '``requests.get()``'
+            '``requests.post()``'
         )
 
 
@@ -192,7 +193,7 @@ class TestCoreAudit(unittest.TestCase):
             self.mock_post.return_value,
             audit_call_result,
             'Returned value must be the object returned by the '
-            '``requests.get()``'
+            '``requests.post()``'
         )
 
 
@@ -202,8 +203,20 @@ class TestCoreDownload(unittest.TestCase):
     """
     def setUp(self):
         self.post_patch = patch('requests.get')
-        self.mock_post = self.post_patch.start()
-        self.mock_post.return_value = Response()
+        self.mock_get = self.post_patch.start()
+
+        # set common data for tests
+        self.test_url_address = 'http://test.url.com'
+        self.file_content = b'some test data'
+        self.file_hash = sha256(self.file_content).hexdigest()
+        self.test_data_for_requests = dict(params={})
+
+        # initial filling the base response object
+        self.mock_get.return_value = Mock()
+        mock_response = self.mock_get.return_value
+        mock_response.status_code = 200
+        mock_response.headers = {'X-Sendfile': self.file_hash}
+        mock_response.content = self.file_content
 
     def tearDown(self):
         self.post_patch.stop()
@@ -212,27 +225,366 @@ class TestCoreDownload(unittest.TestCase):
         """
         Test of returning gotten response object when it's status is not 200.
         """
-        test_url_address = 'http://test.url.com'
-        file_hash = sha256(b'some test data').hexdigest()
-        test_data_for_requests = dict(params={})
-
-        download_call_result = core.download(test_url_address, file_hash)
+        self.mock_get.return_value.status_code = 404
+        download_call_result = core.download(self.test_url_address,
+                                             self.file_hash)
         expected_calls = [call(
-            urljoin(test_url_address, '/api/files/' + file_hash),
-            **test_data_for_requests
+            urljoin(self.test_url_address, '/api/files/' + self.file_hash),
+            **self.test_data_for_requests
         )]
-
         self.assertListEqual(
-            self.mock_post.call_args_list,
+            self.mock_get.call_args_list,
             expected_calls,
-            'In the download() function requests.post() calls are unexpected'
-
+            'In the download() function requests.get() calls are unexpected'
         )
         self.assertIs(
-            self.mock_post.return_value,
+            self.mock_get.return_value,
             download_call_result,
             'Returned value must be the object returned by the '
             '``requests.get()``'
         )
 
+    def test_good_response(self):
+        """
+        Test of returning path for downloaded file when response status is 200.
+        """
+        created_test_file = os.path.abspath(self.file_hash)
+        self.addCleanup(os.unlink, created_test_file)
+        download_call_result = core.download(self.test_url_address,
+                                             self.file_hash)
+        expected_calls = [call(
+            urljoin(self.test_url_address, '/api/files/' + self.file_hash),
+            **self.test_data_for_requests
+        )]
+        expected_return_string = created_test_file
+        self.assertListEqual(
+            self.mock_get.call_args_list,
+            expected_calls,
+            'In the download() function requests.get() calls are unexpected'
+        )
+        self.assertEqual(
+            download_call_result,
+            expected_return_string,
+            "Returned value must be downloaded file's full path"
+        )
+        with open(self.file_hash, 'rb') as downloaded_file:
+            self.assertEqual(
+                downloaded_file.read(),
+                self.file_content,
+                "The content of downloaded file isn't correct"
+            )
 
+    def test_download_in_cwd(self):
+        """
+        Test of downloading file to the current dir by default - when saving
+        under hash-name or given simple new name (without any directories
+        in the name string)
+        """
+        tests_dir = os.path.abspath(os.path.dirname(__file__))
+
+        # Test saving under the hash-name by default
+        created_test_file = os.path.join(tests_dir, self.file_hash)
+        self.addCleanup(os.unlink, created_test_file)
+        with patch('os.getcwd', return_value=tests_dir):
+            call_result = core.download(self.test_url_address, self.file_hash)
+        self.assertEqual(call_result, created_test_file,
+                         "Returned path to the saved file isn't correct")
+        with open(created_test_file, 'rb') as downloaded_file:
+            self.assertEqual(
+                downloaded_file.read(),
+                self.file_content,
+                "The content of downloaded file isn't correct"
+            )
+
+        # Test saving under the new name
+        self.doCleanups()
+        new_file_name = 'TEMP_TEST_FILE.spam'
+        self.mock_get.return_value.headers['X-Sendfile'] = new_file_name
+        created_test_file = os.path.join(tests_dir, new_file_name)
+        self.addCleanup(os.unlink, created_test_file)
+        with patch('os.getcwd', return_value=tests_dir):
+            call_result = core.download(self.test_url_address, self.file_hash,
+                                        rename_file=new_file_name)
+        self.assertEqual(call_result, created_test_file,
+                         "Returned path to the saved file isn't correct")
+        with open(created_test_file, 'rb') as downloaded_file:
+            self.assertEqual(
+                downloaded_file.read(),
+                self.file_content,
+                "The content of downloaded file isn't correct"
+            )
+
+    def test_download_by_full_path(self):
+        """
+        Test for saving file by the given full path.
+        """
+        tests_dir = os.path.abspath(os.path.dirname(__file__))
+        new_file_name = 'TEMP_TEST_FILE.spam'
+        created_test_file = os.path.join(tests_dir, 'temp_intermediate_dir',
+                                         new_file_name)
+        self.mock_get.return_value.headers['X-Sendfile'] = created_test_file
+        self.addCleanup(os.rmdir, os.path.dirname(created_test_file))
+        self.addCleanup(os.unlink, created_test_file)
+        call_result = core.download(self.test_url_address, self.file_hash,
+                                    rename_file=created_test_file)
+        self.assertEqual(call_result, created_test_file,
+                         "Returned path to the saved file isn't correct")
+        with open(created_test_file, 'rb') as downloaded_file:
+            self.assertEqual(
+                downloaded_file.read(),
+                self.file_content,
+                "The content of downloaded file isn't correct"
+            )
+
+    def test_download_by_relative_path(self):
+        """
+        Test for saving file by the given relative path.
+        """
+        tests_dir = os.path.abspath(os.path.dirname(__file__))
+        new_file_name = 'TEMP_TEST_FILE.spam'
+        relative_name = '../../{}'.format(new_file_name)
+        created_test_file = os.path.join(tests_dir, new_file_name)
+        self.mock_get.return_value.headers['X-Sendfile'] = relative_name
+        self.addCleanup(os.unlink, created_test_file)
+        with patch('os.getcwd', return_value=tests_dir + '/dir1/dir2/'):
+            call_result = core.download(self.test_url_address, self.file_hash,
+                                        rename_file=relative_name)
+        self.assertEqual(call_result, created_test_file,
+                         "Returned path to the saved file isn't correct")
+        with open(created_test_file, 'rb') as downloaded_file:
+            self.assertEqual(
+                downloaded_file.read(),
+                self.file_content,
+                "The content of downloaded file isn't correct"
+            )
+
+    def test_not_provide_get_param(self):
+        """
+        Test of not providing ``decryption_key`` and ``file_alias``
+        to the ``core.download()``.
+        """
+        # Test to run without GET parameters
+        self.mock_get.return_value.status_code = 404
+        core.download(self.test_url_address, self.file_hash)
+        expected_calls = [call(
+            urljoin(self.test_url_address, '/api/files/' + self.file_hash),
+            **self.test_data_for_requests
+        )]
+        self.assertListEqual(
+            self.mock_get.call_args_list,
+            expected_calls,
+            'Wrong arguments are passed to requests.get() when only "url_base"'
+            ' and "file_hash" arguments are given to the core.download()'
+        )
+
+    def test_provide_decryption_key(self):
+        """
+        Test of providing ``decryption_key`` to the ``core.download()``.
+        """
+        # Test to run with given ``decryption_key`` argument
+        self.mock_get.return_value.status_code = 404
+        decryption_key = 'some key'
+        self.test_data_for_requests = dict(params={
+            'decryption_key': decryption_key
+        })
+        core.download(self.test_url_address, self.file_hash,
+                      decryption_key=decryption_key)
+        expected_calls = [call(
+            urljoin(self.test_url_address, '/api/files/' + self.file_hash),
+            **self.test_data_for_requests
+        )]
+        self.assertListEqual(
+            self.mock_get.call_args_list,
+            expected_calls,
+            'Wrong arguments are passed to requests.get() when only "url_base"'
+            ' and "file_hash" arguments are given to the core.download()'
+        )
+
+    def test_provide_rename_file(self):
+        """
+        Test of providing ``file_alias`` to the ``core.download()``.
+        """
+        # Test to run with given ``file_alias`` argument
+        self.mock_get.return_value.status_code = 404
+        file_alias = 'some new name'
+        self.test_data_for_requests = dict(params={
+            'file_alias': file_alias
+        })
+        core.download(self.test_url_address, self.file_hash,
+                      rename_file=file_alias)
+        expected_calls = [call(
+            urljoin(self.test_url_address, '/api/files/' + self.file_hash),
+            **self.test_data_for_requests
+        )]
+        self.assertListEqual(
+            self.mock_get.call_args_list,
+            expected_calls,
+            'Wrong arguments are passed to requests.get() when only "url_base"'
+            ' and "file_hash" arguments are given to the core.download()'
+        )
+
+    def test_provide_rename_file_and_decryption_key(self):
+        """
+        Test of providing ``file_alias`` to the ``core.download()``.
+        """
+        # Test to run with given ``file_alias`` argument
+        self.mock_get.return_value.status_code = 404
+        file_alias = 'some new name'
+        decryption_key = 'some key'
+        self.test_data_for_requests = dict(params={
+            'file_alias': file_alias,
+            'decryption_key': decryption_key
+        })
+        core.download(self.test_url_address, self.file_hash,
+                      rename_file=file_alias, decryption_key=decryption_key)
+        expected_calls = [call(
+            urljoin(self.test_url_address, '/api/files/' + self.file_hash),
+            **self.test_data_for_requests
+        )]
+        self.assertListEqual(
+            self.mock_get.call_args_list,
+            expected_calls,
+            'Wrong arguments are passed to requests.get() when only "url_base"'
+            ' and "file_hash" arguments are given to the core.download()'
+        )
+
+    def test_link_argument(self):
+        """
+        Test of generating GET-query string when ``link`` argument is ``True``.
+        """
+        # test with no additional params
+
+        call_return = core.download(
+                self.test_url_address,
+                self.file_hash,
+                link=True
+        )
+        expected_return = '{}/api/files/{}'.format(self.test_url_address,
+                                                   self.file_hash)
+        self.assertEqual(
+            call_return,
+            expected_return,
+            "unexpected URL-query string when link=True"
+        )
+
+        # test with ``rename_file``
+        file_alias = 'some new name'
+        call_return = core.download(
+                self.test_url_address,
+                self.file_hash,
+                rename_file=file_alias,
+                link=True
+        )
+        expected_return = dict(
+            scheme='http',
+            netloc='test.url.com',
+            path='/api/files/' + self.file_hash,
+            params='',
+            query='file_alias={}'.format(quote_plus(file_alias)),
+            fragment=''
+        )
+        parse_result = urlparse(call_return)
+        tested_result = dict(
+            ((key, getattr(parse_result, key)) for key in expected_return)
+        )
+        self.assertEqual(
+            tested_result,
+            expected_return,
+            "unexpected URL-query string when link=True"
+
+        )
+
+        # test with the ``decryption_key``
+        decryption_key = 'some key'
+        call_return = core.download(
+                self.test_url_address,
+                self.file_hash,
+                decryption_key=decryption_key,
+                link=True
+        )
+        expected_return = dict(
+            scheme='http',
+            netloc='test.url.com',
+            path='/api/files/' + self.file_hash,
+            params='',
+            query='decryption_key={}'.format(quote_plus(decryption_key)),
+            fragment=''
+        )
+        parse_result = urlparse(call_return)
+        tested_result = dict(
+            ((key, getattr(parse_result, key)) for key in expected_return)
+        )
+        self.assertEqual(
+            tested_result,
+            expected_return,
+            "unexpected URL-query string when link=True"
+        )
+
+    def test_together_sender_key_and_btctx_api(self):
+        """
+        Test of possibility to provide the ``sender_key`` and ``btctx_api``
+        only together.
+        """
+        btctx_api = BtcTxStore(testnet=True, dryrun=True)
+        sender_key = btctx_api.create_key()
+        self.mock_get.return_value = Response()
+
+        # test only "sender_key" given
+        self.assertRaises(
+            TypeError,
+            core.download,
+            *(self.test_url_address, self.file_hash),
+            **{'sender_key': sender_key}
+        )
+
+        # test only "btctx_api" given
+        self.assertRaises(
+            TypeError,
+            core.download,
+            *(self.test_url_address, self.file_hash),
+            **{'btctx_api': btctx_api}
+        )
+
+        # test of now exception when both args are given
+        download_call_result = core.download(
+            self.test_url_address,
+            self.file_hash,
+            sender_key=sender_key,
+            btctx_api=btctx_api
+        )
+        self.assertIsInstance(download_call_result, Response,
+                              'Must return a response object')
+
+
+    def test_authenticate_headers_provide(self):
+        """
+        Test of preparing and providing credential headers when ``sender_key``
+        and ``btctx_api`` are provided.
+        """
+        btctx_api = BtcTxStore(testnet=True, dryrun=True)
+        sender_key = btctx_api.create_key()
+        signature = btctx_api.sign_unicode(sender_key, self.file_hash)
+        sender_address = btctx_api.get_address(sender_key)
+        self.mock_get.return_value = Response()
+        self.test_data_for_requests['headers'] = {
+                'sender-address': sender_address,
+                'signature': signature,
+            }
+        download_call_result = core.download(
+            self.test_url_address,
+            self.file_hash,
+            sender_key=sender_key,
+            btctx_api=btctx_api
+        )
+        expected_mock_calls = [call(
+            urljoin(self.test_url_address, '/api/files/' + self.file_hash),
+            **self.test_data_for_requests
+        )]
+
+        self.assertListEqual(
+            self.mock_get.call_args_list,
+            expected_mock_calls,
+            'In the download() function requests.get() calls are unexpected'
+        )
+        self.assertIsInstance(download_call_result, Response,
+                              'Must return a response object')
