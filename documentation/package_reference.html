@@ -326,7 +326,7 @@ purposed for generation a new original <strong>hash-sum</strong> from <strong>fi
 <div class="section" id="metatool-download">
 <h2>metatool download<a class="headerlink" href="#metatool-download" title="Permalink to this headline">¶</a></h2>
 <p>Common usage:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ metatool download &lt;file_hash&gt; [--decryption_key KEY] [--rename_file NEW_NAME] [--link]
+<div class="highlight-python"><div class="highlight"><pre>$ metatool download &lt;file_hash&gt; [--decryption_key &quot;KEY&quot;] [--rename_file NEW_NAME] [--link]
 </pre></div>
 </div>
 <p><strong>download</strong> action fetches the file from server. Here is one required argument - <strong>`file_hash`</strong> and two optional -
@@ -334,7 +334,7 @@ purposed for generation a new original <strong>hash-sum</strong> from <strong>fi
 <blockquote>
 <div><ul class="simple">
 <li><strong>`file_hash`</strong> - hash-name of the needed file.</li>
-<li><strong>`&#8211;decryption_key`</strong> - key for the decryption file.</li>
+<li><strong>`&#8211;decryption_key`</strong> - key for the decryption file in a bytes representation.</li>
 <li><strong>`&#8211;rename_file`</strong> - desired saving name (included path) of the downloaded file.</li>
 <li><strong>`&#8211;link`</strong> &#8211; will return the url GET request string instead of performing the downloading.</li>
 </ul>
@@ -348,10 +348,19 @@ while operation complete successfully, otherwise shows an occured error:</p>
 </div>
 <p>This does the same but saves <strong>decrypted</strong> file:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 \
- &gt; --decryption_key=%A3%B4e%EA%82%00%22%3A%C3%86%C0hn1%B3%F7%F7%F8%8EL7S%F3D%28%7C%85%95%CE%9D%D5B
+ &gt; --decryption_key &quot;[\xfcX\x95.\xfa\x86\xa8\x9a\xb8\x9c\xf6\xb6\x05\xc9\xb8\xbf\xcd\x08\xd9\xb4N`p\xe7ai\x1c\xa1\xed+W&quot;
  /home/user/76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695
 </pre></div>
 </div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">Be sure to put the key in quotes (&#8220;KEY&#8221;) because of how does
+command line interprets the <code class="docutils literal"><span class="pre">\</span></code> character.</td>
+</tr>
+</tbody>
+</table>
 <p>In this case it will set a new name for the downloaded file:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ metatool download 1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645 \
 &gt; --rename_file just_file.txt

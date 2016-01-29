@@ -185,13 +185,13 @@ metatool download
 
 Common usage::
 
-    $ metatool download <file_hash> [--decryption_key KEY] [--rename_file NEW_NAME] [--link]
+    $ metatool download <file_hash> [--decryption_key "KEY"] [--rename_file NEW_NAME] [--link]
 
 **download** action fetches the file from server. Here is one required argument - **`file_hash`** and two optional -
 **`--decryption_key`** and **`--rename_file`**:
 
     * **`file_hash`** - hash-name of the needed file.
-    * **`--decryption_key`** - key for the decryption file.
+    * **`--decryption_key`** - key for the decryption file in a bytes representation.
     * **`--rename_file`** - desired saving name (included path) of the downloaded file.
     * **`--link`** -- will return the url GET request string instead of performing the downloading.
 
@@ -206,8 +206,11 @@ while operation complete successfully, otherwise shows an occured error::
 This does the same but saves **decrypted** file::
 
     $ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 \
-     > --decryption_key=%A3%B4e%EA%82%00%22%3A%C3%86%C0hn1%B3%F7%F7%F8%8EL7S%F3D%28%7C%85%95%CE%9D%D5B
+     > --decryption_key "[\xfcX\x95.\xfa\x86\xa8\x9a\xb8\x9c\xf6\xb6\x05\xc9\xb8\xbf\xcd\x08\xd9\xb4N`p\xe7ai\x1c\xa1\xed+W"
      /home/user/76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695
+
+:Note:  Be sure to put the key in quotes ("KEY") because of how does
+        command line interprets the ``\`` character.
 
 In this case it will set a new name for the downloaded file::
 

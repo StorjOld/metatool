@@ -216,7 +216,7 @@ Return a json file of three files with the response data:</p>
 </dd>
 </dl>
 <hr class="docutils" />
-<p><strong>metatool download &lt;file_hash&gt; [&#8211;decryption_key KEY]
+<p><strong>metatool download &lt;file_hash&gt; [&#8211;decryption_key &#8220;KEY&#8221;]
 [&#8211;rename_file NEW_NAME] [&#8211;link]</strong></p>
 <blockquote>
 <div><p>This action fetch desired file from the server by the <strong>hash_name</strong>.
@@ -225,19 +225,28 @@ Returns full path to the file if downloaded successful.</p>
 <div><p><code class="docutils literal"><span class="pre">file_hash</span></code> - string which represents the <strong>file hash</strong>.</p>
 <p><code class="docutils literal"><span class="pre">--link</span></code> - will return the url GET request string instead of
 executing the downloading.</p>
-<p><code class="docutils literal"><span class="pre">--decryption_key</span> <span class="pre">KEY</span></code> - Optional argument. When defined the file si
-going from the server in decrypted state (if allowed for this file).</p>
+<p><code class="docutils literal"><span class="pre">--decryption_key</span> <span class="pre">&quot;KEY&quot;</span></code> - Optional argument. It makes the downloaded
+file to go from the server in decrypted state(if allowed for this file)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">note:</th><td class="field-body">will rewrite existed file with the same name!</td>
+<tr class="field-odd field"><th class="field-name">note:</th><td class="field-body">be sure to put the key in quotes (&#8220;KEY&#8221;) because of how does
+command line interprets the <code class="docutils literal"><span class="pre">\</span></code> character.</td>
 </tr>
 </tbody>
 </table>
 <p><code class="docutils literal"><span class="pre">--rename_file</span> <span class="pre">NEW_NAME</span></code> - Optional argument which defines
 the <strong>NEW_NAME</strong> for the storing file on your disk. You can provide
 an relative and full path to the directory with this name as well.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">note:</th><td class="field-body">will rewrite existed file on you disk with the same name!</td>
+</tr>
+</tbody>
+</table>
 </div></blockquote>
 </div></blockquote>
 <p>For more information about CLI look at the <a class="reference internal" href="package_reference.html#metatool-cli-reference"><span>metatool CLI reference</span></a>.</p>
@@ -267,6 +276,26 @@ required by the core API function</li>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dictionary</p>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="metatool.cli.decryption_key_type">
+<code class="descclassname">metatool.cli.</code><code class="descname">decryption_key_type</code><span class="sig-paren">(</span><em>argument</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.decryption_key_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the special processor for the <code class="docutils literal"><span class="pre">decryption_key</span></code> argument type
+of the <code class="docutils literal"><span class="pre">argparse.ArgumentParser.add_argument()</span></code> method.
+It takes a sting and returns the proper decryption_key&#8217;s form, for
+passing to the <code class="docutils literal"><span class="pre">metatool.download()</span></code> function.</p>
+<p>Return bytes type on Python3 and string type on Python2.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argument</strong> &#8211; decryption_key string, how it represent&#8217;s in bytes.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">bytes string</td>
 </tr>
 </tbody>
 </table>
