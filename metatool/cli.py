@@ -83,7 +83,7 @@ response it will be shown instead of the success result.
 
 -------------------
 
-**metatool download <file_hash> [--decryption_key KEY]
+**metatool download <file_hash> [--decryption_key "KEY"]
 [--rename_file NEW_NAME] [--link]**
 
     This action fetch desired file from the server by the **hash_name**.
@@ -94,14 +94,17 @@ response it will be shown instead of the success result.
         ``--link`` - will return the url GET request string instead of
         executing the downloading.
 
-        ``--decryption_key KEY`` - Optional argument. When defined the file si
-        going from the server in decrypted state (if allowed for this file).
+        ``--decryption_key "KEY"`` - Optional argument. It makes the downloaded
+        file to go from the server in decrypted state(if allowed for this file)
 
-        :note: will rewrite existed file with the same name!
+        :note: be sure to put the key in quotes ("KEY") because of how does
+               command line interprets the ``\`` character.
 
         ``--rename_file NEW_NAME`` - Optional argument which defines
         the **NEW_NAME** for the storing file on your disk. You can provide
         an relative and full path to the directory with this name as well.
+
+        :note: will rewrite existed file on you disk with the same name!
 
 For more information about CLI look at the :ref:`metatool-CLI-reference`.
 
@@ -115,9 +118,15 @@ from __future__ import print_function
 import os.path
 import sys
 import argparse
+import ast
 
 from btctxstore import BtcTxStore
 from requests.models import Response
+
+if sys.version_info.major == 3:
+    from urllib.parse import quote_from_bytes
+else:
+    from urllib import quote as quote_from_bytes
 
 # makes available to import package from the source directory
 parent_dir = os.path.dirname(os.path.dirname(__file__))
@@ -126,6 +135,25 @@ if not parent_dir in sys.path:
 import metatool.core
 
 CORE_NODES_URL = ('http://node2.metadisk.org/', 'http://node3.metadisk.org/')
+
+
+def decryption_key_type(argument):
+    """
+    This is the special processor for the ``decryption_key`` argument type
+    of the ``argparse.ArgumentParser.add_argument()`` method.
+    It takes a sting and returns the proper decryption_key's form, for
+    passing to the ``metatool.download()`` function.
+
+    Return bytes type on Python3 and string type on Python2.
+
+    :param argument: decryption_key string, how it represent's in bytes.
+    :return: bytes string
+    """
+    if sys.version_info.major == 3:
+        argument = bytes(ast.literal_eval('"' + argument + '"'), 'latin-1')
+    else:
+        argument = ast.literal_eval('"' + argument + '"')
+    return quote_from_bytes(argument)
 
 
 def parse():
@@ -152,9 +180,8 @@ def parse():
         add_help=None
     )
     parent_url_parser.add_argument('--url', type=str, dest='url_base',
-                             help='The URL-string which defines the '
-                                  'server will be used.')
-
+                                   help='The URL-string which defines the '
+                                        'server will be used.')
 
     # Create the parser for the "audit" command.
     parser_audit = subparsers.add_parser(
@@ -178,7 +205,7 @@ def parse():
              'by a given file_hash.'
     )
     parser_download.add_argument('file_hash', type=str, help="A file's hash.")
-    parser_download.add_argument('--decryption_key', type=str,
+    parser_download.add_argument('--decryption_key', type=decryption_key_type,
                                  help="The key to decrypt the file "
                                       "while downloading.")
     parser_download.add_argument('--rename_file', type=str,

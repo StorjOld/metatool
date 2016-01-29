@@ -1,3 +1,4 @@
 mock; python_version == '2.7'
 btctxstore
 requests
+file_encryptor
