@@ -4,12 +4,15 @@ interaction with MetaCore cloud servers. Each function provides specific
 type of operation with the MetaCore server. Look through the functions for
 detailed specification.
 """
+from __future__ import print_function
 import sys
 import os
 import os.path
 import requests
-
+import tempfile
 from hashlib import sha256
+
+import file_encryptor
 
 # 2.x/3.x compliance logic
 if sys.version_info.major == 3:
@@ -172,7 +175,7 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
         return response
 
 
-def upload(url_base, sender_key, btctx_api, file, file_role):
+def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
     """
     Upload local file to the server. Max size of file is determined by the
     server. In the most of cases it is restricted by the 128 MB.
@@ -201,23 +204,40 @@ def upload(url_base, sender_key, btctx_api, file, file_role):
         information about the server issue
     :rtype: requests.models.Response object
     """
+    key = None
     file.seek(0)
+    if encrypt:
+        temp_file = tempfile.NamedTemporaryFile()
+        temp_file.writelines(file.readlines())
+        temp_file.flush()
+        temp_file.seek(0)
+        key = file_encryptor.convergence.encrypt_file_inline(
+                temp_file.name, None)
+        file.close()
+        file = temp_file
     files_header = {'file_data': file}
     data_hash = sha256(file.read()).hexdigest()
     file.seek(0)
+    if key:
+        print(
+            'File is encrypted. Decryption key:\n',
+            repr(key),
+            sep='')
+        with open('{}.metakey'.format(data_hash), 'wb') as f_:
+            f_.write(key)
     sender_address = btctx_api.get_address(sender_key)
     signature = btctx_api.sign_unicode(sender_key, data_hash)
     response = requests.post(
-        urljoin(url_base, '/api/files/'),
-        data={
-            'data_hash': data_hash,
-            'file_role': file_role,
-        },
-        files=files_header,
-        headers={
-            'sender-address': sender_address,
-            'signature': signature,
-        }
+            urljoin(url_base, '/api/files/'),
+            data={
+                'data_hash': data_hash,
+                'file_role': file_role,
+            },
+            files=files_header,
+            headers={
+                'sender-address': sender_address,
+                'signature': signature,
+            }
     )
     return response
 

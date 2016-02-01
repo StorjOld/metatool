@@ -150,7 +150,7 @@ def decryption_key_type(argument):
     :return: bytes string
     """
     if sys.version_info.major == 3:
-        argument = bytes(ast.literal_eval('"' + argument + '"'), 'latin-1')
+        argument = bytes(ast.literal_eval('"""' + argument + '"""'), 'latin-1')
     else:
         argument = ast.literal_eval('"' + argument + '"')
     return quote_from_bytes(argument)
@@ -224,6 +224,11 @@ def parse():
     )
     parser_upload.add_argument('file', type=argparse.FileType('rb'),
                                help="A path to the file")
+    parser_upload.add_argument('--encrypt', action='store_true',
+                               help='If argument is present, it will upload'
+                                    'encrypted file and and create a '
+                                    '"<hash_name>.metakey" file with the '
+                                    '"decryption key"')
     parser_upload.add_argument('-r', '--file_role', type=str, default='001',
                                help="It defines behaviour and access "
                                     "of the file.")
