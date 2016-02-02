@@ -192,6 +192,7 @@ class TestCliParseFunction(unittest.TestCase):
             'file_role': '001',
             'url_base': None,
             'execute_case': core.upload,
+            'encrypt': False,
         }
         self.assertDictEqual(
             real_parsed_args_dict,
@@ -210,6 +211,7 @@ class TestCliParseFunction(unittest.TestCase):
             'file_role': args_list[5],
             'url_base': args_list[3],
             'execute_case': core.upload,
+            'encrypt': False,
         }
         self.assertDictEqual(
             real_parsed_args_dict,
