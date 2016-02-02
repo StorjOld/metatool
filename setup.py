@@ -2,7 +2,7 @@ import sys
 from setuptools import setup
 
 
-required_packages = ['requests', 'btctxstore']
+required_packages = ['requests', 'btctxstore', 'file_encryptor']
 if sys.version_info.major == 2:
     required_packages.insert(0, 'mock')
 
