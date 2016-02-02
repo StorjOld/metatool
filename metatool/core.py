@@ -10,6 +10,7 @@ import os
 import os.path
 import requests
 import tempfile
+import shutil
 from hashlib import sha256
 
 import file_encryptor
@@ -204,41 +205,50 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
         information about the server issue
     :rtype: requests.models.Response object
     """
-    key = None
-    file.seek(0)
-    if encrypt:
-        temp_file = tempfile.NamedTemporaryFile()
-        temp_file.writelines(file.readlines())
-        temp_file.flush()
-        temp_file.seek(0)
-        key = file_encryptor.convergence.encrypt_file_inline(
-                temp_file.name, None)
+    decryption_key = None
+    temp_dir_name = ''
+    try:
+        if encrypt:
+            print('Encryption...')
+            source_file_name = file.name
+            temp_dir_name = tempfile.mkdtemp(prefix='metatool.')
+            shutil.copy2(source_file_name, temp_dir_name)
+            temp_file_name = os.path.join(
+                temp_dir_name,
+                os.path.split(source_file_name)[-1])
+            decryption_key = file_encryptor.convergence.encrypt_file_inline(
+                        temp_file_name, None)
+            file.close()
+            file = open(temp_file_name, 'rb')
+
+        file.seek(0)
+        files_header = {'file_data': file}
+        data_hash = sha256(file.read()).hexdigest()
+        file.seek(0)
+        if decryption_key:
+            print('decryption_key:', repr(decryption_key), sep='\n')
+            with open('{}.decryption_key'.format(data_hash), 'wb') as f_:
+                f_.write(decryption_key)
+
+        sender_address = btctx_api.get_address(sender_key)
+        signature = btctx_api.sign_unicode(sender_key, data_hash)
+
+        response = requests.post(
+                urljoin(url_base, '/api/files/'),
+                data={
+                    'data_hash': data_hash,
+                    'file_role': file_role,
+                },
+                files=files_header,
+                headers={
+                    'sender-address': sender_address,
+                    'signature': signature,
+                }
+        )
         file.close()
-        file = temp_file
-    files_header = {'file_data': file}
-    data_hash = sha256(file.read()).hexdigest()
-    file.seek(0)
-    if key:
-        print(
-            'File is encrypted. Decryption key:\n',
-            repr(key),
-            sep='')
-        with open('{}.metakey'.format(data_hash), 'wb') as f_:
-            f_.write(key)
-    sender_address = btctx_api.get_address(sender_key)
-    signature = btctx_api.sign_unicode(sender_key, data_hash)
-    response = requests.post(
-            urljoin(url_base, '/api/files/'),
-            data={
-                'data_hash': data_hash,
-                'file_role': file_role,
-            },
-            files=files_header,
-            headers={
-                'sender-address': sender_address,
-                'signature': signature,
-            }
-    )
+    finally:
+        shutil.rmtree(temp_dir_name, ignore_errors=True)
+
     return response
 
 
