@@ -11,6 +11,8 @@ import os.path
 import requests
 import tempfile
 import shutil
+import json
+import binascii
 from hashlib import sha256
 
 import file_encryptor
@@ -194,6 +196,9 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
         to generate credentials for the server access
     :type btctx_api: btctxstore.BtcTxStore object
 
+    :param encrypt: this is a flag which define will be encryption done, or not
+    :type encrypt: boolean
+
     :param file: file object which will be uploaded to the server
     :type file: file object opened in the 'rb' mode
 
@@ -209,7 +214,6 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
     temp_dir_name = ''
     try:
         if encrypt:
-            print('Encryption...')
             source_file_name = file.name
             temp_dir_name = tempfile.mkdtemp(prefix='metatool.')
             shutil.copy2(source_file_name, temp_dir_name)
@@ -225,11 +229,6 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
         files_header = {'file_data': file}
         data_hash = sha256(file.read()).hexdigest()
         file.seek(0)
-        if decryption_key:
-            print('decryption_key:', repr(decryption_key), sep='\n')
-            with open('{}.decryption_key'.format(data_hash), 'wb') as f_:
-                f_.write(decryption_key)
-
         sender_address = btctx_api.get_address(sender_key)
         signature = btctx_api.sign_unicode(sender_key, data_hash)
 
@@ -246,6 +245,15 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
                 }
         )
         file.close()
+        if decryption_key and response.status_code == 201:
+            decryption_key = binascii.hexlify(decryption_key)
+            if sys.version_info.major == 3:
+                decryption_key = decryption_key.decode()
+            success_content_dict = response.json()
+            success_content_dict['decryption_key'] = decryption_key
+            new_content = json.dumps(success_content_dict, indent=2,
+                                     sort_keys=True)
+            response._content = new_content.encode('ascii')
     finally:
         shutil.rmtree(temp_dir_name, ignore_errors=True)
 

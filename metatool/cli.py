@@ -118,7 +118,6 @@ from __future__ import print_function
 import os.path
 import sys
 import argparse
-import ast
 import binascii
 
 from btctxstore import BtcTxStore
@@ -142,13 +141,17 @@ def decryption_key_type(argument):
     """
     This is the special processor for the ``decryption_key`` argument type
     of the ``argparse.ArgumentParser.add_argument()`` method.
-    It takes a sting and returns the proper decryption_key's form, for
-    passing to the ``metatool.download()`` function.
+    It takes a hexadecimal-string and returns the proper decryption_key's
+    form, for passing to the ``metatool.download()`` function.
 
-    Return bytes type on Python3 and string type on Python2.
+    Returns a string, properly escaped for using like an GET-URL query value.
 
-    :param argument: decryption_key string, how it represent's in bytes.
-    :return: bytes string
+    :param argument: decryption_key hex-string, gained with
+        binascii.hexlify(key), where the `key` is original
+        key, returned from the `file_encryptor.convergence.encrypt_file_inline`
+
+    :return: escaped string value
+    :rtype: string
     """
     if sys.version_info.major == 3:
         argument = bytes(argument, 'ascii')
@@ -225,10 +228,9 @@ def parse():
     parser_upload.add_argument('file', type=argparse.FileType('rb'),
                                help="A path to the file")
     parser_upload.add_argument('--encrypt', action='store_true',
-                               help='If argument is present, it will upload'
-                                    'encrypted file and and create a '
-                                    '"<hash_name>.metakey" file with the '
-                                    '"decryption key"')
+                               help='If argument is present, it will upload '
+                                    'encrypted file and add the '
+                                    '"decryption_key" value to the response')
     parser_upload.add_argument('-r', '--file_role', type=str, default='001',
                                help="It defines behaviour and access "
                                     "of the file.")
