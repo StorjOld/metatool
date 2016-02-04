@@ -4,14 +4,15 @@ import sys
 import threading
 import time
 import unittest
+import binascii
 from hashlib import sha256
 from io import StringIO
 
 if sys.version_info.major == 3:
-    from urllib.parse import urlparse, parse_qs, urlencode
+    from urllib.parse import urlparse, parse_qs, quote_from_bytes, urlencode
 else:
     from urlparse import urlparse, parse_qs
-    from urllib import urlencode
+    from urllib import urlencode, quote as quote_from_bytes
 
 # make the parent tests package importable for the direct running
 parent_dir = os.path.dirname(os.path.dirname(__file__))
@@ -211,7 +212,7 @@ class MetadiskTest(unittest.TestCase):
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'TEST_FILE_NAME'
-        decryption_key = 'some_test_decryption_key'
+        decryption_key = binascii.hexlify(b'some key').decode()
         expected_value = b'TEST_DATA'
         with os.popen('{} __main__.py download {} --decryption_key {}'.format(
             self.metadisk_python_interpreter,
@@ -250,9 +251,10 @@ class MetadiskTest(unittest.TestCase):
                          'unexpected "data_hash" value '
                          'in the returned url line'
         )
-
+        test_dec_key_hex = binascii.hexlify(b'some key').decode()
         sended_data = dict(
-                decryption_key='my_key',
+                decryption_key=quote_from_bytes(
+                        binascii.unhexlify(test_dec_key_hex)),
                 file_alias='new_name.txt'
             )
         expected_url_get_dict = parse_qs(urlencode(sended_data))
@@ -263,7 +265,7 @@ class MetadiskTest(unittest.TestCase):
             bash_command_template.format(
                 self.metadisk_python_interpreter,
                 data_hash,
-                sended_data['decryption_key'],
+                test_dec_key_hex,
                 sended_data['file_alias'],
             )
         ) as printed_data:
