@@ -119,6 +119,7 @@ import os.path
 import sys
 import argparse
 import ast
+import binascii
 
 from btctxstore import BtcTxStore
 from requests.models import Response
@@ -149,12 +150,9 @@ def decryption_key_type(argument):
     :param argument: decryption_key string, how it represent's in bytes.
     :return: bytes string
     """
-    if not argument[0] in "'\"":
-        argument = argument.lstrip('ub')
     if sys.version_info.major == 3:
-        argument = bytes(ast.literal_eval('"""' + argument + '"""'), 'latin-1')
-    else:
-        argument = ast.literal_eval('"' + argument + '"')
+        argument = bytes(argument, 'ascii')
+    argument = binascii.unhexlify(argument)
     return quote_from_bytes(argument)
 
 
