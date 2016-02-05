@@ -19,9 +19,10 @@ import file_encryptor
 
 # 2.x/3.x compliance logic
 if sys.version_info.major == 3:
-    from urllib.parse import urljoin
+    from urllib.parse import urljoin, unquote_to_bytes
 else:
     from urlparse import urljoin
+    from urllib import unquote as unquote_to_bytes
 
 
 def audit(url_base, sender_key, btctx_api, file_hash, seed):
@@ -134,16 +135,15 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
 
     # dict where to collect GET parameters
     params = {}
-    if decryption_key:
-        params['decryption_key'] = decryption_key
-
     if rename_file:
         params['file_alias'] = rename_file
 
     data_for_requests = dict(params=params)
     if link:
+        if decryption_key:
+            params['decryption_key'] = decryption_key
         request = requests.Request('GET', url_for_requests,
-                                   **data_for_requests)
+                                   **dict(params=params))
         request_string = request.prepare()
         return request_string.url
 
@@ -173,6 +173,9 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
                 os.makedirs(download_dir)
         with open(file_name, 'wb') as fp:
             fp.write(response.content)
+        if decryption_key:
+            file_encryptor.convergence.decrypt_file_inline(
+                        file_name, decryption_key)
         return file_name
     else:
         return response
