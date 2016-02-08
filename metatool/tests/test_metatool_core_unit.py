@@ -8,10 +8,10 @@ from hashlib import sha256
 from metatool import core
 
 if sys.version_info.major == 3:
-    from unittest.mock import patch, Mock, call
+    from unittest.mock import patch, Mock, call, mock_open
     from urllib.parse import urljoin, quote_plus, urlparse
 else:
-    from mock import patch, Mock, call
+    from mock import patch, Mock, call, mock_open
     from urlparse import urljoin, urlparse
     from urllib import quote_plus
 
@@ -377,27 +377,42 @@ class TestCoreDownload(unittest.TestCase):
             ' and "file_hash" arguments are given to the core.download()'
         )
 
-    def test_provide_decryption_key(self):
+    @patch('core.file_encryptor.convergence.decrypt_file_inline')
+    @patch('metatool.core.open', mock_open(), create=False)
+    def test_provide_decryption_key(self, mock_decryptor):
         """
         Test of providing ``decryption_key`` to the ``core.download()``.
         """
-        # Test to run with given ``decryption_key`` argument
-        self.mock_get.return_value.status_code = 404
-        decryption_key = 'some key'
-        self.test_data_for_requests = dict(params={
-            'decryption_key': decryption_key
-        })
+        # Test to run with given ``decryption_key`` argument.
+        self.mock_get.return_value.status_code = 200
+        decryption_key = b'test 32 character long key......'
+        self.test_data_for_requests = dict(params={})
         core.download(self.test_url_address, self.file_hash,
                       decryption_key=decryption_key)
-        expected_calls = [call(
+        # Test of args, passed to `requests.get()` in the `core.download()`.
+        expected_request_args = [call(
             urljoin(self.test_url_address, '/api/files/' + self.file_hash),
             **self.test_data_for_requests
         )]
         self.assertListEqual(
             self.mock_get.call_args_list,
-            expected_calls,
-            'Wrong arguments are passed to requests.get() when only "url_base"'
-            ' and "file_hash" arguments are given to the core.download()'
+            expected_request_args,
+            'Wrong arguments are passed to requests.get() when "url_base", '
+            '"file_hash" and "decryption_key" arguments are given to the '
+            'core.download()'
+        )
+        # Test of args, passed to
+        # `core.file_encryptor.convergence.decrypt_file_inline()`
+        # in the `core.download()`.
+        expected_decryption_args = [call(
+            os.path.join(os.path.abspath(self.file_hash)),
+            decryption_key)]
+        self.assertListEqual(
+            mock_decryptor.call_args_list,
+            expected_decryption_args,
+            'Wrong call of the '
+            'core.file_encryptor.convergence.decrypt_file_inline() inside '
+            'the metatool.core.download() function.'
         )
 
     def test_provide_rename_file(self):
@@ -412,40 +427,60 @@ class TestCoreDownload(unittest.TestCase):
         })
         core.download(self.test_url_address, self.file_hash,
                       rename_file=file_alias)
-        expected_calls = [call(
+
+        expected_request_args = [call(
             urljoin(self.test_url_address, '/api/files/' + self.file_hash),
             **self.test_data_for_requests
         )]
+
         self.assertListEqual(
             self.mock_get.call_args_list,
-            expected_calls,
-            'Wrong arguments are passed to requests.get() when only "url_base"'
-            ' and "file_hash" arguments are given to the core.download()'
+            expected_request_args,
+            'Wrong arguments are passed to requests.get() when "url_base", '
+            '"rename_file" and "file_hash" arguments are given '
+            'to the core.download()'
         )
 
-    def test_provide_rename_file_and_decryption_key(self):
+    @patch('core.file_encryptor.convergence.decrypt_file_inline')
+    @patch('metatool.core.open', mock_open(), create=False)
+    def test_provide_rename_file_and_decryption_key(self, mock_decryptor):
         """
         Test of providing ``file_alias`` to the ``core.download()``.
         """
-        # Test to run with given ``file_alias`` argument
-        self.mock_get.return_value.status_code = 404
+        # Test to run with given ``file_alias`` argument.
         file_alias = 'some new name'
-        decryption_key = 'some key'
+        decryption_key = b'test 32 character long key......'
+        self.mock_get.return_value.status_code = 200
+        self.mock_get.return_value.headers['X-Sendfile'] = file_alias
         self.test_data_for_requests = dict(params={
             'file_alias': file_alias,
-            'decryption_key': decryption_key
         })
         core.download(self.test_url_address, self.file_hash,
                       rename_file=file_alias, decryption_key=decryption_key)
-        expected_calls = [call(
+        expected_request_args = [call(
             urljoin(self.test_url_address, '/api/files/' + self.file_hash),
             **self.test_data_for_requests
         )]
+        # Test of args, passed to `requests.get()` in the `core.download()`.
         self.assertListEqual(
             self.mock_get.call_args_list,
-            expected_calls,
-            'Wrong arguments are passed to requests.get() when only "url_base"'
-            ' and "file_hash" arguments are given to the core.download()'
+            expected_request_args,
+            'Wrong arguments are passed to requests.get() when "url_base", '
+            '"file_hash", "rename_file" and "decryption_key" arguments are '
+            'given to the core.download()'
+        )
+        # Test of args, passed to
+        # `core.file_encryptor.convergence.decrypt_file_inline()`
+        # in the `core.download()`.
+        expected_decryption_args = [call(
+            os.path.join(os.path.abspath(file_alias)),
+            decryption_key)]
+        self.assertListEqual(
+            mock_decryptor.call_args_list,
+            expected_decryption_args,
+            'Wrong call of the '
+            'core.file_encryptor.convergence.decrypt_file_inline() inside '
+            'the metatool.core.download() function.'
         )
 
     def test_link_argument(self):
@@ -491,7 +526,6 @@ class TestCoreDownload(unittest.TestCase):
             tested_result,
             expected_return,
             "unexpected URL-query string when link=True"
-
         )
 
         # test with the ``decryption_key``
@@ -554,7 +588,6 @@ class TestCoreDownload(unittest.TestCase):
         )
         self.assertIsInstance(download_call_result, Response,
                               'Must return a response object')
-
 
     def test_authenticate_headers_provide(self):
         """

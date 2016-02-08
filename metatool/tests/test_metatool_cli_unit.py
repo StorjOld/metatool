@@ -136,14 +136,15 @@ class TestCliParseFunction(unittest.TestCase):
         )
 
         # test on correctly parsing of full set of available arguments
-        test_dec_key = binascii.hexlify(b'some key')
+        test_dec_key = binascii.hexlify(b'test 32 character long key......')
         args_list = 'download FILE_HASH ' \
                     '--decryption_key {} ' \
                     '--rename_file TEST_RENAME_FILE ' \
                     '--link'.format(test_dec_key.decode()).split()
         expected_args_dict = {
             'file_hash': args_list[1],
-            'decryption_key': quote_from_bytes(binascii.unhexlify(args_list[3])),
+            'decryption_key': quote_from_bytes(binascii.unhexlify(
+                    args_list[3])),
             'rename_file': args_list[5],
             'link': True,
             'execute_case': core.download,

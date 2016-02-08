@@ -119,6 +119,7 @@ import os.path
 import sys
 import argparse
 import binascii
+import string
 
 from btctxstore import BtcTxStore
 from requests.models import Response
@@ -139,10 +140,13 @@ CORE_NODES_URL = ('http://node2.metadisk.org/', 'http://node3.metadisk.org/')
 
 def decryption_key_type(argument):
     """
-    This is the special processor for the ``decryption_key`` argument type
+    This is the special processor for the ``decryption_key`` argument's type
     of the ``argparse.ArgumentParser.add_argument()`` method.
     It takes a hexadecimal-string and returns the proper decryption_key's
     form, for passing to the ``metatool.download()`` function.
+
+    Decryption key must be either 16, 24, or 32 bytes long (32, 48, or 64
+    characters long, in the hexadecimal string representation)
 
     Returns a string, properly escaped for using like an GET-URL query value.
 
@@ -153,9 +157,18 @@ def decryption_key_type(argument):
     :return: escaped string value
     :rtype: string
     """
-    if sys.version_info.major == 3:
-        argument = bytes(argument, 'ascii')
-    argument = binascii.unhexlify(argument)
+    try:
+        if not all(chr_ in string.hexdigits for chr_ in argument):
+            raise TypeError('string has non-hexadecimal characters')
+        if not len(argument) in (32, 48, 64):
+            raise TypeError('key must be either 32, 48, or 64 '
+                            'characters long, in the hexadecimal-'
+                            'string representation')
+        if sys.version_info.major == 3:
+            argument = bytes(argument, 'ascii')
+        argument = binascii.unhexlify(argument)
+    except TypeError as exc_:
+        raise argparse.ArgumentTypeError(exc_)
     return quote_from_bytes(argument)
 
 

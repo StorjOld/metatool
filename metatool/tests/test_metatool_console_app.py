@@ -14,6 +14,8 @@ else:
     from urlparse import urlparse, parse_qs
     from urllib import urlencode, quote as quote_from_bytes
 
+import file_encryptor
+
 # make the parent tests package importable for the direct running
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 if not parent_dir in sys.path:
@@ -212,7 +214,8 @@ class MetadiskTest(unittest.TestCase):
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'TEST_FILE_NAME'
-        decryption_key = binascii.hexlify(b'some key').decode()
+        decryption_key_raw = b'test 32 character long key......'
+        decryption_key = binascii.hexlify(decryption_key_raw).decode()
         expected_value = b'TEST_DATA'
         with os.popen('{} __main__.py download {} --decryption_key {}'.format(
             self.metadisk_python_interpreter,
@@ -226,6 +229,8 @@ class MetadiskTest(unittest.TestCase):
                 counter += 1
 
             self.assertTrue(os.path.isfile(test_file_name))
+            file_encryptor.convergence.decrypt_file_inline(test_file_name,
+                                                           decryption_key_raw)
             with open(test_file_name, 'rb') as file:
                 downloaded_file_data = file.read()[:-1]
             self.assertEqual(expected_value,
@@ -251,10 +256,11 @@ class MetadiskTest(unittest.TestCase):
                          'unexpected "data_hash" value '
                          'in the returned url line'
         )
-        test_dec_key_hex = binascii.hexlify(b'some key').decode()
+        decryption_key_raw = b'test 32 character long key......'
+        decryption_key_hex = binascii.hexlify(decryption_key_raw).decode()
         sended_data = dict(
                 decryption_key=quote_from_bytes(
-                        binascii.unhexlify(test_dec_key_hex)),
+                        binascii.unhexlify(decryption_key_hex)),
                 file_alias='new_name.txt'
             )
         expected_url_get_dict = parse_qs(urlencode(sended_data))
@@ -265,7 +271,7 @@ class MetadiskTest(unittest.TestCase):
             bash_command_template.format(
                 self.metadisk_python_interpreter,
                 data_hash,
-                test_dec_key_hex,
+                decryption_key_hex,
                 sended_data['file_alias'],
             )
         ) as printed_data:

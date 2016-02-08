@@ -163,7 +163,6 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
         url_for_requests,
         **data_for_requests
     )
-
     if response.status_code == 200:
         file_name = os.path.join(os.path.abspath(
                 response.headers['X-Sendfile']))
@@ -174,6 +173,7 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
         with open(file_name, 'wb') as fp:
             fp.write(response.content)
         if decryption_key:
+            decryption_key = unquote_to_bytes(decryption_key)
             file_encryptor.convergence.decrypt_file_inline(
                         file_name, decryption_key)
         return file_name
