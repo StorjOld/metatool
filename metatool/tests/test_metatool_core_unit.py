@@ -378,7 +378,6 @@ class TestCoreDownload(unittest.TestCase):
         )
 
     @patch('core.file_encryptor.convergence.decrypt_file_inline')
-    @patch('metatool.core.open', mock_open(), create=False)
     def test_provide_decryption_key(self, mock_decryptor):
         """
         Test of providing ``decryption_key`` to the ``core.download()``.
@@ -387,8 +386,18 @@ class TestCoreDownload(unittest.TestCase):
         self.mock_get.return_value.status_code = 200
         decryption_key = b'test 32 character long key......'
         self.test_data_for_requests = dict(params={})
-        core.download(self.test_url_address, self.file_hash,
-                      decryption_key=decryption_key)
+
+        # Get a appropriate "builtin" module name for pythons 2/3
+        # and mocking the builtin `open` function.
+        if sys.version_info.major == 3:
+            builtin_module_name = 'builtins'
+        else:
+            builtin_module_name = '__builtin__'
+        with patch('{}.open'.format(builtin_module_name),
+                   mock_open(), create=False):
+            core.download(self.test_url_address, self.file_hash,
+                          decryption_key=decryption_key)
+
         # Test of args, passed to `requests.get()` in the `core.download()`.
         expected_request_args = [call(
             urljoin(self.test_url_address, '/api/files/' + self.file_hash),
@@ -442,7 +451,6 @@ class TestCoreDownload(unittest.TestCase):
         )
 
     @patch('core.file_encryptor.convergence.decrypt_file_inline')
-    @patch('metatool.core.open', mock_open(), create=False)
     def test_provide_rename_file_and_decryption_key(self, mock_decryptor):
         """
         Test of providing ``file_alias`` to the ``core.download()``.
@@ -455,8 +463,17 @@ class TestCoreDownload(unittest.TestCase):
         self.test_data_for_requests = dict(params={
             'file_alias': file_alias,
         })
-        core.download(self.test_url_address, self.file_hash,
-                      rename_file=file_alias, decryption_key=decryption_key)
+        # Get a appropriate "builtin" module name for pythons 2/3
+        # and mocking the builtin `open` function.
+        if sys.version_info.major == 3:
+            builtin_module_name = 'builtins'
+        else:
+            builtin_module_name = '__builtin__'
+        with patch('{}.open'.format(builtin_module_name),
+                   mock_open(), create=False):
+            core.download(self.test_url_address, self.file_hash,
+                          rename_file=file_alias,
+                          decryption_key=decryption_key)
         expected_request_args = [call(
             urljoin(self.test_url_address, '/api/files/' + self.file_hash),
             **self.test_data_for_requests
