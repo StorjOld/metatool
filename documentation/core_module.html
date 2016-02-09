@@ -316,7 +316,7 @@ information about the server issue</td>
 
 <dl class="function">
 <dt id="metatool.core.upload">
-<code class="descclassname">metatool.core.</code><code class="descname">upload</code><span class="sig-paren">(</span><em>url_base</em>, <em>sender_key</em>, <em>btctx_api</em>, <em>file</em>, <em>file_role</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.upload" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">metatool.core.</code><code class="descname">upload</code><span class="sig-paren">(</span><em>url_base</em>, <em>sender_key</em>, <em>btctx_api</em>, <em>file</em>, <em>file_role</em>, <em>encrypt=False</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.upload" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload local file to the server. Max size of file is determined by the
 server. In the most of cases it is restricted by the 128 MB.
 Return the response object with <code class="docutils literal"><span class="pre">file_hash</span></code> and <code class="docutils literal"><span class="pre">file_role</span></code> when
@@ -331,6 +331,7 @@ have done successfully or the server-error when such has occurred.</p>
 generating credentials required by the access to the server</li>
 <li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
 to generate credentials for the server access</li>
+<li><strong>encrypt</strong> (<em>boolean</em>) &#8211; this is a flag which define will be encryption done, or not</li>
 <li><strong>file</strong> (<em>file object opened in the 'rb' mode</em>) &#8211; file object which will be uploaded to the server</li>
 <li><strong>file_role</strong> (<em>string</em>) &#8211; string of three numbers which define future
 behavior of the file on the server (look more it in the documentation)</li>

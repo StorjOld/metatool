@@ -284,18 +284,24 @@ required by the core API function</li>
 <dl class="function">
 <dt id="metatool.cli.decryption_key_type">
 <code class="descclassname">metatool.cli.</code><code class="descname">decryption_key_type</code><span class="sig-paren">(</span><em>argument</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.decryption_key_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is the special processor for the <code class="docutils literal"><span class="pre">decryption_key</span></code> argument type
+<dd><p>This is the special processor for the <code class="docutils literal"><span class="pre">decryption_key</span></code> argument&#8217;s type
 of the <code class="docutils literal"><span class="pre">argparse.ArgumentParser.add_argument()</span></code> method.
-It takes a sting and returns the proper decryption_key&#8217;s form, for
-passing to the <code class="docutils literal"><span class="pre">metatool.download()</span></code> function.</p>
-<p>Return bytes type on Python3 and string type on Python2.</p>
+It takes a hexadecimal-string and returns the proper decryption_key&#8217;s
+form, for passing to the <code class="docutils literal"><span class="pre">metatool.download()</span></code> function.</p>
+<p>Decryption key must be either 16, 24, or 32 bytes long (32, 48, or 64
+characters long, in the hexadecimal string representation)</p>
+<p>Returns a string, properly escaped for using like an GET-URL query value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argument</strong> &#8211; decryption_key string, how it represent&#8217;s in bytes.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argument</strong> &#8211; decryption_key hex-string, gained with
+binascii.hexlify(key), where the <cite>key</cite> is original
+key, returned from the <cite>file_encryptor.convergence.encrypt_file_inline</cite></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">bytes string</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">escaped string value</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
 </tr>
 </tbody>
 </table>

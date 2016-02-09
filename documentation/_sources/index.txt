@@ -2,7 +2,7 @@ Welcome to MetaTool's documentation!
 ====================================
 
 **metatool** is a Python package purposed for interacting with
-the MetaDisk service. Package provide CLI utility ``metatool`` based on
+the MetaDisk service. Package provide CLI utility ``metatool`` based on the
 MetaTool API. It developed accordingly to actions that you can perform
 with the MetaDisk service through the "curl" terminal command, described
 at the http://node2.metadisk.org/ page, but have some future, like walking

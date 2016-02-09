@@ -142,7 +142,7 @@
   <div class="section" id="metatool-cli-reference">
 <span id="id1"></span><h1>metatool CLI reference<a class="headerlink" href="#metatool-cli-reference" title="Permalink to this headline">¶</a></h1>
 <p>In general for running the application you may use the <strong>metatool</strong> terminal command with specified required arguments.
-For help <strong>information</strong> run <code class="docutils literal"><span class="pre">metatool</span></code> without arguments or with <code class="docutils literal"><span class="pre">-h</span></code>, <code class="docutils literal"><span class="pre">-help</span></code>, <code class="docutils literal"><span class="pre">--help</span></code>:</p>
+For help <strong>information</strong> run <code class="docutils literal"><span class="pre">metatool</span></code> without arguments or with <code class="docutils literal"><span class="pre">-h</span></code> / <code class="docutils literal"><span class="pre">--help</span></code>:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ metatool
 usage: METATOOL [-h] {audit,download,upload,files,info} ...
 
@@ -157,22 +157,22 @@ positional arguments:
 <div class="highlight-python"><div class="highlight"><pre>metatool &lt;action&gt; [ appropriate | arguments | for actions ] [--url URL_ADDRESS]
 </pre></div>
 </div>
-<p>The first required argument after <code class="docutils literal"><span class="pre">metatool</span></code> is an <strong>action</strong>. Namely one of
-<code class="docutils literal"><span class="pre">audit</span></code>,``download``,``files``,``info``,``upload``, each for an appropriate task.
+<p>The first required argument after <code class="docutils literal"><span class="pre">metatool</span></code> is an <strong>action</strong>. Namely, one of
+<code class="docutils literal"><span class="pre">audit</span></code>, <code class="docutils literal"><span class="pre">download</span></code>, <code class="docutils literal"><span class="pre">files</span></code>, <code class="docutils literal"><span class="pre">info</span></code>, <code class="docutils literal"><span class="pre">upload</span></code>; each for an appropriate task.
 In example:</p>
 <div class="highlight-python"><div class="highlight"><pre>metatool info
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">--url</span></code> is the optional argument common for all the actions and defines
+<p>The <code class="docutils literal"><span class="pre">--url</span></code> is the optional argument, common for all of the actions. It defines
 the URL-address of the <strong>target server</strong>:</p>
 <div class="highlight-python"><div class="highlight"><pre>metatool info --url http://node2.metadisk.org/
 </pre></div>
 </div>
 <p>This example in truth don&#8217;t bring any obvious difference in results - by default the target server
 is <strong>http://node2.metadisk.org/</strong> as well.
-You can either set an system <em>environment variable - MEATADISKSERVER*</em> to
-provide target server instead of using the <code class="docutils literal"><span class="pre">--url</span></code> opt. argument.</p>
-<p>All of the actions defines set of original required arguments.
+You can either set an system <em>environment variable</em> - <code class="docutils literal"><span class="pre">MEATADISKSERVER</span></code>, to
+provide target server, instead of using the <code class="docutils literal"><span class="pre">--url</span></code> opt. argument.</p>
+<p>Any of the actions defines the set of distinct required arguments.
 Let us go through all of them!</p>
 <hr class="docutils" />
 <p>There are two the most simple <strong>actions</strong> with no arguments after, but mentioned above optional <code class="docutils literal"><span class="pre">--url</span></code>:</p>
@@ -221,11 +221,12 @@ Let us go through all of them!</p>
 <div class="section" id="metatool-upload">
 <h2>metatool upload<a class="headerlink" href="#metatool-upload" title="Permalink to this headline">¶</a></h2>
 <p>Common form:</p>
-<div class="highlight-python"><div class="highlight"><pre>metatool upload &lt;path_to_file&gt; [-r | --file_role &lt;FILE_ROLE&gt;]
+<div class="highlight-python"><div class="highlight"><pre>metatool upload &lt;path_to_file&gt; [-r | --file_role &lt;FILE_ROLE&gt; ] [--encrypt]
 </pre></div>
 </div>
-<p>This command uploads the __file__ specified like required positional argument into the server
-with the default value of <code class="docutils literal"><span class="pre">__role__</span></code> - <strong>001</strong>:</p>
+<p>The <strong>encrypted file</strong> is preferred, but not forced, way to serve files on the MetaCore server, so uploading supports the <strong>encryption</strong>.</p>
+<p>Next command uploads your <strong>file</strong>, specified as first and required positional argument, into the server
+with the default value of <code class="docutils literal"><span class="pre">file_role</span></code> - <strong>001</strong>:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ metatool upload README.md
 201
 {
@@ -236,12 +237,29 @@ with the default value of <code class="docutils literal"><span class="pre">__rol
 </div>
 <p>Returned data is a printout of the <strong>response code</strong> - <code class="docutils literal"><span class="pre">201</span></code> and content of the json file with <strong>data_hash</strong> and <strong>role</strong> of the
 uploaded file.</p>
+<p>Put the <code class="docutils literal"><span class="pre">--encrypt</span></code> key to encrypt the sent data (your local file remains the same) and get the <code class="docutils literal"><span class="pre">decryption_key</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool upload README.md --encrypt --url http://localhost:5000
+201
+{
+  &quot;data_hash&quot;: &quot;0c50ca846cba1140c1d1be3bdd1f9c10efed6e2692889e8520c73b96a548e998&quot;,
+  &quot;decryption_key&quot;: &quot;5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57&quot;,
+  &quot;file_role&quot;: &quot;001&quot;
+}
+</pre></div>
+</div>
+<p>Now you&#8217;ve got an additional item in the returned JSON - <code class="docutils literal"><span class="pre">decryption_key</span></code>. This is an &#8220;hexadecimalised&#8221; value of the bytes
+<code class="docutils literal"><span class="pre">decryption_key</span></code> value. If you need the original bytes value, use the <code class="docutils literal"><span class="pre">binascii.unhexlify()</span></code> standard library function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">binascii</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">binascii</span><span class="o">.</span><span class="n">unhexlify</span><span class="p">(</span><span class="s">&quot;5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57&quot;</span><span class="p">)</span>
+<span class="go">&#39;[\xfcX\x95.\xfa\x86\xa8\x9a\xb8\x9c\xf6\xb6\x05\xc9\xb8\xbf\xcd\x08\xd9\xb4N`p\xe7ai\x1c\xa1\xed+W&#39;</span>
+</pre></div>
+</div>
 <p>If you want to set the other value of <strong>file_role</strong> use optional argument <code class="docutils literal"><span class="pre">-r</span></code> or <code class="docutils literal"><span class="pre">--file_role</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ metatool upload README.md --file_role 001
+<div class="highlight-python"><div class="highlight"><pre>$ metatool upload README.md --file_role 011
 201
 {
   &quot;data_hash&quot;: &quot;76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695&quot;,
-  &quot;file_role&quot;: &quot;001&quot;
+  &quot;file_role&quot;: &quot;011&quot;
 }
 </pre></div>
 </div>
@@ -334,33 +352,24 @@ purposed for generation a new original <strong>hash-sum</strong> from <strong>fi
 <blockquote>
 <div><ul class="simple">
 <li><strong>`file_hash`</strong> - hash-name of the needed file.</li>
-<li><strong>`&#8211;decryption_key`</strong> - key for the decryption file in a bytes representation.</li>
+<li><strong>`&#8211;decryption_key`</strong> - key to the decryption of file in the <strong>hexlify</strong> bytes representation.</li>
 <li><strong>`&#8211;rename_file`</strong> - desired saving name (included path) of the downloaded file.</li>
 <li><strong>`&#8211;link`</strong> &#8211; will return the url GET request string instead of performing the downloading.</li>
 </ul>
 </div></blockquote>
 <p>Below is the example of commands and explanation for it.</p>
-<p>This command saves the file at the current directory under the hash-name; returns nothing in the console
-while operation complete successfully, otherwise shows an occured error:</p>
+<p>This command saves the file at the current directory under the hash-name by default; returns the full path of downloaded file in the console
+if this operation is completed successfully, otherwise shows an occurred error:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ metatool download 1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645
 /home/user/1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645
 </pre></div>
 </div>
 <p>This does the same but saves <strong>decrypted</strong> file:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 \
- &gt; --decryption_key &quot;[\xfcX\x95.\xfa\x86\xa8\x9a\xb8\x9c\xf6\xb6\x05\xc9\xb8\xbf\xcd\x08\xd9\xb4N`p\xe7ai\x1c\xa1\xed+W&quot;
- /home/user/76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695
+<div class="highlight-python"><div class="highlight"><pre>$ metatool download 0c50ca846cba1140c1d1be3bdd1f9c10efed6e2692889e8520c73b96a548e998 \
+&gt; --decryption_key 5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57
+/home/jeka/PycharmProjects/anvil8/storj/metatool/0c50ca846cba1140c1d1be3bdd1f9c10efed6e2692889e8520c73b96a548e998
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">Be sure to put the key in quotes (&#8220;KEY&#8221;) because of how does
-command line interprets the <code class="docutils literal"><span class="pre">\</span></code> character.</td>
-</tr>
-</tbody>
-</table>
 <p>In this case it will set a new name for the downloaded file:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ metatool download 1d5ae562cc38e3adcf01a062207c2894fb8d055cfcf8200c3854c77eb6965645 \
 &gt; --rename_file just_file.txt
@@ -378,9 +387,9 @@ $ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002e
 /home/user/download/just_file.txt
 </pre></div>
 </div>
-<p>You can even fetch the <strong>http request string</strong> and perform the downloading in example through
-the browser by passing <code class="docutils literal"><span class="pre">--link</span></code> optional argument.
-<strong>metatool</strong> than will not execute the downloading but will generate the appropriate <strong>URL</strong> string:</p>
+<p>You can even fetch the <strong>http request string</strong> and perform the downloading, in example through
+the browser, by passing <code class="docutils literal"><span class="pre">--link</span></code> optional argument.
+<strong>metatool</strong> than will not execute the downloading, but will generate the appropriate <strong>URL</strong> string:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ metatool download 76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695 --rename_file just_file.txt --link
 http://your.node.com/api/files/76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695?file_alias=just_file.md
 </pre></div>

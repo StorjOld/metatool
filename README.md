@@ -13,7 +13,7 @@ Below is the thorough specification for the metatool usage.
 ---
 
 In general for running the application you may use the `metatool` terminal command with specified required arguments.
-For help **information** run `metatool` without arguments or with `-h`, `-help`, `--help`:
+For help **information** run `metatool` without arguments or with `-h`/`--help`:
 
     $ metatool
     $ metatool
