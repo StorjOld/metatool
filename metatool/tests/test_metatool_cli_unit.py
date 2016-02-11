@@ -143,8 +143,7 @@ class TestCliParseFunction(unittest.TestCase):
                     '--link'.format(test_dec_key.decode()).split()
         expected_args_dict = {
             'file_hash': args_list[1],
-            'decryption_key': quote_from_bytes(binascii.unhexlify(
-                    args_list[3])),
+            'decryption_key': args_list[3],
             'rename_file': args_list[5],
             'link': True,
             'execute_case': core.download,

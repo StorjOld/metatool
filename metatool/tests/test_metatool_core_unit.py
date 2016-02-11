@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+import binascii
 
 from requests.models import Response
 from btctxstore import BtcTxStore
@@ -385,6 +386,7 @@ class TestCoreDownload(unittest.TestCase):
         # Test to run with given ``decryption_key`` argument.
         self.mock_get.return_value.status_code = 200
         decryption_key = b'test 32 character long key......'
+        decryption_key_hex = binascii.hexlify(decryption_key)
         self.test_data_for_requests = dict(params={})
 
         # Get a appropriate "builtin" module name for pythons 2/3
@@ -396,7 +398,7 @@ class TestCoreDownload(unittest.TestCase):
         with patch('{}.open'.format(builtin_module_name),
                    mock_open(), create=False):
             core.download(self.test_url_address, self.file_hash,
-                          decryption_key=decryption_key)
+                          decryption_key=decryption_key_hex)
 
         # Test of args, passed to `requests.get()` in the `core.download()`.
         expected_request_args = [call(
@@ -458,6 +460,7 @@ class TestCoreDownload(unittest.TestCase):
         # Test to run with given ``file_alias`` argument.
         file_alias = 'some new name'
         decryption_key = b'test 32 character long key......'
+        decryption_key_hex = binascii.hexlify(decryption_key)
         self.mock_get.return_value.status_code = 200
         self.mock_get.return_value.headers['X-Sendfile'] = file_alias
         self.test_data_for_requests = dict(params={
@@ -473,7 +476,7 @@ class TestCoreDownload(unittest.TestCase):
                    mock_open(), create=False):
             core.download(self.test_url_address, self.file_hash,
                           rename_file=file_alias,
-                          decryption_key=decryption_key)
+                          decryption_key=decryption_key_hex)
         expected_request_args = [call(
             urljoin(self.test_url_address, '/api/files/' + self.file_hash),
             **self.test_data_for_requests

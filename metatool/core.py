@@ -177,9 +177,9 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
         with open(file_name, 'wb') as fp:
             fp.write(response.content)
         if decryption_key:
-            decryption_key = unquote_to_bytes(decryption_key)
+            bytes_decryption_key = binascii.unhexlify(decryption_key)
             file_encryptor.convergence.decrypt_file_inline(
-                        file_name, decryption_key)
+                        file_name, bytes_decryption_key)
         return file_name
     else:
         return response

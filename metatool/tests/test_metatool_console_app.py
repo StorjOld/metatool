@@ -1,3 +1,4 @@
+from __future__ import print_function
 import json
 import os
 import sys
@@ -9,10 +10,10 @@ from hashlib import sha256
 from io import StringIO
 
 if sys.version_info.major == 3:
-    from urllib.parse import urlparse, parse_qs, quote_from_bytes, urlencode
+    from urllib.parse import urlparse, parse_qs, urlencode
 else:
     from urlparse import urlparse, parse_qs
-    from urllib import urlencode, quote as quote_from_bytes
+    from urllib import urlencode
 
 import file_encryptor
 
@@ -252,36 +253,33 @@ class MetadiskTest(unittest.TestCase):
             request_url_string = printed_data.read().rstrip(os.linesep)
         url_object = urlparse(request_url_string)
         data_hash_from_url = url_object.path.split('/')[-1]
-        self.assertEqual(data_hash, data_hash_from_url,
-                         'unexpected "data_hash" value '
-                         'in the returned url line'
+        self.assertEqual(
+            data_hash, data_hash_from_url,
+            'unexpected "data_hash" value in the returned url line'
         )
-        decryption_key_raw = b'test 32 character long key......'
-        decryption_key_hex = binascii.hexlify(decryption_key_raw).decode()
-        sended_data = dict(
-                decryption_key=quote_from_bytes(
-                        binascii.unhexlify(decryption_key_hex)),
-                file_alias='new_name.txt'
-            )
-        expected_url_get_dict = parse_qs(urlencode(sended_data))
-        bash_command_template = """\
-        {} __main__.py download {} --decryption_key {} --rename_file {} --link
+
+        decryption_key = binascii.hexlify(b'test 32 character long key......')
+        decryption_key_str = decryption_key.decode('ascii')
+
+        sent_data = dict(decryption_key=decryption_key,
+                         file_alias='new_name.txt')
+        expected_url_get_dict = parse_qs(urlencode(sent_data))
+        terminal_command_template = """\
+        {} __main__.py download {} --decryption_key {!s} --rename_file {} \
+        --link
         """
-        with os.popen(
-            bash_command_template.format(
-                self.metadisk_python_interpreter,
-                data_hash,
-                decryption_key_hex,
-                sended_data['file_alias'],
-            )
-        ) as printed_data:
+        test_terminal_command = terminal_command_template.format(
+            self.metadisk_python_interpreter,
+            data_hash,
+            decryption_key_str,
+            sent_data['file_alias'],
+        )
+        with os.popen(test_terminal_command) as printed_data:
             request_url_string = printed_data.read().rstrip(os.linesep)
         received_url_get_dict = parse_qs(urlparse(request_url_string).query)
         self.assertEqual(expected_url_get_dict, received_url_get_dict,
                          'unexpected "decryption_key" value in the returned '
                          'url line')
-
-
 
     def test_error_audit(self):
         """

@@ -187,12 +187,9 @@ def decryption_key_type(argument):
             raise TypeError('key must be either 32, 48, or 64 '
                             'characters long, in the hexadecimal-'
                             'string representation')
-        if sys.version_info.major == 3:
-            argument = bytes(argument, 'ascii')
-        argument = binascii.unhexlify(argument)
     except TypeError as exc_:
         raise argparse.ArgumentTypeError(exc_)
-    return quote_from_bytes(argument)
+    return argument
 
 
 def parse():
