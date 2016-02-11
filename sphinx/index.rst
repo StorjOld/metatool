@@ -1,6 +1,14 @@
 Welcome to MetaTool's documentation!
 ====================================
 
+
+.. image:: https://travis-ci.org/Storj/metatool.svg?branch=master
+    :target: https://travis-ci.org/Storj/metatool
+.. image:: https://coveralls.io/repos/github/Storj/metatool/badge.svg?branch=master
+    :target: https://coveralls.io/github/Storj/metatool?branch=master
+.. image:: https://img.shields.io/badge/license-AGPL%20License-blue.svg
+    :target: https://github.com/Storj/metatool/blob/master/LICENSE
+
 **metatool** is a Python package purposed for interacting with
 the MetaDisk service. Package provide CLI utility ``metatool`` based on the
 MetaTool API. It developed accordingly to actions that you can perform
@@ -25,11 +33,13 @@ and require side packages:
 
    | btctxstore_
    | requests_
+   | file_encryptor_
    | mock_ (only for Python 2.x)
 
 .. _btctxstore: https://pypi.python.org/pypi/btctxstore/4.6.0
 .. _requests: https://pypi.python.org/pypi/requests
 .. _mock: https://pypi.python.org/pypi/mock
+.. _file_encryptor: https://pypi.python.org/pypi/file_encryptor/0.2.9
 
 -----------
 

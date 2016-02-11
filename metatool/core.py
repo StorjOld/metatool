@@ -75,16 +75,20 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
     It performs the downloading of the file from the server
     by the given ``file_hash``.
     If ``link=True`` will return GET-request URL-string instead of download,
-    so you can use it like a simple URL address and download it through the
+    so you can use it like a simple URL address and download file through the
     browser.
 
     :note: The "link=True" case implies non-authenticated access to the
         file, available only for files with such values of ``roles``: 101, 001
 
-    Will return the response object with information about the server-error
+    Will return the response object with information about the server-error,
     when such has occurred.
 
-    :param url_base: URL-string which defines the server will be used
+    :param url_base: URL-string, which defines the server, that will be used
+
+        :note: should be used the generic URI syntax, i.e.:
+            ``http://node2.metadisk.org/``
+
     :type url_base: string
 
     :param sender_key: unique secret key which will be used for the
@@ -107,26 +111,26 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
         (optional, default: None)
     :type rename_file: string
 
-    :param decryption_key: key value which will be used to decrypt file
-        on the server before the downloading (if allowed by the role)
+    :param decryption_key: key value, hexlify from bytes, which will be used to
+        decrypt file locally, or used as a GET-parameter, when ``link==True``
 
         (optional, default: None)
     :type decryption_key: string
 
-    :param link: if ``True``, function doesn't perform the downloading but
+    :param link: if ``True``, function doesn't perform the downloading, but
         generate appropriate GET URL-string instead
 
         (optional, default: False)
     :type link: boolean
 
-    :returns: full path to the file if download done successfully
+    :returns: full path to the file, if download done successfully
 
         :rtype: string
     :returns: if ``link=True``, will return GET-request
         URL-string, instead of processing the downloading
 
         :rtype: string
-    :returns: object with information about the occurred error on the server
+    :returns: object with information about the occurred error on the server,
         while the downloading
 
         :rtype: requests.models.Response object
@@ -188,6 +192,12 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
     Return the response object with ``file_hash`` and ``file_role`` when
     have done successfully or the server-error when such has occurred.
 
+    The **encrypted file** is preferred, but not forced, way to serve files
+    on the MetaCore server, so uploading supports the **encryption**.
+    When ``encrypt=True``, to the returned JSON will be added the
+    ``decryption_key``. It is an "hexadecimalised" value of the bytes
+    ``decryption_key`` value.
+
     :param url_base: URL-string which defines the server will be used
     :type url_base: string
 
@@ -199,7 +209,9 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
         to generate credentials for the server access
     :type btctx_api: btctxstore.BtcTxStore object
 
-    :param encrypt: this is a flag which define will be encryption done, or not
+    :param encrypt: this is a flag which defines, will be the encryption done
+
+        (optional, default: False)
     :type encrypt: boolean
 
     :param file: file object which will be uploaded to the server

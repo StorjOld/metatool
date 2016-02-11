@@ -172,7 +172,7 @@ the URL-address of the <strong>target server</strong>:</p>
 is <strong>http://node2.metadisk.org/</strong> as well.
 You can either set an system <em>environment variable</em> - <code class="docutils literal"><span class="pre">MEATADISKSERVER</span></code>, to
 provide target server, instead of using the <code class="docutils literal"><span class="pre">--url</span></code> opt. argument.</p>
-<p>Any of the actions defines the set of distinct required arguments.
+<p>Any of the actions has a set of distinct required arguments.
 Let us go through all of them!</p>
 <hr class="docutils" />
 <p>There are two the most simple <strong>actions</strong> with no arguments after, but mentioned above optional <code class="docutils literal"><span class="pre">--url</span></code>:</p>
@@ -247,7 +247,7 @@ uploaded file.</p>
 }
 </pre></div>
 </div>
-<p>Now you&#8217;ve got an additional item in the returned JSON - <code class="docutils literal"><span class="pre">decryption_key</span></code>. This is an &#8220;hexadecimalised&#8221; value of the bytes
+<p>Now you&#8217;ve got an additional item in the returned JSON - <code class="docutils literal"><span class="pre">decryption_key</span></code>. This is a &#8220;hexadecimalised&#8221; value of the bytes
 <code class="docutils literal"><span class="pre">decryption_key</span></code> value. If you need the original bytes value, use the <code class="docutils literal"><span class="pre">binascii.unhexlify()</span></code> standard library function:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">binascii</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">binascii</span><span class="o">.</span><span class="n">unhexlify</span><span class="p">(</span><span class="s">&quot;5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57&quot;</span><span class="p">)</span>
@@ -338,8 +338,8 @@ purposed for generation a new original <strong>hash-sum</strong> from <strong>fi
 }
 </pre></div>
 </div>
-<p>Responce for the command is the <em>response code</em> - <code class="docutils literal"><span class="pre">201</span></code> and json with the data you was enter with the one additional item -
-<strong>`challenge_response`</strong> - the original <strong>hash</strong> mentioned above. You can compare it with an expected value.</p>
+<p>Response for the command is the <em>response code</em> - <code class="docutils literal"><span class="pre">201</span></code> and json with the data you was enter with the one additional item -
+<strong>challenge_response</strong> - the original <strong>hash</strong> mentioned above. You can compare it with an expected value.</p>
 </div>
 <div class="section" id="metatool-download">
 <h2>metatool download<a class="headerlink" href="#metatool-download" title="Permalink to this headline">¶</a></h2>
@@ -347,14 +347,14 @@ purposed for generation a new original <strong>hash-sum</strong> from <strong>fi
 <div class="highlight-python"><div class="highlight"><pre>$ metatool download &lt;file_hash&gt; [--decryption_key &quot;KEY&quot;] [--rename_file NEW_NAME] [--link]
 </pre></div>
 </div>
-<p><strong>download</strong> action fetches the file from server. Here is one required argument - <strong>`file_hash`</strong> and two optional -
-<strong>`&#8211;decryption_key`</strong> and <strong>`&#8211;rename_file`</strong>:</p>
+<p><strong>download</strong> action fetches the file from server. Here is one required argument - <code class="docutils literal"><span class="pre">file_hash</span></code> and two optional -
+<code class="docutils literal"><span class="pre">--decryption_key</span></code> and <code class="docutils literal"><span class="pre">--rename_file</span></code>:</p>
 <blockquote>
 <div><ul class="simple">
-<li><strong>`file_hash`</strong> - hash-name of the needed file.</li>
-<li><strong>`&#8211;decryption_key`</strong> - key to the decryption of file in the <strong>hexlify</strong> bytes representation.</li>
-<li><strong>`&#8211;rename_file`</strong> - desired saving name (included path) of the downloaded file.</li>
-<li><strong>`&#8211;link`</strong> &#8211; will return the url GET request string instead of performing the downloading.</li>
+<li><code class="docutils literal"><span class="pre">file_hash</span></code> - hash-name of the needed file.</li>
+<li><code class="docutils literal"><span class="pre">--decryption_key</span></code> - key to the decryption of file in the <strong>hexlify</strong> bytes representation.</li>
+<li><code class="docutils literal"><span class="pre">--rename_file</span></code> - desired saving name (included path) of the downloaded file.</li>
+<li><code class="docutils literal"><span class="pre">--link</span></code> &#8211; will return the url GET request string instead of performing the downloading.</li>
 </ul>
 </div></blockquote>
 <p>Below is the example of commands and explanation for it.</p>

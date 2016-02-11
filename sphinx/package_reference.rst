@@ -40,7 +40,7 @@ You can either set an system *environment variable* - ``MEATADISKSERVER``, to
 provide target server, instead of using the ``--url`` opt. argument.
 
 
-Any of the actions defines the set of distinct required arguments.
+Any of the actions has a set of distinct required arguments.
 Let us go through all of them!
 
 -------------------
@@ -126,7 +126,7 @@ Put the ``--encrypt`` key to encrypt the sent data (your local file remains the 
       "file_role": "001"
     }
 
-Now you've got an additional item in the returned JSON - ``decryption_key``. This is an "hexadecimalised" value of the bytes
+Now you've got an additional item in the returned JSON - ``decryption_key``. This is a "hexadecimalised" value of the bytes
 ``decryption_key`` value. If you need the original bytes value, use the ``binascii.unhexlify()`` standard library function:
 
     >>> import binascii
@@ -197,8 +197,8 @@ Be sure to put this arguments in the right order::
       "data_hash": "76cc2d5c077f440c8a422bec61070e3383807205845c8f6f22beeb28002ed695"
     }
 
-Responce for the command is the *response code* - ``201`` and json with the data you was enter with the one additional item -
-**`challenge_response`** - the original **hash** mentioned above. You can compare it with an expected value.
+Response for the command is the *response code* - ``201`` and json with the data you was enter with the one additional item -
+**challenge_response** - the original **hash** mentioned above. You can compare it with an expected value.
 
 metatool download
 """""""""""""""""
@@ -207,13 +207,13 @@ Common usage::
 
     $ metatool download <file_hash> [--decryption_key "KEY"] [--rename_file NEW_NAME] [--link]
 
-**download** action fetches the file from server. Here is one required argument - **`file_hash`** and two optional -
-**`--decryption_key`** and **`--rename_file`**:
+**download** action fetches the file from server. Here is one required argument - ``file_hash`` and two optional -
+``--decryption_key`` and ``--rename_file``:
 
-    * **`file_hash`** - hash-name of the needed file.
-    * **`--decryption_key`** - key to the decryption of file in the **hexlify** bytes representation.
-    * **`--rename_file`** - desired saving name (included path) of the downloaded file.
-    * **`--link`** -- will return the url GET request string instead of performing the downloading.
+    * ``file_hash`` - hash-name of the needed file.
+    * ``--decryption_key`` - key to the decryption of file in the **hexlify** bytes representation.
+    * ``--rename_file`` - desired saving name (included path) of the downloaded file.
+    * ``--link`` -- will return the url GET request string instead of performing the downloading.
 
 Below is the example of commands and explanation for it.
 

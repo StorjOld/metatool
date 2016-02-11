@@ -189,15 +189,32 @@ on the node.</dd>
 </dl>
 <hr class="docutils" />
 <dl class="docutils">
-<dt><strong>metatool upload &lt;path_to_file&gt; [-r | &#8211;file_role FILE_ROLE]</strong></dt>
-<dd><p class="first">Upload file to the server.</p>
+<dt><strong>metatool upload &lt;path_to_file&gt; [-r | &#8211;file_role FILE_ROLE] [&#8211;encrypt]</strong></dt>
+<dd><p class="first">Upload file to the server.
+The <strong>encrypted file</strong> is preferred, but not forced, way to serve files
+on the MetaCore server, so uploading supports the <strong>encryption</strong>.</p>
 <blockquote>
 <div><p><code class="docutils literal"><span class="pre">path_to_file</span></code> - Name of the file from the working directory
 or a <em>full/related</em> path to the file.</p>
 <p><code class="docutils literal"><span class="pre">-r</span> <span class="pre">|</span> <span class="pre">--file_role</span> <span class="pre">FILE_ROLE</span></code>  -  Key <strong>-r</strong> or <strong>&#8211;file_role</strong>
 purposed for the setting desired <strong>file_role</strong>. <strong>001</strong> by default.</p>
+<p><code class="docutils literal"><span class="pre">--encrypt</span></code> - Key to encrypt the sent data (your local file remains
+the same) and get the <code class="docutils literal"><span class="pre">decryption_key</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ metatool upload README.md --encrypt --url http://localhost:5000
+201
+{
+  &quot;data_hash&quot;: &quot;0c50ca846cba1140c1d1be3bdd1f9c10efed6e269...&quot;,
+  &quot;decryption_key&quot;: &quot;5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9...&quot;,
+  &quot;file_role&quot;: &quot;001&quot;
+}
+</pre></div>
+</div>
+<p>Now you&#8217;ve got an additional item in the returned JSON -
+<code class="docutils literal"><span class="pre">decryption_key</span></code>. This is an &#8220;hexadecimalised&#8221; value of the bytes
+<code class="docutils literal"><span class="pre">decryption_key</span></code> value.</p>
 </div></blockquote>
-<p class="last">Returns a json file with <strong>data_hash</strong> and <strong>file_role</strong>.</p>
+<p class="last">Without the <code class="docutils literal"><span class="pre">--ecrypt</span></code> returns a json file with <strong>data_hash</strong>
+and <strong>file_role</strong>.</p>
 </dd>
 </dl>
 <hr class="docutils" />
@@ -225,17 +242,12 @@ Returns full path to the file if downloaded successful.</p>
 <div><p><code class="docutils literal"><span class="pre">file_hash</span></code> - string which represents the <strong>file hash</strong>.</p>
 <p><code class="docutils literal"><span class="pre">--link</span></code> - will return the url GET request string instead of
 executing the downloading.</p>
-<p><code class="docutils literal"><span class="pre">--decryption_key</span> <span class="pre">&quot;KEY&quot;</span></code> - Optional argument. It makes the downloaded
-file to go from the server in decrypted state(if allowed for this file)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">note:</th><td class="field-body">be sure to put the key in quotes (&#8220;KEY&#8221;) because of how does
-command line interprets the <code class="docutils literal"><span class="pre">\</span></code> character.</td>
-</tr>
-</tbody>
-</table>
+<p><code class="docutils literal"><span class="pre">--decryption_key</span> <span class="pre">&quot;KEY&quot;</span></code> - Optional argument. It performs the
+decryption of the file directly at your machine, after the downloading.
+This file can be decrypted on the server, when downloading manually,
+if allowed for this file by the <code class="docutils literal"><span class="pre">file_role</span></code>
+(i.e., when you are using the URL GET-query string, that you
+got, with the <code class="docutils literal"><span class="pre">--link</span></code> optional argument).</p>
 <p><code class="docutils literal"><span class="pre">--rename_file</span> <span class="pre">NEW_NAME</span></code> - Optional argument which defines
 the <strong>NEW_NAME</strong> for the storing file on your disk. You can provide
 an relative and full path to the directory with this name as well.</p>
@@ -257,7 +269,7 @@ an relative and full path to the directory with this name as well.</p>
 <dl class="function">
 <dt id="metatool.cli.args_prepare">
 <code class="descclassname">metatool.cli.</code><code class="descname">args_prepare</code><span class="sig-paren">(</span><em>required_args</em>, <em>parsed_args</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.args_prepare" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filling all missed but required by the core API function arguments.
+<dd><p>Filling all missed, but required by the core API function arguments.
 Return dictionary that will be passed to the API function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -271,7 +283,7 @@ required by the core API function</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dictionary that will be used like <cite>**kwargs</cite> argument</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dictionary that will be used like the <code class="docutils literal"><span class="pre">**kwargs</span></code> argument</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dictionary</p>
@@ -286,7 +298,7 @@ required by the core API function</li>
 <code class="descclassname">metatool.cli.</code><code class="descname">decryption_key_type</code><span class="sig-paren">(</span><em>argument</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.cli.decryption_key_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the special processor for the <code class="docutils literal"><span class="pre">decryption_key</span></code> argument&#8217;s type
 of the <code class="docutils literal"><span class="pre">argparse.ArgumentParser.add_argument()</span></code> method.
-It takes a hexadecimal-string and returns the proper decryption_key&#8217;s
+It takes a <strong>hexadecimal-string</strong> and returns the proper decryption_key&#8217;s
 form, for passing to the <code class="docutils literal"><span class="pre">metatool.download()</span></code> function.</p>
 <p>Decryption key must be either 16, 24, or 32 bytes long (32, 48, or 64
 characters long, in the hexadecimal string representation)</p>
@@ -295,13 +307,20 @@ characters long, in the hexadecimal string representation)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argument</strong> &#8211; decryption_key hex-string, gained with
-binascii.hexlify(key), where the <cite>key</cite> is original
-key, returned from the <cite>file_encryptor.convergence.encrypt_file_inline</cite></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argument</strong> &#8211; decryption_key <strong>hex-string</strong>, gained with
+binascii.hexlify(key), where the <strong>key</strong> is original key, returned
+from the <code class="docutils literal"><span class="pre">file_encryptor.convergence.encrypt_file_inline()</span></code> function,
+from the <a class="reference external" href="https://pypi.python.org/pypi/file_encryptor/0.2.9">file_encryptor</a> lib.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">escaped string value</td>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">escaped string value</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
 </tr>
 </tbody>
 </table>

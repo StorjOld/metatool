@@ -190,7 +190,7 @@ information about the server issue</p>
 <dd><p>It performs the downloading of the file from the server
 by the given <code class="docutils literal"><span class="pre">file_hash</span></code>.
 If <code class="docutils literal"><span class="pre">link=True</span></code> will return GET-request URL-string instead of download,
-so you can use it like a simple URL address and download it through the
+so you can use it like a simple URL address and download file through the
 browser.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -201,14 +201,24 @@ file, available only for files with such values of <code class="docutils literal
 </tr>
 </tbody>
 </table>
-<p>Will return the response object with information about the server-error
+<p>Will return the response object with information about the server-error,
 when such has occurred.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>url_base</strong> (<em>string</em>) &#8211; URL-string which defines the server will be used</li>
+<li><strong>url_base</strong> (<em>string</em>) &#8211; <p>URL-string, which defines the server, that will be used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">note:</th><td class="field-body">should be used the generic URI syntax, i.e.:
+<code class="docutils literal"><span class="pre">http://node2.metadisk.org/</span></code></td>
+</tr>
+</tbody>
+</table>
+</li>
 <li><strong>sender_key</strong> (<em>string</em>) &#8211; <p>unique secret key which will be used for the
 generating credentials required by the access to the server</p>
 <p>(optional, default: None)</p>
@@ -221,18 +231,18 @@ to generate credentials for the server access</p>
 <li><strong>rename_file</strong> (<em>string</em>) &#8211; <p>defines new name of the file after downloading</p>
 <p>(optional, default: None)</p>
 </li>
-<li><strong>decryption_key</strong> (<em>string</em>) &#8211; <p>key value which will be used to decrypt file
-on the server before the downloading (if allowed by the role)</p>
+<li><strong>decryption_key</strong> (<em>string</em>) &#8211; <p>key value, hexlify from bytes, which will be used to
+decrypt file locally, or used as a GET-parameter, when <code class="docutils literal"><span class="pre">link==True</span></code></p>
 <p>(optional, default: None)</p>
 </li>
-<li><strong>link</strong> (<em>boolean</em>) &#8211; <p>if <code class="docutils literal"><span class="pre">True</span></code>, function doesn&#8217;t perform the downloading but
+<li><strong>link</strong> (<em>boolean</em>) &#8211; <p>if <code class="docutils literal"><span class="pre">True</span></code>, function doesn&#8217;t perform the downloading, but
 generate appropriate GET URL-string instead</p>
 <p>(optional, default: False)</p>
 </li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>full path to the file if download done successfully</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>full path to the file, if download done successfully</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -257,7 +267,7 @@ URL-string, instead of processing the downloading</p>
 </p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>object with information about the occurred error on the server
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>object with information about the occurred error on the server,
 while the downloading</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -321,6 +331,11 @@ information about the server issue</td>
 server. In the most of cases it is restricted by the 128 MB.
 Return the response object with <code class="docutils literal"><span class="pre">file_hash</span></code> and <code class="docutils literal"><span class="pre">file_role</span></code> when
 have done successfully or the server-error when such has occurred.</p>
+<p>The <strong>encrypted file</strong> is preferred, but not forced, way to serve files
+on the MetaCore server, so uploading supports the <strong>encryption</strong>.
+When <code class="docutils literal"><span class="pre">encrypt=True</span></code>, to the returned JSON will be added the
+<code class="docutils literal"><span class="pre">decryption_key</span></code>. It is an &#8220;hexadecimalised&#8221; value of the bytes
+<code class="docutils literal"><span class="pre">decryption_key</span></code> value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -331,7 +346,9 @@ have done successfully or the server-error when such has occurred.</p>
 generating credentials required by the access to the server</li>
 <li><strong>btctx_api</strong> (<em>btctxstore.BtcTxStore object</em>) &#8211; instance of the <code class="docutils literal"><span class="pre">BtcTxStore</span></code> class which will be used
 to generate credentials for the server access</li>
-<li><strong>encrypt</strong> (<em>boolean</em>) &#8211; this is a flag which define will be encryption done, or not</li>
+<li><strong>encrypt</strong> (<em>boolean</em>) &#8211; <p>this is a flag which defines, will be the encryption done</p>
+<p>(optional, default: False)</p>
+</li>
 <li><strong>file</strong> (<em>file object opened in the 'rb' mode</em>) &#8211; file object which will be uploaded to the server</li>
 <li><strong>file_role</strong> (<em>string</em>) &#8211; string of three numbers which define future
 behavior of the file on the server (look more it in the documentation)</li>
@@ -355,10 +372,10 @@ information about the server issue</p>
 <p>This part of the documentation gives thorough knowledge of the MetaTool API usage.</p>
 <div class="section" id="introduction">
 <h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h3>
-<p>All API functions are placed in the <code class="docutils literal"><span class="pre">metatool.core</span></code> module which is described on the <a class="reference internal" href="#metatool-api-specification">MetaTool API specification</a>,
+<p>All API functions are placed in the <code class="docutils literal"><span class="pre">metatool.core</span></code> module, which is described on the <a class="reference internal" href="#metatool-api-specification">MetaTool API specification</a>,
 so here we&#8217;ll look on their use.</p>
 <p>To start using the MetaTool API you should get the source code from the <a class="reference external" href="https://github.com/Storj/metatool.git">repository</a> and
-either install the package with the <code class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code> command or make sure that the directory nested the <code class="docutils literal"><span class="pre">metatool</span></code> package
+either install the package with the <code class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code> command, or make sure that the directory nested the <code class="docutils literal"><span class="pre">metatool</span></code> package
 is present at your <code class="docutils literal"><span class="pre">sys.path</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -533,13 +550,13 @@ The same list will be represented if you visit <a class="reference external" hre
 <div class="section" id="post-data">
 <h3>POST Data<a class="headerlink" href="#post-data" title="Permalink to this headline">¶</a></h3>
 <p>You can upload data via POST to an node with <code class="docutils literal"><span class="pre">metatool.core.upload()</span></code> function.
-It require <code class="docutils literal"><span class="pre">url_base</span></code>, <code class="docutils literal"><span class="pre">sender_key</span></code>, <code class="docutils literal"><span class="pre">btctx_api</span></code> arguments described at <a class="reference internal" href="#review-of-common-arguments">Review of common arguments</a>
-and two original arguments:</p>
+It require <code class="docutils literal"><span class="pre">url_base</span></code>, <code class="docutils literal"><span class="pre">sender_key</span></code>, <code class="docutils literal"><span class="pre">btctx_api</span></code> arguments, described at <a class="reference internal" href="#review-of-common-arguments">Review of common arguments</a>
+and three original arguments:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">file:</th><td class="field-body"><p class="first">It&#8217;s a file object opened in the <code class="docutils literal"><span class="pre">'rb'</span></code> mode:</p>
+<tr class="field-odd field"><th class="field-name">file:</th><td class="field-body"><p class="first">It&#8217;s a file object, opened in the <code class="docutils literal"><span class="pre">'rb'</span></code> mode:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># file object should be opened in the binary mode!</span>
 <span class="n">file_obj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;eggs.txt&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
 </pre></div>
@@ -557,7 +574,7 @@ and two original arguments:</p>
 <tr class="field-even field"><th class="field-name">file_role:</th><td class="field-body"><p class="first">It&#8217;s a string of three numbers which define future behavior of the file on the server.
 For example, <code class="docutils literal"><span class="pre">'001'</span></code> would be a free public file that can be downloaded in plaintext.
 Look more at the <a class="reference internal" href="package_reference.html#file-roles"><span>file roles</span></a>.</p>
-<table class="last docutils field-list" frame="void" rules="none">
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -569,9 +586,17 @@ It can confuse, because the integer value <code class="docutils literal"><span c
 </table>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">encrypt:</th><td class="field-body"><p class="first last">The <strong>encrypted file</strong> is preferred, but not forced, way to serve files on the MetaCore server,
+so uploading supports the <strong>encryption</strong>.
+Default value <code class="docutils literal"><span class="pre">encrypt=False</span></code>, which mean that the original file will be uploaded without changes.
+The <code class="docutils literal"><span class="pre">True</span></code> value runs the encryption logic. Temporary copy of your file will be encrypted
+and sent to the server; the additional item <code class="docutils literal"><span class="pre">decryption_key</span></code> will be added into the returned JSON.
+The value of <code class="docutils literal"><span class="pre">decryption_key</span></code> is a &#8220;hexadecimalised&#8221; value of the original bytes key.</p>
+</td>
+</tr>
 </tbody>
 </table>
-<p>It returns the <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> object with such a JSON string:</p>
+<p>It returns the <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> object with such a JSON string, when <code class="docutils literal"><span class="pre">encrypt=False</span></code>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
   <span class="s">&quot;data_hash&quot;</span><span class="p">:</span> <span class="s">&quot;72937d081099a3326b05228e30e7ee8a0a05efac68ec2e8d3c6bf1ee4e5bda69&quot;</span><span class="p">,</span>
   <span class="s">&quot;file_role&quot;</span><span class="p">:</span> <span class="s">&quot;101&quot;</span>
@@ -606,16 +631,38 @@ the old <code class="docutils literal"><span class="pre">file_role</span></code>
 </tr>
 </tbody>
 </table>
+<p>If you are going to upload some file in the encrypted form, set the <code class="docutils literal"><span class="pre">encrypt=True</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre>...
+&gt;&gt;&gt; response = metatool.core.upload(
+...     url_base=&#39;http://localhost:5000&#39;,
+...     sender_key=sender_key,
+...     btctx_api=btctx_api,
+...     file=file_obj,
+...     file_role=&#39;101&#39;,
+...     encrypt=True
+... )
+&gt;&gt;&gt; json.loads(response.text)
+{&quot;data_hash&quot;: &quot;0c50ca846cba1140c1d1be3bdd1f9c10efed6e2692889e8520c73b96a548e998&quot;,
+&quot;decryption_key&quot;: &quot;5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57&quot;,
+&quot;file_role&quot;: &quot;001&quot;}
+</pre></div>
+</div>
 </div>
 <div class="section" id="download-data">
 <h3>Download Data<a class="headerlink" href="#download-data" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal"><span class="pre">metatool.core.download()</span></code> is the API MetaTool function, which downloads
-data from the node server. Type of returned data is depends on download status -
+data from the node server. Type of returned data is depends of download status -
 if file is downloaded successfully returned data will be a <strong>full path</strong> to the saved file,
-otherwise it will be a <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> object with a response status code.</p>
+otherwise it will be a <a class="reference external" href="http://docs.python-requests.org/en/latest/api/#requests.Response">response</a> object. Usually content of this response is a JSON
+with some internal error status code:</p>
+<div class="highlight-python"><div class="highlight"><pre>{ &quot;error_code&quot;: &lt;internal_error_code&gt; }
+</pre></div>
+</div>
+<p>But, if you occasionally, or deliberately refer to any non-MetaCore server (i.e. <a class="reference external" href="http://google.com">http://google.com</a>)
+it can be any unpredictable response content.</p>
 <p>Also, if the <code class="docutils literal"><span class="pre">link</span></code> optional argument will be provided like <code class="docutils literal"><span class="pre">True</span></code>, instead of downloading
 appropriate GET URL-request string will be returned to perform the downloading manually,
-but available only for non-authenticated access, defined for each file by the <code class="docutils literal"><span class="pre">file_role</span></code>:</p>
+but downloading is available only for the non-authenticated access, defined for each file by the <a class="reference internal" href="package_reference.html#file-roles"><span>file roles</span></a>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">download</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://node2.metadisk.org&#39;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">file_hash</span><span class="o">=</span><span class="s">&#39;1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e&#39;</span><span class="p">,</span>
@@ -630,10 +677,10 @@ but available only for non-authenticated access, defined for each file by the <c
 <span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://node2.metadisk.org&#39;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">file_hash</span><span class="o">=</span><span class="s">&#39;1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e&#39;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">rename_file</span><span class="o">=</span><span class="s">&#39;new_name.eggs&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">decryption_key</span><span class="o">=</span><span class="s">&#39;%A3%B4e</span><span class="si">%E</span><span class="s">A</span><span class="si">%82%</span><span class="s">00</span><span class="si">%22%</span><span class="s">3A%C3</span><span class="si">%86%</span><span class="s">C0hn1%B3</span><span class="si">%F</span><span class="s">7</span><span class="si">%F</span><span class="s">7</span><span class="si">%F</span><span class="s">8</span><span class="si">%8E</span><span class="s">L7S</span><span class="si">%F</span><span class="s">3D</span><span class="si">%28%</span><span class="s">7C</span><span class="si">%85%</span><span class="s">95%CE%9D%D5B&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">decryption_key</span><span class="o">=</span><span class="s">&#39;5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57&#39;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">link</span><span class="o">=</span><span class="bp">True</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="go">&#39;http://node2.metadisk.org/api/files/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e?decryption_key=%25A3%25B4e%25EA%2582%2500%2522%253A%25C3%2586%25C0hn1%25B3%25F7%25F7%25F8%258EL7S%25F3D%2528%257C%2585%2595%25CE%259D%25D5B&amp;file_alias=new_name.eggs&#39;</span>
+<span class="go">&#39;http://node2.metadisk.org/api/files/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e?file_alias=new_name.eggs&amp;decryption_key=5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57&#39;</span>
 </pre></div>
 </div>
 <p>This function have all of the <a class="reference internal" href="#common-arguments">common-arguments</a> and three additional arguments:</p>
@@ -664,7 +711,10 @@ directory, but recursively creating intermediate directories in given path.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">it require appropriate <a class="reference internal" href="package_reference.html#file-roles"><span>file roles</span></a> value - available only for the <code class="docutils literal"><span class="pre">**1</span></code> role variants</td>
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">MetaTool, in truth, decrypts files locally, regardless to the <a class="reference internal" href="package_reference.html#file-roles"><span>file roles</span></a>, but when
+you are downloading files manually from the server,
+(i.e. using gained URL-string, by passing the <code class="docutils literal"><span class="pre">link=True</span></code> to the <code class="docutils literal"><span class="pre">metatool.core.download()</span></code> on the browser)
+decryption is available only for the <code class="docutils literal"><span class="pre">**1</span></code> <a class="reference internal" href="package_reference.html#file-roles"><span>file roles</span></a> variants.</td>
 </tr>
 </tbody>
 </table>
@@ -710,7 +760,7 @@ only for the files with non-authenticated access (<code class="docutils literal"
 <span class="go">&#39;/home/user/374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38&#39;</span>
 </pre></div>
 </div>
-<p>Because of arguments <code class="docutils literal"><span class="pre">sender_key</span></code> and <code class="docutils literal"><span class="pre">btctx_api</span></code> in this function are optional they can be omitted,
+<p>Because of arguments <code class="docutils literal"><span class="pre">sender_key</span></code> and <code class="docutils literal"><span class="pre">btctx_api</span></code> in this function are optional, they can be omitted,
 but you can&#8217;t provide only one of them, they should be given at the same time.</p>
 <p>If you try to download file with invalid credentials function will return response object with occurred error status:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">download</span><span class="p">(</span>

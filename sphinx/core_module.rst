@@ -17,11 +17,11 @@ This part of the documentation gives thorough knowledge of the MetaTool API usag
 Introduction
 """"""""""""
 
-All API functions are placed in the ``metatool.core`` module which is described on the `MetaTool API specification`_,
+All API functions are placed in the ``metatool.core`` module, which is described on the `MetaTool API specification`_,
 so here we'll look on their use.
 
 To start using the MetaTool API you should get the source code from the repository_ and
-either install the package with the ``python setup.py install`` command or make sure that the directory nested the ``metatool`` package
+either install the package with the ``python setup.py install`` command, or make sure that the directory nested the ``metatool`` package
 is present at your ``sys.path``.
 
 .. _repository: https://github.com/Storj/metatool.git
@@ -191,11 +191,11 @@ POST Data
 """""""""
 
 You can upload data via POST to an node with ``metatool.core.upload()`` function.
-It require ``url_base``, ``sender_key``, ``btctx_api`` arguments described at `Review of common arguments`_
-and two original arguments:
+It require ``url_base``, ``sender_key``, ``btctx_api`` arguments, described at `Review of common arguments`_
+and three original arguments:
 
 :file:
-    It's a file object opened in the ``'rb'`` mode::
+    It's a file object, opened in the ``'rb'`` mode::
 
         # file object should be opened in the binary mode!
         file_obj = open('eggs.txt', 'rb')
@@ -211,7 +211,15 @@ and two original arguments:
         instead of ``'001'`` passed value will be ``1`` and upload will fail.
         It can confuse, because the integer value ``101`` will be processed fine.
 
-It returns the response_ object with such a JSON string::
+:encrypt:
+    The **encrypted file** is preferred, but not forced, way to serve files on the MetaCore server,
+    so uploading supports the **encryption**.
+    Default value ``encrypt=False``, which mean that the original file will be uploaded without changes.
+    The ``True`` value runs the encryption logic. Temporary copy of your file will be encrypted
+    and sent to the server; the additional item ``decryption_key`` will be added into the returned JSON.
+    The value of ``decryption_key`` is a "hexadecimalised" value of the original bytes key.
+
+It returns the response_ object with such a JSON string, when ``encrypt=False``::
 
     {
       "data_hash": "72937d081099a3326b05228e30e7ee8a0a05efac68ec2e8d3c6bf1ee4e5bda69",
@@ -240,17 +248,39 @@ Let's look at the example:
     like you're doing it in the very first time, but transmission wouldn't be performed, and
     the old ``file_role`` **value will be retained**!!!
 
+If you are going to upload some file in the encrypted form, set the ``encrypt=True``::
+
+    ...
+    >>> response = metatool.core.upload(
+    ...     url_base='http://localhost:5000',
+    ...     sender_key=sender_key,
+    ...     btctx_api=btctx_api,
+    ...     file=file_obj,
+    ...     file_role='101',
+    ...     encrypt=True
+    ... )
+    >>> json.loads(response.text)
+    {"data_hash": "0c50ca846cba1140c1d1be3bdd1f9c10efed6e2692889e8520c73b96a548e998",
+    "decryption_key": "5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57",
+    "file_role": "001"}
+
 Download Data
 """""""""""""
 
 ``metatool.core.download()`` is the API MetaTool function, which downloads
-data from the node server. Type of returned data is depends on download status -
+data from the node server. Type of returned data is depends of download status -
 if file is downloaded successfully returned data will be a **full path** to the saved file,
-otherwise it will be a response_ object with a response status code.
+otherwise it will be a response_ object. Usually content of this response is a JSON
+with some internal error status code::
+
+    { "error_code": <internal_error_code> }
+
+But, if you occasionally, or deliberately refer to any non-MetaCore server (i.e. http://google.com)
+it can be any unpredictable response content.
 
 Also, if the ``link`` optional argument will be provided like ``True``, instead of downloading
 appropriate GET URL-request string will be returned to perform the downloading manually,
-but available only for non-authenticated access, defined for each file by the ``file_role``::
+but downloading is available only for the non-authenticated access, defined for each file by the :ref:`file-roles`::
 
     >>> metatool.core.download(
     ...     url_base='http://node2.metadisk.org',
@@ -266,10 +296,10 @@ This mode of ``download()`` supports rendering of provided ``rename_file`` and `
     ...     url_base='http://node2.metadisk.org',
     ...     file_hash='1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e',
     ...     rename_file='new_name.eggs',
-    ...     decryption_key='%A3%B4e%EA%82%00%22%3A%C3%86%C0hn1%B3%F7%F7%F8%8EL7S%F3D%28%7C%85%95%CE%9D%D5B',
+    ...     decryption_key='5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57',
     ...     link=True
     ... )
-    'http://node2.metadisk.org/api/files/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e?decryption_key=%25A3%25B4e%25EA%2582%2500%2522%253A%25C3%2586%25C0hn1%25B3%25F7%25F7%25F8%258EL7S%25F3D%2528%257C%2585%2595%25CE%259D%25D5B&file_alias=new_name.eggs'
+    'http://node2.metadisk.org/api/files/1a8b26b9ce3983ff21d0d85c796ad75c1d2d6047ec3f082497eb1a33e8120f3e?file_alias=new_name.eggs&decryption_key=5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9b44e6070e761691ca1ed2b57'
 
 This function have all of the `common-arguments`_ and three additional arguments:
 
@@ -290,7 +320,11 @@ This function have all of the `common-arguments`_ and three additional arguments
 :decryption_key:
     This is the optional argument - string which is a key to decrypt data in the course of downloading.
 
-    :Note: it require appropriate :ref:`file-roles` value - available only for the ``**1`` role variants
+    :Note:
+        MetaTool, in truth, decrypts files locally, regardless to the :ref:`file-roles`, but when
+        you are downloading files manually from the server,
+        (i.e. using gained URL-string, by passing the ``link=True`` to the ``metatool.core.download()`` on the browser)
+        decryption is available only for the ``**1`` :ref:`file-roles` variants.
 
 :link:
     It defines behaviour of the function:
@@ -324,7 +358,7 @@ To download files with other ``file_role`` you should pass ``sender_key`` and  `
     ... )
     '/home/user/374522eb582f4773c9d92376c8aece5e7838375f69282d007ab5513034debf38'
 
-Because of arguments ``sender_key`` and ``btctx_api`` in this function are optional they can be omitted,
+Because of arguments ``sender_key`` and ``btctx_api`` in this function are optional, they can be omitted,
 but you can't provide only one of them, they should be given at the same time.
 
 If you try to download file with invalid credentials function will return response object with occurred error status::

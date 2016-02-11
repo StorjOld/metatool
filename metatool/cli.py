@@ -57,8 +57,10 @@ response it will be shown instead of the success result.
 
 -------------------
 
-**metatool upload <path_to_file> [-r | --file_role FILE_ROLE]**
+**metatool upload <path_to_file> [-r | --file_role FILE_ROLE] [--encrypt]**
     Upload file to the server.
+    The **encrypted file** is preferred, but not forced, way to serve files
+    on the MetaCore server, so uploading supports the **encryption**.
 
         ``path_to_file`` - Name of the file from the working directory
         or a *full/related* path to the file.
@@ -66,7 +68,23 @@ response it will be shown instead of the success result.
         ``-r | --file_role FILE_ROLE``  -  Key **-r** or **--file_role**
         purposed for the setting desired **file_role**. **001** by default.
 
-    Returns a json file with **data_hash** and **file_role**.
+        ``--encrypt`` - Key to encrypt the sent data (your local file remains
+        the same) and get the ``decryption_key``::
+
+            $ metatool upload README.md --encrypt --url http://localhost:5000
+            201
+            {
+              "data_hash": "0c50ca846cba1140c1d1be3bdd1f9c10efed6e269...",
+              "decryption_key": "5bfc58952efa86a89ab89cf6b605c9b8bfcd08d9...",
+              "file_role": "001"
+            }
+
+        Now you've got an additional item in the returned JSON -
+        ``decryption_key``. This is an "hexadecimalised" value of the bytes
+        ``decryption_key`` value.
+
+    Without the ``--ecrypt`` returns a json file with **data_hash**
+    and **file_role**.
 
 -------------------
 
@@ -94,11 +112,12 @@ response it will be shown instead of the success result.
         ``--link`` - will return the url GET request string instead of
         executing the downloading.
 
-        ``--decryption_key "KEY"`` - Optional argument. It makes the downloaded
-        file to go from the server in decrypted state(if allowed for this file)
-
-        :note: be sure to put the key in quotes ("KEY") because of how does
-               command line interprets the ``\`` character.
+        ``--decryption_key "KEY"`` - Optional argument. It performs the
+        decryption of the file directly at your machine, after the downloading.
+        This file can be decrypted on the server, when downloading manually,
+        if allowed for this file by the ``file_role``
+        (i.e., when you are using the URL GET-query string, that you
+        got, with the ``--link`` optional argument).
 
         ``--rename_file NEW_NAME`` - Optional argument which defines
         the **NEW_NAME** for the storing file on your disk. You can provide
@@ -142,7 +161,7 @@ def decryption_key_type(argument):
     """
     This is the special processor for the ``decryption_key`` argument's type
     of the ``argparse.ArgumentParser.add_argument()`` method.
-    It takes a hexadecimal-string and returns the proper decryption_key's
+    It takes a **hexadecimal-string** and returns the proper decryption_key's
     form, for passing to the ``metatool.download()`` function.
 
     Decryption key must be either 16, 24, or 32 bytes long (32, 48, or 64
@@ -150,12 +169,16 @@ def decryption_key_type(argument):
 
     Returns a string, properly escaped for using like an GET-URL query value.
 
-    :param argument: decryption_key hex-string, gained with
-        binascii.hexlify(key), where the `key` is original
-        key, returned from the `file_encryptor.convergence.encrypt_file_inline`
+    :param argument: decryption_key **hex-string**, gained with
+        binascii.hexlify(key), where the **key** is original key, returned
+        from the ``file_encryptor.convergence.encrypt_file_inline()`` function,
+        from the file_encryptor_ lib.
+
+    .. _file_encryptor: https://pypi.python.org/pypi/file_encryptor/0.2.9
 
     :return: escaped string value
     :rtype: string
+
     """
     try:
         if not all(chr_ in string.hexdigits for chr_ in argument):
@@ -285,7 +308,7 @@ def show_data(source):
 
 def args_prepare(required_args, parsed_args):
     """
-    Filling all missed but required by the core API function arguments.
+    Filling all missed, but required by the core API function arguments.
     Return dictionary that will be passed to the API function.
 
     :param required_args: list of required argument's names for
@@ -295,7 +318,7 @@ def args_prepare(required_args, parsed_args):
         required by the core API function
     :type parsed_args: argparse.Namespace
 
-    :returns: dictionary that will be used like `**kwargs` argument
+    :returns: dictionary that will be used like the ``**kwargs`` argument
     :rtype: dictionary
     """
     btctx_api = BtcTxStore(testnet=True, dryrun=True)
