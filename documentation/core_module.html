@@ -326,7 +326,7 @@ information about the server issue</td>
 
 <dl class="function">
 <dt id="metatool.core.upload">
-<code class="descclassname">metatool.core.</code><code class="descname">upload</code><span class="sig-paren">(</span><em>url_base</em>, <em>sender_key</em>, <em>btctx_api</em>, <em>file</em>, <em>file_role</em>, <em>encrypt=False</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.upload" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">metatool.core.</code><code class="descname">upload</code><span class="sig-paren">(</span><em>url_base</em>, <em>sender_key</em>, <em>btctx_api</em>, <em>file_</em>, <em>file_role</em>, <em>encrypt=False</em><span class="sig-paren">)</span><a class="headerlink" href="#metatool.core.upload" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload local file to the server. Max size of file is determined by the
 server. In the most of cases it is restricted by the 128 MB.
 Return the response object with <code class="docutils literal"><span class="pre">file_hash</span></code> and <code class="docutils literal"><span class="pre">file_role</span></code> when
@@ -556,7 +556,7 @@ and three original arguments:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">file:</th><td class="field-body"><p class="first">It&#8217;s a file object, opened in the <code class="docutils literal"><span class="pre">'rb'</span></code> mode:</p>
+<tr class="field-odd field"><th class="field-name">file_:</th><td class="field-body"><p class="first">It&#8217;s a file object, opened in the <code class="docutils literal"><span class="pre">'rb'</span></code> mode:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># file object should be opened in the binary mode!</span>
 <span class="n">file_obj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;eggs.txt&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
 </pre></div>
@@ -614,7 +614,41 @@ The value of <code class="docutils literal"><span class="pre">decryption_key</sp
 <span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://localhost:5000&#39;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">sender_key</span><span class="o">=</span><span class="n">sender_key</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">btctx_api</span><span class="o">=</span><span class="n">btctx_api</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="nb">file</span><span class="o">=</span><span class="n">file_obj</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">file_</span><span class="o">=</span><span class="n">file_obj</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">file_role</span><span class="o">=</span><span class="s">&#39;101&#39;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="go">{&#39;file_role&#39;: &#39;101&#39;, &#39;data_hash&#39;: &#39;76a97c878c9c7a8321bb395c2b44d3fe2f8d81314d219b20138ed0e2dddd5182&#39;}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">metatool</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">btctxstore</span> <span class="kn">import</span> <span class="n">BtcTxStore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file_obj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;some_file.txt&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">btctx_api</span> <span class="o">=</span> <span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sender_key</span> <span class="o">=</span> <span class="n">btctx_api</span><span class="o">.</span><span class="n">create_key</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://localhost:5000&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sender_key</span><span class="o">=</span><span class="n">sender_key</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">btctx_api</span><span class="o">=</span><span class="n">btctx_api</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">file_</span><span class="o">=</span><span class="n">file_obj</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">file_role</span><span class="o">=</span><span class="s">&#39;101&#39;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="go">{&#39;file_role&#39;: &#39;101&#39;, &#39;data_hash&#39;: &#39;76a97c878c9c7a8321bb395c2b44d3fe2f8d81314d219b20138ed0e2dddd5182&#39;}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">metatool</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">btctxstore</span> <span class="kn">import</span> <span class="n">BtcTxStore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file_obj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;some_file.txt&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">btctx_api</span> <span class="o">=</span> <span class="n">BtcTxStore</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sender_key</span> <span class="o">=</span> <span class="n">btctx_api</span><span class="o">.</span><span class="n">create_key</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metatool</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">url_base</span><span class="o">=</span><span class="s">&#39;http://localhost:5000&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sender_key</span><span class="o">=</span><span class="n">sender_key</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">btctx_api</span><span class="o">=</span><span class="n">btctx_api</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">file_</span><span class="o">=</span><span class="n">file_obj</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">file_role</span><span class="o">=</span><span class="s">&#39;101&#39;</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
@@ -637,7 +671,7 @@ the old <code class="docutils literal"><span class="pre">file_role</span></code>
 ...     url_base=&#39;http://localhost:5000&#39;,
 ...     sender_key=sender_key,
 ...     btctx_api=btctx_api,
-...     file=file_obj,
+...     file_=file_obj,
 ...     file_role=&#39;101&#39;,
 ...     encrypt=True
 ... )

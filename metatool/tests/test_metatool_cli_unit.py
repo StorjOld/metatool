@@ -14,11 +14,9 @@ from metatool import core
 if sys.version_info.major == 3:
     from io import StringIO
     from unittest.mock import patch, Mock, call, mock_open
-    from urllib.parse import quote_from_bytes
 else:
     from io import BytesIO as StringIO
     from mock import patch, Mock, call, mock_open
-    from urllib import quote as quote_from_bytes
 
 
 class TestCliShowDataFunction(unittest.TestCase):
@@ -175,16 +173,16 @@ class TestCliParseFunction(unittest.TestCase):
             parsed_args = parse().parse_args(['upload', full_file_path])
             temp_file.write(test_file_content[0])
             temp_file.flush()
-            read_data = [parsed_args.file.read(), ]
+            read_data = [parsed_args.file_.read(), ]
             temp_file.seek(0)
             temp_file.truncate()
             temp_file.write(test_file_content[1])
             temp_file.flush()
-            parsed_args.file.seek(0)
-            read_data.append(parsed_args.file.read())
-            parsed_args.file.close()
+            parsed_args.file_.seek(0)
+            read_data.append(parsed_args.file_.read())
+            parsed_args.file_.close()
         self.assertListEqual(read_data, test_file_content)
-        self.assertEqual(parsed_args.file.mode, 'rb')
+        self.assertEqual(parsed_args.file_.mode, 'rb')
 
         # Test on correctly parsing only "file" argument.
         # Expect correct default values of optional arguments.
@@ -192,7 +190,7 @@ class TestCliParseFunction(unittest.TestCase):
         parsed_args = parse().parse_args(args_list)
         real_parsed_args_dict = dict(parsed_args._get_kwargs())
         expected_args_dict = {
-            'file': parsed_args.file,
+            'file_': parsed_args.file_,
             'file_role': '001',
             'url_base': None,
             'execute_case': core.upload,
@@ -202,7 +200,7 @@ class TestCliParseFunction(unittest.TestCase):
             real_parsed_args_dict,
             expected_args_dict,
         )
-        parsed_args.file.close()
+        parsed_args.file_.close()
 
         # test on correctly parsing of full set of available arguments
         args_list = 'upload {} ' \
@@ -211,7 +209,7 @@ class TestCliParseFunction(unittest.TestCase):
         parsed_args = parse().parse_args(args_list)
         real_parsed_args_dict = dict(parsed_args._get_kwargs())
         expected_args_dict = {
-            'file': parsed_args.file,
+            'file_': parsed_args.file_,
             'file_role': args_list[5],
             'url_base': args_list[3],
             'execute_case': core.upload,
@@ -221,14 +219,14 @@ class TestCliParseFunction(unittest.TestCase):
             real_parsed_args_dict,
             expected_args_dict
         )
-        parsed_args.file.close()
+        parsed_args.file_.close()
 
         # test "-r" optional argument
         args_list = 'upload {} ' \
                     '-r TEST_FILE_ROLE'.format(full_file_path).split()
         parsed_args = parse().parse_args(args_list)
         self.assertEqual(parsed_args.file_role, args_list[3])
-        parsed_args.file.close()
+        parsed_args.file_.close()
 
     def test_info_argument(self):
         """

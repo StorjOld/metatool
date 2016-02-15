@@ -4,7 +4,6 @@ interaction with MetaCore cloud servers. Each function provides specific
 type of operation with the MetaCore server. Look through the functions for
 detailed specification.
 """
-from __future__ import print_function
 import sys
 import os
 import os.path
@@ -19,10 +18,9 @@ import file_encryptor
 
 # 2.x/3.x compliance logic
 if sys.version_info.major == 3:
-    from urllib.parse import urljoin, unquote_to_bytes
+    from urllib.parse import urljoin
 else:
     from urlparse import urljoin
-    from urllib import unquote as unquote_to_bytes
 
 
 def audit(url_base, sender_key, btctx_api, file_hash, seed):
@@ -185,7 +183,7 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
         return response
 
 
-def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
+def upload(url_base, sender_key, btctx_api, file_, file_role, encrypt=False):
     """
     Upload local file to the server. Max size of file is determined by the
     server. In the most of cases it is restricted by the 128 MB.
@@ -214,8 +212,8 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
         (optional, default: False)
     :type encrypt: boolean
 
-    :param file: file object which will be uploaded to the server
-    :type file: file object opened in the 'rb' mode
+    :param file_: file object which will be uploaded to the server
+    :type file_: file object opened in the 'rb' mode
 
     :param file_role: string of three numbers which define future
         behavior of the file on the server (look more it in the documentation)
@@ -229,7 +227,7 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
     temp_dir_name = ''
     try:
         if encrypt:
-            source_file_name = file.name
+            source_file_name = file_.name
             temp_dir_name = tempfile.mkdtemp(prefix='metatool.')
             shutil.copy2(source_file_name, temp_dir_name)
             temp_file_name = os.path.join(
@@ -237,13 +235,13 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
                 os.path.split(source_file_name)[-1])
             decryption_key = file_encryptor.convergence.encrypt_file_inline(
                         temp_file_name, None)
-            file.close()
-            file = open(temp_file_name, 'rb')
+            file_.close()
+            file_ = open(temp_file_name, 'rb')
 
-        file.seek(0)
-        files_header = {'file_data': file}
-        data_hash = sha256(file.read()).hexdigest()
-        file.seek(0)
+        file_.seek(0)
+        files_header = {'file_data': file_}
+        data_hash = sha256(file_.read()).hexdigest()
+        file_.seek(0)
         sender_address = btctx_api.get_address(sender_key)
         signature = btctx_api.sign_unicode(sender_key, data_hash)
 
@@ -259,7 +257,7 @@ def upload(url_base, sender_key, btctx_api, file, file_role, encrypt=False):
                     'signature': signature,
                 }
         )
-        file.close()
+        file_.close()
         if decryption_key and response.status_code == 201:
             decryption_key = binascii.hexlify(decryption_key)
             if sys.version_info.major == 3:

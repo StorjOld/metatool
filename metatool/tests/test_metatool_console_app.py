@@ -76,8 +76,8 @@ class MetadiskTest(unittest.TestCase):
           }
         }
         with os.popen('{} __main__.py info'.format(
-                self.metadisk_python_interpreter)) as file:
-            info_response = json.loads(file.read()[4:-1])
+                self.metadisk_python_interpreter)) as file_:
+            info_response = json.loads(file_.read()[4:-1])
 
         self.assertEqual(info_response, expected_value)
 
@@ -89,8 +89,8 @@ class MetadiskTest(unittest.TestCase):
         """
         expected_value = []
         with os.popen('{} __main__.py files'.format(
-                self.metadisk_python_interpreter)) as file:
-            files_response = json.loads(file.read()[4:-1])
+                self.metadisk_python_interpreter)) as file_:
+            files_response = json.loads(file_.read()[4:-1])
         self.assertEqual(files_response, expected_value,
                          'command "python __main__.py files" must return '
                          'must receive an empty list')
@@ -102,8 +102,8 @@ class MetadiskTest(unittest.TestCase):
         """
         expected_value = [1, 2]
         with os.popen('{} __main__.py files'.format(
-                self.metadisk_python_interpreter)) as file:
-            files_response = json.loads(file.read()[4:-1])
+                self.metadisk_python_interpreter)) as file_:
+            files_response = json.loads(file_.read()[4:-1])
         self.assertEqual(files_response, expected_value,
                          'command "python __main__.py files" now must return '
                          'the {} list'.format(expected_value))
@@ -115,38 +115,41 @@ class MetadiskTest(unittest.TestCase):
         """
         file_data = b'some data in test file\r\n\r\nself-delete after the test'
         data_hash = sha256(file_data).hexdigest()
-        with open('temporary_test_file', 'wb') as file:
-            file.write(file_data)
+        test_file_name = 'temporary_test_file'
+        self.addCleanup(os.remove, test_file_name)
+
+        with open(test_file_name, 'wb') as file_:
+            file_.write(file_data)
         expected_value = {
             "data_hash": data_hash,
             "file_role": "001",
         }
         with os.popen('{} __main__.py upload temporary_test_file'.format(
-                self.metadisk_python_interpreter)) as file:
-            upload_response = json.loads(file.read()[4:-1])
+                self.metadisk_python_interpreter)) as file_:
+            upload_response = json.loads(file_.read()[4:-1])
         self.assertEqual(upload_response, expected_value)
-        os.remove('temporary_test_file')
 
     def test_upload_set_file_role(self):
         """
         Test of uploading file on the server through
         "python __main__.py upload setup.sh --file_role 002" command call.
         """
+        test_file_name = 'temporary_test_file'
+        self.addCleanup(os.remove, test_file_name)
         file_data = b'some data in test file\r\n\r\nself-delete after the test'
         data_hash = sha256(file_data).hexdigest()
-        with open('temporary_test_file', 'wb') as file:
-            file.write(file_data)
+        with open(test_file_name, 'wb') as file_:
+            file_.write(file_data)
         expected_value = {
             "data_hash": data_hash,
             "file_role": "002",
         }
         with os.popen(
             '{} __main__.py upload temporary_test_file --file_role 002'.format(
-                self.metadisk_python_interpreter)) as file:
-            upload_response = json.loads(file.read()[4:-1])
+                self.metadisk_python_interpreter)) as file_:
+            upload_response = json.loads(file_.read()[4:-1])
         self.assertEqual(upload_response['file_role'],
                          expected_value['file_role'])
-        os.remove('temporary_test_file')
 
     def test_download_error(self):
         """
@@ -160,7 +163,6 @@ class MetadiskTest(unittest.TestCase):
             data_hash
         )) as download:
             download_response = json.loads(download.read()[4:-1])
-
             self.assertEqual(expected_value, download_response)
 
     def test_download_valid_data_hash(self):
@@ -170,6 +172,7 @@ class MetadiskTest(unittest.TestCase):
         data_hash = 'test_valid_data_hash'
         test_file_name = 'TEST_FILE_NAME'
         expected_value = b'TEST_DATA'
+        self.addCleanup(os.remove, test_file_name)
         with os.popen('{} __main__.py download {}'.format(
             self.metadisk_python_interpreter,
             data_hash
@@ -181,11 +184,10 @@ class MetadiskTest(unittest.TestCase):
                 counter += 1
 
             self.assertTrue(os.path.isfile(test_file_name))
-            with open(test_file_name, 'rb') as file:
-                downloaded_file_data = file.read()[:-1]
+            with open(test_file_name, 'rb') as file_:
+                downloaded_file_data = file_.read()[:-1]
             self.assertEqual(expected_value,
                              downloaded_file_data)
-            os.remove(test_file_name)
 
     def test_download_rename_file(self):
         """
@@ -194,6 +196,7 @@ class MetadiskTest(unittest.TestCase):
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'DIFFERENT_TEST_FILE_NAME'
+        self.addCleanup(os.remove, test_file_name)
         with os.popen('{} __main__.py download {} --rename_file {}'.format(
             self.metadisk_python_interpreter,
             data_hash,
@@ -206,7 +209,6 @@ class MetadiskTest(unittest.TestCase):
                 counter += 1
 
             self.assertTrue(os.path.isfile(test_file_name))
-            os.remove(test_file_name)
 
     def test_download_decryption_key(self):
         """
@@ -215,6 +217,7 @@ class MetadiskTest(unittest.TestCase):
         """
         data_hash = 'test_valid_data_hash'
         test_file_name = 'TEST_FILE_NAME'
+        self.addCleanup(os.remove, test_file_name)
         decryption_key_raw = b'test 32 character long key......'
         decryption_key = binascii.hexlify(decryption_key_raw).decode()
         expected_value = b'TEST_DATA'
@@ -232,11 +235,10 @@ class MetadiskTest(unittest.TestCase):
             self.assertTrue(os.path.isfile(test_file_name))
             file_encryptor.convergence.decrypt_file_inline(test_file_name,
                                                            decryption_key_raw)
-            with open(test_file_name, 'rb') as file:
-                downloaded_file_data = file.read()[:-1]
+            with open(test_file_name, 'rb') as file_:
+                downloaded_file_data = file_.read()[:-1]
             self.assertEqual(expected_value,
                              downloaded_file_data)
-            os.remove(test_file_name)
 
     def test_download_link(self):
         """
@@ -339,8 +341,8 @@ class MetadiskTest(unittest.TestCase):
         with os.popen(
             '{} __main__.py info --url http://{}:{}'.format(
                 self.metadisk_python_interpreter, host, port)
-        ) as file:
-            info_response_status = file.read()[:3]
+        ) as file_:
+            info_response_status = file_.read()[:3]
         sys.stderr.close()
         sys.stderr = sys.__stderr__  # Turn back the error stream output.
         self.assertEqual(
@@ -372,8 +374,8 @@ class MetadiskTest(unittest.TestCase):
         with os.popen(
             '{} __main__.py info --url http://{}:{}'.format(
                 self.metadisk_python_interpreter, host, port)
-        ) as file:
-            info_response_status = file.read()[:3]
+        ) as file_:
+            info_response_status = file_.read()[:3]
         sys.stderr.close()
         sys.stderr = sys.__stderr__  # Turn back the error stream output.
         self.assertEqual(

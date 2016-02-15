@@ -194,7 +194,7 @@ You can upload data via POST to an node with ``metatool.core.upload()`` function
 It require ``url_base``, ``sender_key``, ``btctx_api`` arguments, described at `Review of common arguments`_
 and three original arguments:
 
-:file:
+:file\_:
     It's a file object, opened in the ``'rb'`` mode::
 
         # file object should be opened in the binary mode!
@@ -238,7 +238,43 @@ Let's look at the example:
     ...     url_base='http://localhost:5000',
     ...     sender_key=sender_key,
     ...     btctx_api=btctx_api,
-    ...     file=file_obj,
+    ...     file_=file_obj,
+    ...     file_role='101'
+    ... )
+    >>> json.loads(response.text)
+    {'file_role': '101', 'data_hash': '76a97c878c9c7a8321bb395c2b44d3fe2f8d81314d219b20138ed0e2dddd5182'}
+
+
+
+    >>> import metatool
+    >>> from btctxstore import BtcTxStore
+    >>> import json
+    >>> file_obj = open('some_file.txt', 'rb')
+    >>> btctx_api = BtcTxStore(testnet=True, dryrun=True)
+    >>> sender_key = btctx_api.create_key()
+    >>> response = metatool.core.upload(
+    ...     url_base='http://localhost:5000',
+    ...     sender_key=sender_key,
+    ...     btctx_api=btctx_api,
+    ...     file_=file_obj,
+    ...     file_role='101'
+    ... )
+    >>> json.loads(response.text)
+    {'file_role': '101', 'data_hash': '76a97c878c9c7a8321bb395c2b44d3fe2f8d81314d219b20138ed0e2dddd5182'}
+
+
+
+    >>> import metatool
+    >>> from btctxstore import BtcTxStore
+    >>> import json
+    >>> file_obj = open('some_file.txt', 'rb')
+    >>> btctx_api = BtcTxStore(testnet=True, dryrun=True)
+    >>> sender_key = btctx_api.create_key()
+    >>> response = metatool.core.upload(
+    ...     url_base='http://localhost:5000',
+    ...     sender_key=sender_key,
+    ...     btctx_api=btctx_api,
+    ...     file_=file_obj,
     ...     file_role='101'
     ... )
     >>> json.loads(response.text)
@@ -255,7 +291,7 @@ If you are going to upload some file in the encrypted form, set the ``encrypt=Tr
     ...     url_base='http://localhost:5000',
     ...     sender_key=sender_key,
     ...     btctx_api=btctx_api,
-    ...     file=file_obj,
+    ...     file_=file_obj,
     ...     file_role='101',
     ...     encrypt=True
     ... )

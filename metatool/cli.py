@@ -137,16 +137,11 @@ from __future__ import print_function
 import os.path
 import sys
 import argparse
-import binascii
 import string
 
 from btctxstore import BtcTxStore
 from requests.models import Response
 
-if sys.version_info.major == 3:
-    from urllib.parse import quote_from_bytes
-else:
-    from urllib import quote as quote_from_bytes
 
 # makes available to import package from the source directory
 parent_dir = os.path.dirname(os.path.dirname(__file__))
@@ -242,14 +237,15 @@ def parse():
     )
     parser_download.add_argument('file_hash', type=str, help="A file's hash.")
     parser_download.add_argument('--decryption_key', type=decryption_key_type,
-                                 help="The key to decrypt the file "
-                                      "while downloading.")
+                                 help="The key to decrypt this file while "
+                                      "downloading (expect the hexadecimal "
+                                      "representation of the bytes key value)")
     parser_download.add_argument('--rename_file', type=str,
                                  help="It defines how to rename the file "
                                       "while downloading.")
     parser_download.add_argument('--link', action='store_true',
                                  help='If argument is present it will return '
-                                      'an URL-string for a manual downloading')
+                                      'an URL-string for manual downloading.')
     parser_download.set_defaults(execute_case=metatool.core.download)
 
     # create the parser for the "upload" command.
@@ -258,8 +254,8 @@ def parse():
         parents=[parent_url_parser],
         help='It uploads a local file to the server.'
     )
-    parser_upload.add_argument('file', type=argparse.FileType('rb'),
-                               help="A path to the file")
+    parser_upload.add_argument('file_', type=argparse.FileType('rb'),
+                               metavar='file', help="A path to the file.")
     parser_upload.add_argument('--encrypt', action='store_true',
                                help='If argument is present, it will upload '
                                     'encrypted file and add the '
@@ -334,12 +330,18 @@ def args_prepare(required_args, parsed_args):
 
 def get_all_func_args(function):
     """
-    It finds out all available arguments of the given function.
+    It finds out all names of positional and default arguments.
+
+    :Note: Such types of arguments are not inspected:
+        collected remaining positional arguments - ``def func(*args)``;
+        collected remaining keyword arguments - ``def func(**name)``;
+        args that must be passed by keyword only -
+        ``def func(*other, name=value)``.
 
     :param function: function object to inspect
     :type function: function object
 
-    :returns: list with names of all available arguments
+    :returns: list with names of all positional and optional arguments
     :rtype: list of strings
     """
     return function.__code__.co_varnames[:function.__code__.co_argcount]
