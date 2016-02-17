@@ -2,6 +2,9 @@ import os
 import sys
 import unittest
 import binascii
+import tempfile
+import shutil
+import filecmp
 
 from requests.models import Response
 from btctxstore import BtcTxStore
@@ -99,8 +102,8 @@ class TestCoreUpload(unittest.TestCase):
 
     def test_core_upload(self):
         """
-        Test of providing correct arguments to the ``requests.post()``
-        and returning gotten response object.
+        Test of providing correct arguments (without encryption) to the
+        ``requests.post()`` and returning gotten response object.
         """
         # Test fixture
         full_file_path = os.path.join(os.path.dirname(__file__),
@@ -146,6 +149,61 @@ class TestCoreUpload(unittest.TestCase):
             upload_call_result,
             'Returned value must be the object returned by the '
             '``requests.post()``'
+        )
+
+    def test_doesnt_encrypt_original_file(self):
+        """
+        Check that when the ``encrypt=True`` the source file remains the same
+        but the temporary copy of this file was encrypted and uploaded.
+        """
+        # Test fixture
+        testing_dir = os.path.dirname(os.path.abspath(__file__))
+        test_source_file = tempfile.NamedTemporaryFile(prefix='tmp_',
+                                                       suffix='.txt',
+                                                       mode="w+",
+                                                       dir=testing_dir)
+        test_source_file.write('some file content')
+        test_source_file.flush()
+
+        # Prepare arguments for API's function call.
+        test_url_address = 'http://test.url.com'
+        btctx_api = BtcTxStore(testnet=True, dryrun=True)
+        sender_key = btctx_api.create_key()
+        file_role = '101'
+        # Check that by default (encrypt=False) API passes the original file
+        # object to the requests.post()
+        with open(test_source_file.name, 'rb') as temp_file_obj:
+            core.upload(test_url_address, sender_key, btctx_api, temp_file_obj,
+                        file_role)
+            # get the source file object used as encrypted sent data.
+            args, kwargs = self.mock_post.call_args
+            self.assertIs(kwargs['files']['file_data'], temp_file_obj,
+                          'When encrypt=False the upload() should use '
+                          'exactly the originally passed object!')
+        # Check that when the ``ecrypt=True`` API doesn't pass the original
+        # file object in requests.post(), but some other object.
+        with open(test_source_file.name, 'rb') as temp_file_obj:
+            core.upload(test_url_address, sender_key, btctx_api, temp_file_obj,
+                        file_role, encrypt=True)
+            # get the source file object used as encrypted sent data.
+            args, kwargs = self.mock_post.call_args
+            self.assertIsNot(kwargs['files']['file_data'], temp_file_obj,
+                             "When encrypt=True the upload() should make a "
+                             "copy of originally passed file object and "
+                             "processing this copy now!")
+        # Check that the originally passed to the API function file object
+        # wasn't changed.
+        etalon_copy_name = os.path.join(
+            testing_dir, 'copy_' + os.path.split(test_source_file.name)[-1])
+        self.addCleanup(os.remove, etalon_copy_name)
+        shutil.copy2(test_source_file.name, etalon_copy_name)
+
+        with open(test_source_file.name, 'rb') as temp_file_obj:
+            core.upload(test_url_address, sender_key, btctx_api, temp_file_obj,
+                        file_role, encrypt=True)
+        self.assertTrue(
+            filecmp.cmp(test_source_file.name, etalon_copy_name),
+            "The original file must remains unchanged!"
         )
 
 

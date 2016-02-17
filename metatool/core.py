@@ -166,8 +166,7 @@ def download(url_base, file_hash, sender_key=None, btctx_api=None,
         **data_for_requests
     )
     if response.status_code == 200:
-        file_name = os.path.join(os.path.abspath(
-                response.headers['X-Sendfile']))
+        file_name = os.path.abspath(response.headers['X-Sendfile'])
         download_dir = os.path.dirname(file_name)
         if download_dir:
             if not os.path.exists(download_dir):
