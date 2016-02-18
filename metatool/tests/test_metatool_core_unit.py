@@ -98,14 +98,13 @@ class TestCoreUpload(unittest.TestCase):
         self.mock_post = self.post_patch.start()
         self.mock_post.return_value = Response()
 
-        # Prepare common arguments for API's function call.
+        # Prepare common arguments for the API's function call.
         btctx_api = BtcTxStore(testnet=True, dryrun=True)
         self.upload_param = dict(
             url_base='http://test.url.com',
             btctx_api=btctx_api,
             sender_key=btctx_api.create_key(),
             file_role='101',
-            encrypt=False
         )
         
     def tearDown(self):
@@ -117,36 +116,36 @@ class TestCoreUpload(unittest.TestCase):
         ``requests.post()`` and returning gotten response object.
         """
         # Test fixture
-        full_file_path = os.path.join(os.path.dirname(__file__),
-                                      'temporary_test_file')
-        temp_file = open(full_file_path, 'wb')
-        temp_file.write(b'some file content')
-        temp_file.close()
-        self.addCleanup(os.unlink, full_file_path)
+        testing_dir = os.path.dirname(os.path.abspath(__file__))
+        test_source_file = tempfile.NamedTemporaryFile(prefix='tmp_',
+                                                       suffix='.txt',
+                                                       mode="w+",
+                                                       dir=testing_dir)
+        test_source_file.write('some file content')
+        test_source_file.flush()
 
-        test_url_address = 'http://test.url.com'
-        btctx_api = BtcTxStore(testnet=True, dryrun=True)
-        sender_key = btctx_api.create_key()
-        file_role = '111'
-        with open(full_file_path, 'rb') as temp_file_obj:
-            temp_file_obj.flush()
-            temp_file_obj.seek(0)
+        with open(test_source_file.name, 'rb') as temp_file_obj:
             data_hash = sha256(temp_file_obj.read()).hexdigest()
-            upload_call_result = core.upload(test_url_address, sender_key,
-                                             btctx_api, temp_file_obj,
-                                             file_role)
+            upload_call_result = core.upload(file_=temp_file_obj,
+                                             **self.upload_param)
             expected_calls = [call(
-                    urljoin(test_url_address, '/api/files/'),
-                    data={
-                        'data_hash': data_hash,
-                        'file_role': file_role
-                    },
-                    files={'file_data': temp_file_obj},
-                    headers={
-                        'sender-address': btctx_api.get_address(sender_key),
-                        'signature': btctx_api.sign_unicode(sender_key,
-                                                            data_hash)
-                    }
+                urljoin(self.upload_param['url_base'], '/api/files/'),
+                data={
+                    'data_hash': data_hash,
+                    'file_role': self.upload_param['file_role']
+                },
+                files={'file_data': temp_file_obj},
+                headers={
+                    'sender-address': self.upload_param[
+                        'btctx_api'].get_address(
+                            self.upload_param['sender_key']
+                    ),
+                    'signature':  self.upload_param[
+                        'btctx_api'].sign_unicode(
+                            self.upload_param['sender_key'],
+                            data_hash
+                    )
+                }
             )]
 
         self.assertListEqual(
@@ -176,16 +175,10 @@ class TestCoreUpload(unittest.TestCase):
         test_source_file.write('some file content')
         test_source_file.flush()
 
-        # Prepare arguments for API's function call.
-        test_url_address = 'http://test.url.com'
-        btctx_api = BtcTxStore(testnet=True, dryrun=True)
-        sender_key = btctx_api.create_key()
-        file_role = '101'
         # Check that by default (encrypt=False) API passes the original file
         # object to the requests.post()
         with open(test_source_file.name, 'rb') as temp_file_obj:
-            core.upload(test_url_address, sender_key, btctx_api, temp_file_obj,
-                        file_role)
+            core.upload(file_=temp_file_obj, **self.upload_param)
             # get the source file object used as encrypted sent data.
             args, kwargs = self.mock_post.call_args
             self.assertIs(kwargs['files']['file_data'], temp_file_obj,
@@ -194,8 +187,7 @@ class TestCoreUpload(unittest.TestCase):
         # Check that when the ``ecrypt=True`` API doesn't pass the original
         # file object in requests.post(), but some other object.
         with open(test_source_file.name, 'rb') as temp_file_obj:
-            core.upload(test_url_address, sender_key, btctx_api, temp_file_obj,
-                        file_role, encrypt=True)
+            core.upload(encrypt=True, file_=temp_file_obj, **self.upload_param)
             # get the source file object used as encrypted sent data.
             args, kwargs = self.mock_post.call_args
             self.assertIsNot(kwargs['files']['file_data'], temp_file_obj,
@@ -210,8 +202,7 @@ class TestCoreUpload(unittest.TestCase):
         shutil.copy2(test_source_file.name, etalon_copy_name)
 
         with open(test_source_file.name, 'rb') as temp_file_obj:
-            core.upload(test_url_address, sender_key, btctx_api, temp_file_obj,
-                        file_role, encrypt=True)
+            core.upload(encrypt=True, file_=temp_file_obj, **self.upload_param)
         self.assertTrue(
             filecmp.cmp(test_source_file.name, etalon_copy_name),
             "The original file must remains unchanged!"
@@ -271,9 +262,7 @@ class TestCoreUpload(unittest.TestCase):
             return Response()
 
         self.mock_post.side_effect = check_encryption
-        self.upload_param['encrypt'] = True
-        self.upload_param['file_'] = test_source_file
-        core.upload(**self.upload_param)
+        core.upload(encrypt=True, file_=test_source_file, **self.upload_param)
 
 
 class TestCoreAudit(unittest.TestCase):
