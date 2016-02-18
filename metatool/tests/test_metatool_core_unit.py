@@ -5,7 +5,6 @@ import binascii
 import tempfile
 import shutil
 import filecmp
-
 from requests.models import Response
 from btctxstore import BtcTxStore
 from hashlib import sha256
@@ -18,6 +17,8 @@ else:
     from mock import patch, Mock, call, mock_open
     from urlparse import urljoin, urlparse
     from urllib import quote_plus
+    
+from file_encryptor import convergence
 
 # make the parent tests package importable for the direct running
 parent_dir = os.path.dirname(os.path.dirname(__file__))
@@ -97,6 +98,16 @@ class TestCoreUpload(unittest.TestCase):
         self.mock_post = self.post_patch.start()
         self.mock_post.return_value = Response()
 
+        # Prepare common arguments for API's function call.
+        btctx_api = BtcTxStore(testnet=True, dryrun=True)
+        self.upload_param = dict(
+            url_base='http://test.url.com',
+            btctx_api=btctx_api,
+            sender_key=btctx_api.create_key(),
+            file_role='101',
+            encrypt=False
+        )
+        
     def tearDown(self):
         self.post_patch.stop()
 
@@ -205,6 +216,64 @@ class TestCoreUpload(unittest.TestCase):
             filecmp.cmp(test_source_file.name, etalon_copy_name),
             "The original file must remains unchanged!"
         )
+
+    def test_sent_file_was_encrypted(self):
+        """
+        Test that the file eventually used by ``requests`` library, is
+        properly encrypted.
+        :return: None
+        """
+        # Test fixture
+        testing_dir = os.path.dirname(os.path.abspath(__file__))
+        test_source_file = tempfile.NamedTemporaryFile(prefix='tmp_',
+                                                       suffix='.txt',
+                                                       mode="w+",
+                                                       dir=testing_dir,
+                                                       delete=False)
+        self.addCleanup(os.remove, test_source_file.name)
+        test_source_file.write('some file content')
+        test_source_file.flush()
+
+        def check_encryption(*args, **kwargs):
+            """
+            Function that will be used as ``side_effect`` argument, when
+            an instance of the ``Mock()`` class will be created for the
+            ``requests.post()`` function.
+
+            It asserts that file, which is passed to the ``requests.post()``
+            are properly encrypted.
+
+            It will be called inside the upload function, where is temporary
+            encrypted copy of original file is available.
+
+            :param args: positional arguments of the ``requests.post()`` func.
+            :param kwargs: optional args of the ``requests.post()`` func.
+            :return: empty response object
+            :rtype: requests.models.Response object
+            """
+            tested_file_obj = kwargs['files']['file_data']
+            sampler_encrypted_file_name = os.path.join(
+                testing_dir, 'copy_' + os.path.split(
+                    test_source_file.name)[-1]
+            )
+            self.addCleanup(os.remove, sampler_encrypted_file_name)
+            shutil.copy2(test_source_file.name, sampler_encrypted_file_name)
+            convergence.encrypt_file_inline(
+                sampler_encrypted_file_name, None
+            )
+            self.assertTrue(
+                filecmp.cmp(tested_file_obj.name, sampler_encrypted_file_name),
+                "A generated copy of the file that was originally passed "
+                "to upload(), should be the same as encrypted test sampler "
+                "file!"
+            )
+
+            return Response()
+
+        self.mock_post.side_effect = check_encryption
+        self.upload_param['encrypt'] = True
+        self.upload_param['file_'] = test_source_file
+        core.upload(**self.upload_param)
 
 
 class TestCoreAudit(unittest.TestCase):
