@@ -5,6 +5,7 @@ import binascii
 import tempfile
 import shutil
 import filecmp
+import json
 from requests.models import Response
 from btctxstore import BtcTxStore
 from hashlib import sha256
@@ -93,12 +94,31 @@ class TestCoreUpload(unittest.TestCase):
     """
     Test of the ``metatool.core.upload()`` API function.
     """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Create a temporary that will be used as uploaded file.
+        :return:
+        """
+        cls.testing_dir = os.path.dirname(os.path.abspath(__file__))
+        cls.test_source_file = tempfile.NamedTemporaryFile(prefix='tmp_',
+                                                           suffix='.spam',
+                                                           mode="w+",
+                                                           dir=cls.testing_dir,
+                                                           delete=False)
+        cls.test_source_file.write('some file content')
+        cls.test_source_file.flush()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.test_source_file.name)
+
     def setUp(self):
         self.post_patch = patch('requests.post')
         self.mock_post = self.post_patch.start()
         self.mock_post.return_value = Response()
 
-        # Prepare common arguments for the API's function call.
+        # Prepare common arguments for the API's ``upload()`` function call.
         btctx_api = BtcTxStore(testnet=True, dryrun=True)
         self.upload_param = dict(
             url_base='http://test.url.com',
@@ -115,16 +135,7 @@ class TestCoreUpload(unittest.TestCase):
         Test of providing correct arguments (without encryption) to the
         ``requests.post()`` and returning gotten response object.
         """
-        # Test fixture
-        testing_dir = os.path.dirname(os.path.abspath(__file__))
-        test_source_file = tempfile.NamedTemporaryFile(prefix='tmp_',
-                                                       suffix='.txt',
-                                                       mode="w+",
-                                                       dir=testing_dir)
-        test_source_file.write('some file content')
-        test_source_file.flush()
-
-        with open(test_source_file.name, 'rb') as temp_file_obj:
+        with open(self.test_source_file.name, 'rb') as temp_file_obj:
             data_hash = sha256(temp_file_obj.read()).hexdigest()
             upload_call_result = core.upload(file_=temp_file_obj,
                                              **self.upload_param)
@@ -151,8 +162,7 @@ class TestCoreUpload(unittest.TestCase):
         self.assertListEqual(
             self.mock_post.call_args_list,
             expected_calls,
-            'In the upload() function requests.post() calls are unexpected'
-
+            'In the upload() function requests.post() calls are unexpected!'
         )
         self.assertIs(
             self.mock_post.return_value,
@@ -166,18 +176,9 @@ class TestCoreUpload(unittest.TestCase):
         Check that when the ``encrypt=True`` the source file remains the same
         but the temporary copy of this file was encrypted and uploaded.
         """
-        # Test fixture
-        testing_dir = os.path.dirname(os.path.abspath(__file__))
-        test_source_file = tempfile.NamedTemporaryFile(prefix='tmp_',
-                                                       suffix='.txt',
-                                                       mode="w+",
-                                                       dir=testing_dir)
-        test_source_file.write('some file content')
-        test_source_file.flush()
-
         # Check that by default (encrypt=False) API passes the original file
         # object to the requests.post()
-        with open(test_source_file.name, 'rb') as temp_file_obj:
+        with open(self.test_source_file.name, 'rb') as temp_file_obj:
             core.upload(file_=temp_file_obj, **self.upload_param)
             # get the source file object used as encrypted sent data.
             args, kwargs = self.mock_post.call_args
@@ -186,7 +187,7 @@ class TestCoreUpload(unittest.TestCase):
                           'exactly the originally passed object!')
         # Check that when the ``ecrypt=True`` API doesn't pass the original
         # file object in requests.post(), but some other object.
-        with open(test_source_file.name, 'rb') as temp_file_obj:
+        with open(self.test_source_file.name, 'rb') as temp_file_obj:
             core.upload(encrypt=True, file_=temp_file_obj, **self.upload_param)
             # get the source file object used as encrypted sent data.
             args, kwargs = self.mock_post.call_args
@@ -197,14 +198,16 @@ class TestCoreUpload(unittest.TestCase):
         # Check that the originally passed to the API function file object
         # wasn't changed.
         etalon_copy_name = os.path.join(
-            testing_dir, 'copy_' + os.path.split(test_source_file.name)[-1])
+            self.testing_dir,
+            'copy_' + os.path.split(self.test_source_file.name)[-1]
+        )
         self.addCleanup(os.remove, etalon_copy_name)
-        shutil.copy2(test_source_file.name, etalon_copy_name)
+        shutil.copy2(self.test_source_file.name, etalon_copy_name)
 
-        with open(test_source_file.name, 'rb') as temp_file_obj:
+        with open(self.test_source_file.name, 'rb') as temp_file_obj:
             core.upload(encrypt=True, file_=temp_file_obj, **self.upload_param)
         self.assertTrue(
-            filecmp.cmp(test_source_file.name, etalon_copy_name),
+            filecmp.cmp(self.test_source_file.name, etalon_copy_name),
             "The original file must remains unchanged!"
         )
 
@@ -214,17 +217,6 @@ class TestCoreUpload(unittest.TestCase):
         properly encrypted.
         :return: None
         """
-        # Test fixture
-        testing_dir = os.path.dirname(os.path.abspath(__file__))
-        test_source_file = tempfile.NamedTemporaryFile(prefix='tmp_',
-                                                       suffix='.txt',
-                                                       mode="w+",
-                                                       dir=testing_dir,
-                                                       delete=False)
-        self.addCleanup(os.remove, test_source_file.name)
-        test_source_file.write('some file content')
-        test_source_file.flush()
-
         def check_encryption(*args, **kwargs):
             """
             Function that will be used as ``side_effect`` argument, when
@@ -244,11 +236,12 @@ class TestCoreUpload(unittest.TestCase):
             """
             tested_file_obj = kwargs['files']['file_data']
             sampler_encrypted_file_name = os.path.join(
-                testing_dir, 'copy_' + os.path.split(
-                    test_source_file.name)[-1]
+                self.testing_dir,
+                'copy_' + os.path.split(self.test_source_file.name)[-1]
             )
             self.addCleanup(os.remove, sampler_encrypted_file_name)
-            shutil.copy2(test_source_file.name, sampler_encrypted_file_name)
+            shutil.copy2(self.test_source_file.name,
+                         sampler_encrypted_file_name)
             convergence.encrypt_file_inline(
                 sampler_encrypted_file_name, None
             )
@@ -262,7 +255,57 @@ class TestCoreUpload(unittest.TestCase):
             return Response()
 
         self.mock_post.side_effect = check_encryption
-        core.upload(encrypt=True, file_=test_source_file, **self.upload_param)
+        core.upload(encrypt=True, file_=self.test_source_file,
+                    **self.upload_param)
+
+    def test_add_decryption_key_to_the_response_obj(self):
+        """
+        Test on adding ``decryption_key`` to the derived Response object,
+        when ``ecrypt=True``. The ``upload()`` function then derive
+        ``decryption_key`` value, whilst encrypt local copy of the file,
+        and should modify ``Response`` object by adding this decryption key
+        to the json's content.
+        :return: None
+        """
+        # initial filling the base response object
+        sampler_encrypted_file_name = os.path.join(
+            self.testing_dir,
+            'copy_' + os.path.split(self.test_source_file.name)[-1]
+        )
+        self.addCleanup(os.remove, sampler_encrypted_file_name)
+        shutil.copy2(self.test_source_file.name, sampler_encrypted_file_name)
+        sampler_decryption_key = convergence.encrypt_file_inline(
+            sampler_encrypted_file_name, None
+        )
+        sampler_decryption_key = binascii.hexlify(sampler_decryption_key)
+        if sys.version_info.major == 3:
+            sampler_decryption_key = sampler_decryption_key.decode()
+        with open(sampler_encrypted_file_name, 'rb') as file_:
+            sampler_data_hash = sha256(file_.read()).hexdigest()
+        mock_response_data_dict = dict(
+            data_hash=sampler_data_hash,
+            file_role=self.upload_param['file_role']
+        )
+        response_content = json.dumps(mock_response_data_dict,
+                                      indent=2, sort_keys=True)
+        mock_response = self.mock_post.return_value
+        mock_response.status_code = 201
+        mock_response._content = response_content.encode('ascii')
+
+        tested_response = core.upload(file_=self.test_source_file,
+                                      encrypt=True, **self.upload_param)
+        self.assertIs(tested_response, mock_response,
+                      'Returned object should be the same object which was '
+                      'returned from the ``requests.post()`` call!')
+        tested_response_data_dict = tested_response.json()
+        mock_response_data_dict.update(
+                decryption_key=sampler_decryption_key)
+        self.assertDictEqual(
+            tested_response_data_dict,
+            mock_response_data_dict,
+            'When encrypt=true, returned response object should contain same '
+            'data, but with additional and expected decryption_key value.'
+        )
 
 
 class TestCoreAudit(unittest.TestCase):
