@@ -304,15 +304,15 @@ class TestCliArgumentsPreparation(unittest.TestCase):
 class TestCliStarter(unittest.TestCase):
 
     @staticmethod
-    def sys_stdout_help_run(tested_callable, etalon_callable, *args):
+    def sys_stdout_help_run(tested_callable, sample_callable, *args):
         """
         It's run passed callable and return their intercepted print-out.
         :note: While the running passed callable SystemExit is excepted,
         like normal exit for providing the help information.
 
         :param tested_callable: callable that may print help info
-        :param etalon_callable: callable for the desired print-out
-        :param args: argumets needed to be passed to the etalon callable
+        :param sample_callable: callable for the desired print-out
+        :param args: arguments needed to be passed to the sample callable
         :return: tuple of strings with first tested print and the second
         expected print
         """
@@ -324,16 +324,16 @@ class TestCliStarter(unittest.TestCase):
                 pass
             mock_stdout.seek(0)
             tested_result = mock_stdout.read()
-            # get etalon result
+            # get sample result
             mock_stdout.seek(0)
             mock_stdout.truncate()
             try:
-                etalon_callable(*args)
+                sample_callable(*args)
             except SystemExit:
                 pass
             mock_stdout.seek(0)
-            etalon_result = mock_stdout.read()
-        return tested_result, etalon_result
+            sample_result = mock_stdout.read()
+        return tested_result, sample_result
 
     def test_subtest_through_all_help_info(self):
         """
@@ -342,7 +342,7 @@ class TestCliStarter(unittest.TestCase):
         """
         # Tuple of tuples with subtest's variant of terminal's command. The
         # first list is tested `sys.argv` value and second list is arguments
-        # for the `parse().parse_args()` used like the etalon call result.
+        # for the `parse().parse_args()` used like the sample call result.
         tests_set = (
             (['', ], ['--help', ]),
             (['', '-h'], ['-h', ]),
