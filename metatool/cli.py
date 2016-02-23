@@ -156,13 +156,13 @@ def decryption_key_type(argument):
     """
     This is the special processor for the ``decryption_key`` argument's type
     of the ``argparse.ArgumentParser.add_argument()`` method.
-    It takes a **hexadecimal-string** and returns the proper decryption_key's
-    form, for passing to the ``metatool.download()`` function.
+    It takes a **hexadecimal-string**, checks if it consists of hexadecimal
+    characters and has a proper decryption_key's length.
+    If the string is consistent, just returns it, else raises an
+    exception, used by the ``argparse`` to inform the user.
 
     Decryption key must be either 16, 24, or 32 bytes long (32, 48, or 64
     characters long, in the hexadecimal string representation)
-
-    Returns a string, properly escaped for using like an GET-URL query value.
 
     :param argument: decryption_key **hex-string**, gained with
         binascii.hexlify(key), where the **key** is original key, returned
@@ -171,17 +171,20 @@ def decryption_key_type(argument):
 
     .. _file_encryptor: https://pypi.python.org/pypi/file_encryptor/0.2.9
 
-    :return: escaped string value
+    :type argument: string
+
+    :return: the same string, if it's a normal value
     :rtype: string
 
     """
+    valid_key_lengths = (32, 48, 64)
     try:
         if not all(chr_ in string.hexdigits for chr_ in argument):
             raise TypeError('string has non-hexadecimal characters')
-        if not len(argument) in (32, 48, 64):
-            raise TypeError('key must be either 32, 48, or 64 '
+        if not len(argument) in valid_key_lengths:
+            raise TypeError('key must be either %d, %d, or %d '
                             'characters long, in the hexadecimal-'
-                            'string representation')
+                            'string representation' % valid_key_lengths)
     except TypeError as exc_:
         raise argparse.ArgumentTypeError(exc_)
     return argument

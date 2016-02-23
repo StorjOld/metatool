@@ -3,12 +3,14 @@ import os
 import sys
 import unittest
 import binascii
-from argparse import Namespace
+import random
+import string
+import argparse
 
 from requests.models import Response
 
 from metatool.cli import (show_data, parse, get_all_func_args, args_prepare,
-                          main, CORE_NODES_URL)
+                          main, CORE_NODES_URL, decryption_key_type)
 from metatool import core
 
 if sys.version_info.major == 3:
@@ -17,6 +19,75 @@ if sys.version_info.major == 3:
 else:
     from io import BytesIO as StringIO
     from mock import patch, Mock, call, mock_open
+
+
+class TestCliDecryptionKeyType(unittest.TestCase):
+    """
+    Test for the decryption_key's type checker.
+    """
+    @staticmethod
+    def get_rand_string(length, used_chars):
+        return ''.join(random.choice(used_chars) for _ in range(length))
+
+    def test_normal_decryption_key_length(self):
+        """
+        Test that ``decryption_key_type`` properly inspects the length of
+        passed key.
+        """
+        valid_lengths = (32, 48, 64)
+        # Check the correct variants of passed string length.
+        for length_case in valid_lengths:
+            key_example = self.get_rand_string(length_case, string.hexdigits)
+            assert len(key_example) == length_case
+            self.assertIs(
+                decryption_key_type(key_example),
+                key_example,
+                "Function should just return the passed argument, because "
+                "the %d is valid length for a decryption key!" % length_case
+            )
+        # Check the raising an exception when the length of passed
+        # argument is wrong.
+        for i in set(range(100)) - set(valid_lengths):
+            key_example = self.get_rand_string(i, string.hexdigits)
+            self.assertRaises(
+                argparse.ArgumentTypeError,
+                decryption_key_type,
+                (key_example,)
+            )
+
+    def test_hex_characters_in_key(self):
+        """
+        Test the ``decryption_key_type`` function on raising an exception
+        when non-hexadecimal value are present in passed string, and
+        normal returning the same string when there is no non-hexadecimal
+        character within it.
+        """
+        valid_lengths = (32, 48, 64)
+        for key_len in valid_lengths:
+            # Test the valid character set for the "decryption key"
+            for i in range(10):
+                key_value = self.get_rand_string(key_len, string.hexdigits)
+                self.assertIs(
+                    decryption_key_type(key_value),
+                    key_value,
+                    "Function should just return the passed argument, because "
+                    "in the passed string were used only hexadecimal digits!"
+                )
+            # Test the raising an exception when non-hexadecimal character
+            # are present in the decryption key.
+            non_hex_char = ''.join(
+                    set(string.ascii_letters) - set(string.hexdigits)
+                )
+            for bad_char in non_hex_char:
+                key_value = self.get_rand_string(key_len, string.hexdigits)
+                key_value = key_value.replace(
+                    random.choice(key_value), bad_char, 1)
+                assert not all(chr_ in string.hexdigits for chr_ in key_value)
+                self.assertRaises(
+                    argparse.ArgumentTypeError,
+                    decryption_key_type,
+                    (key_value,)
+                )
 
 
 class TestCliShowDataFunction(unittest.TestCase):
@@ -278,7 +349,7 @@ class TestCliArgumentsPreparation(unittest.TestCase):
             two='TEST 2'
         )
         given_required_names = ['one', 'two']
-        given_namespace = Namespace(
+        given_namespace = argparse.Namespace(
             one='TEST 1',
             two='TEST 2',
             three='TEST 3'
@@ -466,8 +537,8 @@ class TestCliStarter(unittest.TestCase):
         )
         # mocking the parsing logic
         parser = mock_parse.return_value
-        parser.parse_args.return_value = Namespace(execute_case=core_func,
-                                                   url_base=None)
+        parser.parse_args.return_value = argparse.Namespace(
+            execute_case=core_func, url_base=None)
         # Mocking the list of default URL-addresses.
         # Walking should retrieve an acceptable result on the third address.
         url_list = ['first.fail.url', 'second.fail.url',
