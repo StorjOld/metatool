@@ -211,8 +211,9 @@ def upload(url_base, sender_key, btctx_api, file_, file_role, encrypt=False):
         (optional, default: False)
     :type encrypt: boolean
 
-    :param file_: file object which will be uploaded to the server
-    :type file_: file object opened in the 'rb' mode
+    :param ``file_``: file object opened in the 'rb' mode, which will be
+        uploaded to the server
+    :type ``file_``: file object
 
     :param file_role: string of three numbers which define future
         behavior of the file on the server (look more it in the documentation)
