@@ -317,9 +317,9 @@ class TestCliArgumentsPreparation(unittest.TestCase):
         """
         Test of accurate discovery of required arguments of the function.
         """
-        expected_args_set = ('arg_1', 'arg_2', 'arg_3')
+        expected_args_set = ['arg_1', 'arg_2', 'arg_3']
 
-        self.assertTupleEqual(
+        self.assertListEqual(
             get_all_func_args(lambda arg_1, arg_2, arg_3=True: None),
             expected_args_set,
             '"get_all_func_args" must return tuple like "expected_args_set" !'
@@ -328,8 +328,8 @@ class TestCliArgumentsPreparation(unittest.TestCase):
         # definition of the tested function
         def test_function(one, two=True, *args, **kwargs):
             local_variable = None
-        expected_args_set = ('one', 'two')
-        self.assertTupleEqual(
+        expected_args_set = ['one', 'two']
+        self.assertListEqual(
             get_all_func_args(test_function),
             expected_args_set,
             '"get_all_func_args" must return tuple like "expected_args_set" !'
@@ -343,7 +343,7 @@ class TestCliArgumentsPreparation(unittest.TestCase):
         """
         mock_btctx_api = mock_btctx_store.return_value
         mock_btctx_api.create_key.return_value = 'TEST_SENDER_KEY'
-        # testing for minimal providing arguments
+        # testing for minimal providing of arguments
         expected_args_dict = dict(
             one='TEST 1',
             two='TEST 2'
@@ -360,7 +360,7 @@ class TestCliArgumentsPreparation(unittest.TestCase):
             "Should provide only `one` and `two` arguments"
         )
 
-        # test of max providing omitted arguments
+        # test of max providing of omitted arguments
         expected_args_dict['sender_key'] = 'TEST_SENDER_KEY'
         expected_args_dict['btctx_api'] = mock_btctx_api
         given_required_names += ['sender_key', 'btctx_api']
@@ -475,7 +475,7 @@ class TestCliStarter(unittest.TestCase):
         mock_response.status_code = 500
         expected_calls = [
             call('{}api/nodes/me/'.format(url)) for url in CORE_NODES_URL
-        ]
+            ]
         with patch('os.getenv', Mock(return_value=None)):
             with patch('metatool.cli.show_data'):
                 with patch('sys.argv', ['', 'info']):
@@ -532,8 +532,8 @@ class TestCliStarter(unittest.TestCase):
         bad_response_result = Mock(__class__=Response, status_code=500)
         # Set up the order of the core function call's results.
         core_func = Mock(
-                side_effect=[bad_response_result, bad_response_result,
-                             exit_point_result, bad_response_result]
+            side_effect=[bad_response_result, bad_response_result,
+                         exit_point_result, bad_response_result]
         )
         # mocking the parsing logic
         parser = mock_parse.return_value
@@ -595,4 +595,93 @@ class TestCliStarter(unittest.TestCase):
             [call(success_response)],
             'the show_data() obj must be called once with `success_response` '
             'object!'
+        )
+
+    @patch('metatool.cli.BtcTxStore')
+    @patch('metatool.cli.show_data', Mock())
+    def test_omit_btctx_api_and_send_key_for_download_when_link_true(
+            self, mock_btctxstore):
+        """
+        Test, that when the ``main`` function passes ``link=True`` argument
+         to the ``download`` API function, the ``sender_key`` and
+        ``btctx_api`` arguments will not be prepared and passed to the
+        ``download()`` call.
+        """
+        # Make a list of arguments for the parser.
+        mock_sys_argv = '__file__ download FILE_HASH --link'.split()
+
+        # Get argument's list from the "download" function before as mock it.
+        download_available_args = get_all_func_args(core.download)
+
+        # mock the Response object for the mocking the download's return
+        trick_response = Response()
+        trick_response.status_code = 200
+
+        with patch('sys.argv', mock_sys_argv):
+            with patch('metatool.cli.get_all_func_args',
+                       return_value=get_all_func_args(core.download)):
+                with patch('metatool.core.download',
+                           return_value=trick_response) as mock_download:
+                    main()
+        passed_args = mock_download.call_args[1]
+        omitted_args = set(download_available_args) - set(passed_args.keys())
+        self.assertFalse(
+            mock_btctxstore.called,
+            "The btctxstore.BtcTxStore module should not be called when "
+            "the --link argument wasn't parsed!"
+        )
+        self.assertSetEqual(
+            omitted_args, {'btctx_api', 'sender_key'},
+            "Only btctx_api and sender_key arguments should not be passed "
+            "to the download() call, when the `--link` argument is occurred."
+        )
+        self.assertEqual(
+            mock_download.call_count,
+            1,
+            '"download" should be called only once!'
+        )
+
+    @patch('metatool.cli.BtcTxStore')
+    @patch('metatool.cli.show_data', Mock())
+    def test_prepare_btctx_api_and_send_key_for_download_when_link_true(
+            self, mock_btctxstore):
+        """
+        Test, that when the ``main`` function passes ``link=False``
+        argument to the ``download`` API function, the ``sender_key`` and
+        ``btctx_api`` arguments will be prepared and passed to the
+        ``download()`` call.
+        """
+        # Make a list of arguments for the parser.
+        mock_sys_argv = '__file__ download FILE_HASH'.split()
+        # Get argument's list from the "download" function before as mock it.
+        download_available_args = get_all_func_args(core.download)
+        # mock the Response object for the mocking the download's return
+        trick_response = Response()
+        trick_response.status_code = 200
+
+        with patch('sys.argv', mock_sys_argv):
+            with patch('metatool.cli.get_all_func_args',
+                       return_value=get_all_func_args(core.download)):
+                with patch('metatool.core.download',
+                           return_value=trick_response) as mock_download:
+                    main()
+        passed_args = mock_download.call_args[1]
+        omitted_args = set(download_available_args) - set(passed_args.keys())
+        self.assertSetEqual(
+            omitted_args, set(),
+            'Full set of arguments should be passed '
+            'to the download() call, when the "--link" is not occured.'
+        )
+        expected_BtcTxStore_call = call(testnet=True, dryrun=True).create_key()
+        self.assertEqual(
+            mock_btctxstore.mock_calls,
+            expected_BtcTxStore_call.call_list(),
+            "The btctxstore.BtcTxStore should be properly called to create "
+            "credentials, as expected when the --link argument was parsed!"
+
+        )
+        self.assertEqual(
+            mock_download.call_count,
+            1,
+            '"download" should be called only once!'
         )

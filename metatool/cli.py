@@ -317,12 +317,13 @@ def args_prepare(required_args, parsed_args):
     :returns: dictionary that will be used like the ``**kwargs`` argument
     :rtype: dictionary
     """
-    btctx_api = BtcTxStore(testnet=True, dryrun=True)
     prepared_args = {}
-    args_base = dict(
-        sender_key=btctx_api.create_key(),
-        btctx_api=btctx_api,
-    )
+    if 'sender_key' in required_args and 'btctx_api' in required_args:
+        btctx_api = BtcTxStore(testnet=True, dryrun=True)
+        args_base = dict(
+            sender_key=btctx_api.create_key(),
+            btctx_api=btctx_api,
+        )
     for required_arg in required_args:
         try:
             prepared_args[required_arg] = getattr(parsed_args, required_arg)
@@ -347,7 +348,7 @@ def get_all_func_args(function):
     :returns: list with names of all positional and optional arguments
     :rtype: list of strings
     """
-    return function.__code__.co_varnames[:function.__code__.co_argcount]
+    return list(function.__code__.co_varnames[:function.__code__.co_argcount])
 
 
 def main():
@@ -361,7 +362,14 @@ def main():
         parse().print_help()
         return
     args = parse().parse_args()
-    parsed_args = args_prepare(get_all_func_args(args.execute_case), args)
+    required_args = get_all_func_args(args.execute_case)
+
+    if (args.execute_case == metatool.core.download
+            and args.link):
+        required_args.remove('btctx_api')
+        required_args.remove('sender_key')
+
+    parsed_args = args_prepare(required_args, args)
 
     # Get the url from the environment variable
     # or from the "--url" parsed argument
